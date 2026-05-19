@@ -15,6 +15,8 @@ from model import (
     build_res_arrays,
 )
 
+print(jax.devices())
+
 n_iter    = 50000
 log_every = 100
 
