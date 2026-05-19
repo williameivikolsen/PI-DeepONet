@@ -47,7 +47,7 @@ trunk_layers  = [2, 200, 200, 100]
 
 model = PI_DeepONet(
     branch_layers, trunk_layers,
-    N_angles=4,
+    N_angles=128,
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
     x_sensors=ds['x'], X=X_slab,
     lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
@@ -62,7 +62,7 @@ dt = time.time() - t0
 print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
 os.makedirs("trained_models", exist_ok=True)
-with open("trained_models/physics_informed_4_angles.pkl", "wb") as f:
+with open("trained_models/data_only_128_angles.pkl", "wb") as f:
     pickle.dump({
         "params": model.params,
         "config": {
@@ -82,4 +82,4 @@ with open("trained_models/physics_informed_4_angles.pkl", "wb") as f:
         "n_iter": n_iter,
         "log_every": log_every,
     }, f)
-print("Saved trained_models/physics_informed_4_angles.pkl")
+print("Saved trained_models/data_only_128_angles.pkl")
