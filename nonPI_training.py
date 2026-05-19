@@ -16,7 +16,7 @@ from nonPI_model import (
 
 print(jax.devices())
 
-E = 2000 # Epochs
+E = 10000 # Epochs
 B = 1000 # Batch size
 D = 50000 # Number of points in dataset
 n_iter = int(D*E/B)
