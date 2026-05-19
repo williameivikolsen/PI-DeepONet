@@ -39,12 +39,12 @@ bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=2000,
 res_dataset  = DataGenerator(res_in,  res_out,  batch_size=2000,
                              rng_key=random.PRNGKey(303))
 
-branch_layers = [J, 50, 50, 50, 50, 50]
-trunk_layers  = [2, 50, 50, 50, 50, 50]
+branch_layers = [J, 200, 200, 100]
+trunk_layers  = [2, 200, 200, 100]
 
 model = PI_DeepONet(
     branch_layers, trunk_layers,
-    N_angles=16,
+    N_angles=32,
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
     x_sensors=ds['x'], X=X_slab,
     lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
@@ -79,4 +79,4 @@ with open("trained_models/M_Iso_trained.pkl", "wb") as f:
         "n_iter": n_iter,
         "log_every": log_every,
     }, f)
-print("Saved trained_models/M_Iso_trained.pkl")
+print("Saved trained_models/data_only_32_angles.pkl")

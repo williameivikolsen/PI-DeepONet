@@ -289,12 +289,12 @@ class PI_DeepONet:
     # Define total loss
     def loss(self, params, data_batch, bcs_batch, res_batch):
         l_data = self.loss_data(params, data_batch)
-        l_bcs  = self.loss_bcs(params, bcs_batch)
-        l_res  = self.loss_res(params, res_batch)
+        # l_bcs  = self.loss_bcs(params, bcs_batch)
+        # l_res  = self.loss_res(params, res_batch)
         return (
             self.lambda_data * l_data
-            + self.lambda_bcs * l_bcs
-            + self.lambda_res * l_res
+            # + self.lambda_bcs * l_bcs
+            # + self.lambda_res * l_res
         )
 
     # Define a compiled update step
