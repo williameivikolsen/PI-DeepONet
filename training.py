@@ -2,6 +2,7 @@ import os
 import time
 
 import numpy as onp
+import jax
 import jax.numpy as jnp
 from jax import random
 
