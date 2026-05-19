@@ -16,7 +16,10 @@ from nonPI_model import (
 
 print(jax.devices())
 
-n_iter    = 50000
+E = 2000 # Epochs
+B = 1000 # Batch size
+D = 50000 # Number of points in dataset
+n_iter = D*E/B
 log_every = 100
 
 ds_np = onp.load("datasets/M_Iso_train.npz")
