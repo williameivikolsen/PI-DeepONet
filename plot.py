@@ -28,7 +28,7 @@ fig1 = plot_loss_curves(
 ds_np = onp.load("datasets/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
 
-sample_indices = [0, 42, 123, 314]
+sample_indices = [1, 2, 3, 4]
 
 fig2 = plot_sample_predictions(
     model,

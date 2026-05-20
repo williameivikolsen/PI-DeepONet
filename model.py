@@ -101,7 +101,7 @@ def build_data_arrays(ds, normalize=True):
     return (Q_flat, x_flat), phi_flat, phi_scale
 
 
-def build_bcs_arrays(ds, X, n_per_sample=50,
+def build_bcs_arrays(ds, X, n_per_sample=500,
                      rng_key=random.PRNGKey(2025)):
     """
     Random vacuum-BC evaluation points.
@@ -141,7 +141,7 @@ def build_bcs_arrays(ds, X, n_per_sample=50,
     return (Q_flat, y), s
 
 
-def build_res_arrays(ds, X, n_per_sample=100,
+def build_res_arrays(ds, X, n_per_sample=1000,
                      rng_key=random.PRNGKey(2026)):
     """
     Random interior collocation points in (0, X) x (-1, 1) for the PDE

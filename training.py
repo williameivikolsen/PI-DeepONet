@@ -40,11 +40,11 @@ print(f"  Network learns psi/phi_scale; residual uses Q/phi_scale; predict_s un-
 bcs_in,  bcs_out  = build_bcs_arrays(ds, X=X_slab, n_per_sample=50)
 res_in,  res_out  = build_res_arrays(ds, X=X_slab, n_per_sample=100)
 
-data_dataset = DataGenerator(data_in, data_out, batch_size=2000,
+data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                              rng_key=random.PRNGKey(101))
-bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=2000,
+bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
                              rng_key=random.PRNGKey(202))
-res_dataset  = DataGenerator(res_in,  res_out,  batch_size=2000,
+res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
                              rng_key=random.PRNGKey(303))
 
 branch_layers = [J, 200, 200, 100]
