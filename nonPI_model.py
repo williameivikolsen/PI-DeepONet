@@ -191,9 +191,12 @@ class DeepONet:
 
                 self.loss_log.append(float(l))
 
-                print(
-                    f"Iter {it:6d}: L={float(l):.3e}  "
-                )
+                inputs_b, outputs_b = data_batch
+                Q_b, x_b = inputs_b
+                pred_b = vmap(self.operator_net, (None, 0, 0))(self.params, Q_b, x_b)
+                are = float(np.mean(np.abs((outputs_b.flatten() - pred_b) / outputs_b.flatten())) * 100)
+
+                print(f"Iter {it:6d}: L={float(l):.3e}  ARE={are:.3f}%")
 
                 if callback is not None:
                     callback(it, float(l))
