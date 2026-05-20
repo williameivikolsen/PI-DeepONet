@@ -96,15 +96,13 @@ class DeepONet:
                  Sigma_t, Sigma_s0, Sigma_s1,
                  x_sensors, X,
                  lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
-                 activation=None,
+                 activation=relu,
                  lr_init=1e-3,
                  lr_decay_rate=0.9,
                  lr_transition_steps=10000,
                  output_scale=1.0,
                  seed=None):
         # Network initialization and evaluation functions
-        if activation is None:
-            activation = np.tanh
         self.branch_init, self.branch_apply = MLP(branch_layers, activation=activation)
         self.trunk_init, self.trunk_apply = MLP(trunk_layers, activation=activation)
 
