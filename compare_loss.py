@@ -2,11 +2,12 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
-for file in os.listdir("./trained_models"):
-    with open("./trained_models/" + file, "rb") as f:
-        ckpt = pickle.load(f)
-    if len(ckpt["loss_log"]) > 600:
-        plt.plot(ckpt["loss_log"], label=file)
+with open("./trained_models/n_samples.pkl", "rb") as f:
+    ckpt = pickle.load(f)
+plt.plot(ckpt["loss_log"], label="n_samples")
+with open("./trained_models/PI_test.pkl", "rb") as f:
+    ckpt = pickle.load(f)
+plt.plot(ckpt["loss_log"], label="PI")
 
 plt.ylabel("Loss")
 plt.yscale("log")

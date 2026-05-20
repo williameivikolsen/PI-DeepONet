@@ -47,8 +47,8 @@ bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
 res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
                              rng_key=random.PRNGKey(303))
 
-branch_layers = [J, 200, 200, 100]
-trunk_layers  = [2, 200, 200, 100]
+branch_layers = [J, 50, 50, 50, 50, 50]
+trunk_layers  = [2, 50, 50, 50, 50, 50]
 
 model = PI_DeepONet(
     branch_layers, trunk_layers,
