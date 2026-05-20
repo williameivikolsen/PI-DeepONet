@@ -83,7 +83,7 @@ class DeepONet:
                  activation=None,
                  lr_init=1e-3,
                  lr_decay_rate=0.9,
-                 lr_transition_steps=2000,
+                 lr_transition_steps=10000,
                  seed=None):
         # Network initialization and evaluation functions
         if activation is None:
