@@ -19,7 +19,7 @@ model.loss_log      = ckpt["loss_log"]
 ds_np = np.load("datasets/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
 
-data_in, data_out, phi_scale, Q_scale = build_data_arrays(ds, normalize=True)
+data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
 
 # Sanity check: phi_scale should match what was saved in the checkpoint
 assert abs(phi_scale - cfg["output_scale"]) < 1e-5, \
