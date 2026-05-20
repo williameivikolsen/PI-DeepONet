@@ -5,7 +5,7 @@ from model import PI_DeepONet
 from helpers import plot_loss_curves, plot_sample_predictions
 import matplotlib.pyplot as plt
 
-with open("trained_models/physics_informed_128_angles.pkl", "rb") as f:
+with open("trained_models/PI_test.pkl", "rb") as f:
     ckpt = pickle.load(f)
 
 cfg = ckpt["config"]

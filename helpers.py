@@ -43,13 +43,16 @@ def plot_loss_curves(model,
     return fig
 
 def predict_phi0(model, Q: jnp.ndarray, x_points: jnp.ndarray) -> jnp.ndarray:
+    # operator_net returns normalized psi (psi_tilde = psi/output_scale),
+    # so the quadrature gives normalized phi_0. Multiply by output_scale
+    # to return phi_0 in raw units for comparison against ds['phi_0'].
     def phi0_at(x_j):
         psi_vec = vmap(
             lambda mu_k: model.operator_net(model.params, Q, x_j, mu_k)
         )(model.mu_GL)
         return jnp.dot(model.w_GL, psi_vec)
 
-    return vmap(phi0_at)(x_points)
+    return model.output_scale * vmap(phi0_at)(x_points)
 
 def plot_sample_predictions(model,
                             ds: dict,
@@ -121,4 +124,3 @@ def plot_sample_predictions(model,
     fig.tight_layout()
 
     return fig
-
