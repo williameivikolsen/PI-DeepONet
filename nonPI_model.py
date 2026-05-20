@@ -57,14 +57,23 @@ class DataGenerator(data.Dataset):
         return in_batch, out_batch
 
 
-def build_data_arrays(ds):
+def build_data_arrays(ds, normalize=True):
     """
     Flat arrays for the supervised phi_0 loss.
 
     inputs = (Q_flat, x_flat)
         Q_flat : (N*J, J)    branch inputs, one row per (sample, x-point)
         x_flat : (N*J,)      scalar spatial coord
-    outputs = phi_flat       : (N*J,)  scalar flux targets
+    outputs = phi_flat       : (N*J,)  scalar flux targets (normalized by
+                                       training-set mean if normalize=True)
+
+    Returns
+    -------
+    inputs    : tuple (Q_flat, x_flat)
+    outputs   : phi_flat (possibly normalized)
+    phi_scale : float — the mean of raw phi_0 used for normalization
+                (==1.0 if normalize=False). Pass this to DeepONet so
+                predict_s returns un-normalized predictions.
     """
     Q     = np.asarray(ds['Q'])            # (N, J)
     phi_0 = np.asarray(ds['phi_0'])        # (N, J)
@@ -73,7 +82,14 @@ def build_data_arrays(ds):
     Q_flat   = np.repeat(Q, J, axis=0)     # (N*J, J)
     x_flat   = np.tile(x, N)               # (N*J,)
     phi_flat = phi_0.reshape(-1)           # (N*J,)
-    return (Q_flat, x_flat), phi_flat
+
+    if normalize:
+        phi_scale = float(np.mean(phi_flat))
+        phi_flat  = phi_flat / phi_scale
+    else:
+        phi_scale = 1.0
+
+    return (Q_flat, x_flat), phi_flat, phi_scale
 
 class DeepONet:
     def __init__(self, branch_layers, trunk_layers,
@@ -84,6 +100,7 @@ class DeepONet:
                  lr_init=1e-3,
                  lr_decay_rate=0.9,
                  lr_transition_steps=10000,
+                 output_scale=1.0,
                  seed=None):
         # Network initialization and evaluation functions
         if activation is None:
@@ -109,6 +126,11 @@ class DeepONet:
         # collocation points via jnp.interp inside residual_net.
         self.x_sensors = np.asarray(x_sensors)   # shape (J,)
         self.X         = float(X)                # slab length
+
+        # Output normalization constant.
+        # Network learns phi_0 / output_scale; predict_s multiplies back.
+        # Loss is computed on normalized values (targets already divided).
+        self.output_scale = float(output_scale)
 
         # 1. Define schedule
         self.lr_schedule = optax.exponential_decay(
@@ -180,7 +202,10 @@ class DeepONet:
 
     @partial(jit, static_argnums=(0,))
     def predict_s(self, params, Q_star, x_star):
-        return vmap(self.operator_net, (None, 0, 0))(params, Q_star, x_star)
+        # Network is trained on phi_0 / output_scale, so multiply back
+        # to return predictions in the original (un-normalized) units.
+        phi_norm = vmap(self.operator_net, (None, 0, 0))(params, Q_star, x_star)
+        return self.output_scale * phi_norm
 
     @partial(jit, static_argnums=(0,))
     def predict_res(self, params, Q_star, Y_star):
