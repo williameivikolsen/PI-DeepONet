@@ -14,16 +14,17 @@ def objective(trial):
     lambda_bcs    = trial.suggest_float("lambda_bcs", 1e-3, 10.0, log=True)
     branch_width  = trial.suggest_categorical("branch_width", [100, 250, 500])
     trunk_width   = trial.suggest_categorical("trunk_width", [100, 250, 500])
+    n_per_sample = trial.suggest_categorical("n_per_sample", [100, 250, 500])
     n_layers      = trial.suggest_int("n_layers", 2, 5)
-    n_iter_trial = 10000
+    n_iter_trial = 50000
     lr_transition_steps = trial.suggest_categorical("lr_transition_steps", [n_iter_trial//20, n_iter_trial//10, n_iter_trial//5])
 
     branch_layers = [J] + [branch_width] * n_layers + [100]
     trunk_layers  = [2] + [trunk_width]  * n_layers + [100]
 
     data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
-    bcs_in, bcs_out = build_bcs_arrays(ds, X=X_slab, n_per_sample=50)
-    res_in, res_out = build_res_arrays(ds, X=X_slab, n_per_sample=100)
+    bcs_in, bcs_out = build_bcs_arrays(ds, X=X_slab, n_per_sample=n_per_sample)
+    res_in, res_out = build_res_arrays(ds, X=X_slab, n_per_sample=n_per_sample)
 
     data_dataset = DataGenerator(data_in, data_out, batch_size=1000, rng_key=random.PRNGKey(101))
     bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=1000, rng_key=random.PRNGKey(202))
