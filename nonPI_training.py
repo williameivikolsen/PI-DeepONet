@@ -34,7 +34,7 @@ J = int(ds['x'].shape[0])
 
 data_in, data_out = build_data_arrays(ds)
 
-data_dataset = DataGenerator(data_in, data_out, batch_size=2000,
+data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                              rng_key=random.PRNGKey(101))
 
 branch_layers = [J, 200, 200, 100]
