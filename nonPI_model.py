@@ -99,7 +99,7 @@ class DeepONet:
                  activation=relu,
                  lr_init=1e-3,
                  lr_decay_rate=0.9,
-                 lr_transition_steps=10000,
+                 lr_transition_steps=5000,
                  output_scale=1.0,
                  seed=None):
         # Network initialization and evaluation functions
