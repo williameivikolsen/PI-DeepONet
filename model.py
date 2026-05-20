@@ -57,14 +57,31 @@ class DataGenerator(data.Dataset):
         return in_batch, out_batch
 
 
-def build_data_arrays(ds):
+def build_data_arrays(ds, normalize=True):
     """
     Flat arrays for the supervised phi_0 loss.
 
     inputs = (Q_flat, x_flat)
         Q_flat : (N*J, J)    branch inputs, one row per (sample, x-point)
         x_flat : (N*J,)      scalar spatial coord
-    outputs = phi_flat       : (N*J,)  scalar flux targets
+    outputs = phi_flat       : (N*J,)  scalar flux targets (normalized by
+                                       training-set mean if normalize=True)
+
+    When normalize=True, ALL fluxes and the source Q are rescaled by
+    phi_scale = mean(phi_0). This is exact: the steady-state transport
+    equation is linear, so substituting psi = phi_scale * psi_tilde
+    (and same for phi_0, phi_1) leaves the equation identical except Q
+    is replaced by Q/phi_scale. The network therefore solves the same
+    physical problem in dimensionless units, with all fields O(1).
+
+    Returns
+    -------
+    inputs    : tuple (Q_flat, x_flat) — Q in RAW units; the model
+                divides by phi_scale internally in residual_net.
+    outputs   : phi_flat (normalized).
+    phi_scale : float — mean of raw phi_0. Pass as output_scale to the
+                model so loss_data, residual_net, and predict_s all
+                stay consistent.
     """
     Q     = np.asarray(ds['Q'])            # (N, J)
     phi_0 = np.asarray(ds['phi_0'])        # (N, J)
@@ -73,7 +90,15 @@ def build_data_arrays(ds):
     Q_flat   = np.repeat(Q, J, axis=0)     # (N*J, J)
     x_flat   = np.tile(x, N)               # (N*J,)
     phi_flat = phi_0.reshape(-1)           # (N*J,)
-    return (Q_flat, x_flat), phi_flat
+
+    if normalize:
+        phi_scale = float(np.mean(phi_flat))
+        phi_flat  = phi_flat / phi_scale
+        # Q stays in raw units — residual_net divides by phi_scale internally.
+    else:
+        phi_scale = 1.0
+
+    return (Q_flat, x_flat), phi_flat, phi_scale
 
 
 def build_bcs_arrays(ds, X, n_per_sample=50,
@@ -143,14 +168,13 @@ class PI_DeepONet:
                  Sigma_t, Sigma_s0, Sigma_s1,
                  x_sensors, X,
                  lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
-                 activation=None,
+                 activation=relu,
                  lr_init=1e-3,
                  lr_decay_rate=0.9,
                  lr_transition_steps=2000,
+                 output_scale=1.0,
                  seed=None):
         # Network initialization and evaluation functions
-        if activation is None:
-            activation = np.tanh
         self.branch_init, self.branch_apply = MLP(branch_layers, activation=activation)
         self.trunk_init, self.trunk_apply = MLP(trunk_layers, activation=activation)
         self.N_angles = N_angles
@@ -178,6 +202,18 @@ class PI_DeepONet:
         # collocation points via jnp.interp inside residual_net.
         self.x_sensors = np.asarray(x_sensors)   # shape (J,)
         self.X         = float(X)                # slab length
+
+        # Flux normalization constant: phi_scale = mean(phi_0) on training set.
+        # The network learns the normalized fields psi_tilde = psi/phi_scale,
+        # phi_0_tilde = phi_0/phi_scale, phi_1_tilde = phi_1/phi_scale.
+        # The transport equation in these variables is identical to the
+        # original except Q is replaced by Q/phi_scale (linearity).
+        # - loss_data: targets are pre-normalized in build_data_arrays.
+        # - loss_bcs:  zero targets, zero predictions; unaffected.
+        # - residual_net: divides interpolated Q by output_scale.
+        # - predict_s:  multiplies network output by output_scale to
+        #               return raw psi.
+        self.output_scale = float(output_scale)
 
         # Loss-term weights
         self.lambda_data = float(lambda_data)
@@ -242,7 +278,9 @@ class PI_DeepONet:
         psi_x     = grad(self.operator_net, argnums=2)(params, Q, x, mu)
 
         # Q(x) via linear interpolation on the sensor grid.
-        Q_x = np.interp(x, self.x_sensors, Q)
+        # Divide by output_scale: in the normalized PDE that the network
+        # learns, the source term is Q/phi_scale (linearity of transport).
+        Q_x = np.interp(x, self.x_sensors, Q) / self.output_scale
 
         res = (
             mu * psi_x
@@ -347,10 +385,14 @@ class PI_DeepONet:
     # Evaluates predictions at test points
     @partial(jit, static_argnums=(0,))
     def predict_s(self, params, Q_star, Y_star):
-        s_pred = vmap(self.operator_net, (None, 0, 0, 0))(params, Q_star, Y_star[:, 0], Y_star[:, 1])
-        return s_pred
+        # Network outputs psi_tilde = psi/output_scale; multiply back to
+        # return raw psi in original units.
+        psi_norm = vmap(self.operator_net, (None, 0, 0, 0))(params, Q_star, Y_star[:, 0], Y_star[:, 1])
+        return self.output_scale * psi_norm
 
     @partial(jit, static_argnums=(0,))
     def predict_res(self, params, Q_star, Y_star):
+        # residual_net returns the residual of the normalized PDE.
+        # The raw-PDE residual is output_scale times that (linearity).
         r_pred = vmap(self.residual_net, (None, 0, 0, 0))(params, Q_star, Y_star[:, 0], Y_star[:, 1])
-        return r_pred
+        return self.output_scale * r_pred

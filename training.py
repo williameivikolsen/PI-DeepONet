@@ -18,7 +18,10 @@ from model import (
 
 print(jax.devices())
 
-n_iter    = 50000
+E = 2000 # Epochs
+B = 1000 # Batch size
+D = 50000 # Number of points in dataset
+n_iter = int(D*E/B)
 log_every = 100
 
 ds_np = onp.load("datasets/M_Iso_train.npz")
@@ -31,7 +34,9 @@ X_slab = 10.0
 Sigma_t, Sigma_s0, Sigma_s1 = 1.0, 0.5, 0.0
 J = int(ds['x'].shape[0])
 
-data_in, data_out = build_data_arrays(ds)
+data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
+print(f"\nFlux normalization: phi_scale = {phi_scale:.6f}")
+print(f"  Network learns psi/phi_scale; residual uses Q/phi_scale; predict_s un-normalizes.")
 bcs_in,  bcs_out  = build_bcs_arrays(ds, X=X_slab, n_per_sample=50)
 res_in,  res_out  = build_res_arrays(ds, X=X_slab, n_per_sample=100)
 
@@ -51,6 +56,8 @@ model = PI_DeepONet(
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
     x_sensors=ds['x'], X=X_slab,
     lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
+    lr_transition_steps=n_iter//20,
+    output_scale=phi_scale,
 )
 print(f"\nInstantiated PI_DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
 
@@ -62,7 +69,7 @@ dt = time.time() - t0
 print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
 os.makedirs("trained_models", exist_ok=True)
-with open("trained_models/physics_informed_128_angles.pkl", "wb") as f:
+with open("trained_models/PI_test.pkl", "wb") as f:
     pickle.dump({
         "params": model.params,
         "config": {
@@ -74,6 +81,7 @@ with open("trained_models/physics_informed_128_angles.pkl", "wb") as f:
             "Sigma_s1":      Sigma_s1,
             "x_sensors":     onp.asarray(ds['x']),
             "X":             X_slab,
+            "output_scale":  phi_scale,
         },
         "loss_log":      model.loss_log,
         "loss_data_log": model.loss_data_log,
@@ -82,4 +90,4 @@ with open("trained_models/physics_informed_128_angles.pkl", "wb") as f:
         "n_iter": n_iter,
         "log_every": log_every,
     }, f)
-print("Saved trained_models/physics_informed_128_angles.pkl")
+print("Saved trained_models/PI_test.pkl")
