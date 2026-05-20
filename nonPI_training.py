@@ -47,7 +47,7 @@ model = DeepONet(
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
     x_sensors=ds['x'], X=X_slab,
     lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
-    lr_transition_steps=n_iter//20,
+    lr_transition_steps=n_iter//10,
     output_scale=phi_scale,
 )
 print(f"\nInstantiated PI_DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
