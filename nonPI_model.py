@@ -69,11 +69,13 @@ def build_data_arrays(ds, normalize=True):
 
     Returns
     -------
-    inputs    : tuple (Q_flat, x_flat)
+    inputs    : tuple (Q_flat, x_flat) — Q is returned in raw units; the
+                model divides by input_scale internally inside operator_net.
     outputs   : phi_flat (possibly normalized)
-    phi_scale : float — the mean of raw phi_0 used for normalization
-                (==1.0 if normalize=False). Pass this to DeepONet so
-                predict_s returns un-normalized predictions.
+    phi_scale : float — mean of raw phi_0 used for output normalization
+                (==1.0 if normalize=False). Pass to DeepONet as output_scale.
+    Q_scale   : float — mean of raw Q used for input normalization
+                (==1.0 if normalize=False). Pass to DeepONet as input_scale.
     """
     Q     = np.asarray(ds['Q'])            # (N, J)
     phi_0 = np.asarray(ds['phi_0'])        # (N, J)
@@ -86,10 +88,15 @@ def build_data_arrays(ds, normalize=True):
     if normalize:
         phi_scale = float(np.mean(phi_flat))
         phi_flat  = phi_flat / phi_scale
+        Q_scale   = float(np.mean(Q_flat))
+        # NOTE: we do NOT divide Q_flat here. The model handles input
+        # normalization inside operator_net so that callers (both training
+        # and inference) pass raw Q values everywhere.
     else:
         phi_scale = 1.0
+        Q_scale   = 1.0
 
-    return (Q_flat, x_flat), phi_flat, phi_scale
+    return (Q_flat, x_flat), phi_flat, phi_scale, Q_scale
 
 class DeepONet:
     def __init__(self, branch_layers, trunk_layers,
@@ -101,6 +108,7 @@ class DeepONet:
                  lr_decay_rate=0.9,
                  lr_transition_steps=5000,
                  output_scale=1.0,
+                 input_scale=1.0,
                  seed=None):
         # Network initialization and evaluation functions
         self.branch_init, self.branch_apply = MLP(branch_layers, activation=activation)
@@ -130,6 +138,11 @@ class DeepONet:
         # Loss is computed on normalized values (targets already divided).
         self.output_scale = float(output_scale)
 
+        # Input (branch) normalization constant.
+        # operator_net divides Q by input_scale internally, so callers always
+        # pass raw Q values (training and inference both transparent).
+        self.input_scale = float(input_scale)
+
         # 1. Define schedule
         self.lr_schedule = optax.exponential_decay(
             init_value=lr_init,
@@ -154,7 +167,8 @@ class DeepONet:
     def operator_net(self, params, Q, x):
         branch_params, trunk_params = params
         y = np.atleast_1d(x)          # scalar → shape (1,)
-        B = self.branch_apply(branch_params, Q)
+        Q_norm = Q / self.input_scale  # normalize branch input
+        B = self.branch_apply(branch_params, Q_norm)
         T = self.trunk_apply(trunk_params, y)
         return np.sum(B * T)
 

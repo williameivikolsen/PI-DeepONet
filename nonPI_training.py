@@ -32,9 +32,10 @@ X_slab = 10.0
 Sigma_t, Sigma_s0, Sigma_s1 = 1.0, 0.5, 0.0
 J = int(ds['x'].shape[0])
 
-data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
-print(f"\nOutput normalization: phi_scale = {phi_scale:.6f}")
-print(f"  (network learns phi_0 / phi_scale; predict_s un-normalizes automatically)")
+data_in, data_out, phi_scale, Q_scale = build_data_arrays(ds, normalize=True)
+print(f"\nNormalization scales:")
+print(f"  phi_scale = {phi_scale:.6f}  (output: predict_s un-normalizes automatically)")
+print(f"  Q_scale   = {Q_scale:.6f}  (input:  operator_net normalizes internally)")
 
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                              rng_key=random.PRNGKey(101))
@@ -49,6 +50,7 @@ model = DeepONet(
     lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
     lr_transition_steps=n_iter//20,
     output_scale=phi_scale,
+    input_scale=Q_scale,
 )
 print(f"\nInstantiated PI_DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
 
@@ -72,6 +74,7 @@ with open("trained_models/sahadath.pkl", "wb") as f:
             "x_sensors":     onp.asarray(ds['x']),
             "X":             X_slab,
             "output_scale":  phi_scale,
+            "input_scale":   Q_scale,
         },
         "loss_log":      model.loss_log,
         "n_iter": n_iter,
