@@ -10,12 +10,13 @@ X_slab = 10.0
 J = int(ds['x'].shape[0])
 
 def objective(trial):
-    lambda_res    = trial.suggest_float("lambda_res", 1e-3, 10.0, log=True)
-    lambda_bcs    = trial.suggest_float("lambda_bcs", 1e-3, 10.0, log=True)
-    branch_width  = trial.suggest_categorical("branch_width", [100, 250, 500])
-    trunk_width   = trial.suggest_categorical("trunk_width", [100, 250, 500])
-    n_per_sample = trial.suggest_categorical("n_per_sample", [100, 250, 500])
-    n_layers      = trial.suggest_int("n_layers", 2, 5)
+    # lambda_res    = trial.suggest_float("lambda_res", 1e-3, 10.0, log=True)
+    # lambda_bcs    = trial.suggest_float("lambda_bcs", 1e-3, 10.0, log=True)
+    branch_width  = trial.suggest_categorical("branch_width", [50, 100, 250])
+    # trunk_width   = trial.suggest_categorical("trunk_width", [100, 250, 500])
+    trunk_width   = 100
+    n_per_sample  = trial.suggest_categorical("n_per_sample", [500, 750, 1000])
+    n_layers      = trial.suggest_int("n_layers", 5, 8)
     n_iter_trial = 50000
     lr_transition_steps = trial.suggest_categorical("lr_transition_steps", [n_iter_trial//20, n_iter_trial//10, n_iter_trial//5])
 
@@ -35,7 +36,7 @@ def objective(trial):
         N_angles=16,
         Sigma_t=1.0, Sigma_s0=0.5, Sigma_s1=0.0,
         x_sensors=ds['x'], X=X_slab,
-        lambda_data=1.0, lambda_res=lambda_res, lambda_bcs=lambda_bcs,
+        lambda_data=0.1, lambda_res=0.7, lambda_bcs=0.2,
         output_scale=phi_scale,
         lr_transition_steps=lr_transition_steps
     )
