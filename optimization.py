@@ -46,8 +46,8 @@ def objective(trial):
     return float(model.loss_log[-1]) 
 
 study = optuna.create_study(
-    storage="sqlite:///pi_optuna.db",
-    study_name="pi_deeponet_tuning",
+    storage="sqlite:///pi_deeponet_tuning_v2.db",
+    study_name="pi_deeponet_tuning_v2",
     direction="minimize",
     load_if_exists=True,
 )
