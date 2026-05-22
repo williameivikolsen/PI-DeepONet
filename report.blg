@@ -1,0 +1,68 @@
+This is BibTeX, Version 0.99e (TeX Live 2026)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: report.aux
+The style file: apsrev4-1.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Database file #1: reportNotes.bib
+Database file #2: bibliography.bib
+control{REVTEX41Control}, control.key{N/A}, control.author{N/A}, control.editor{N/A}, control.title{N/A}, control.pages{N/A}, control.year{N/A}, control.eprint{N/A}, 
+control{apsrev41Control}, control.key{N/A}, control.author{08}, control.editor{1}, control.title{}, control.pages{0}, control.year{1}, control.eprint{N/A}, 
+Warning--jnrlst (dependency: not reversed) set 1
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+merlin.mbs apsrev4-1.bst 2010-07-25 4.21a (PWD, AO, DPC) hacked
+Control: key (0) 
+Control: author (8) initials jnrlst
+Control: editor formatted (1) identically to author
+Control: production of article title (-1) disabled
+Control: page (0) single
+Control: year (1) truncated
+Control: production of eprint (0) enabled
+Warning--missing journal in nuproship
+You've used 18 entries,
+            5847 wiz_defined-function locations,
+            1713 strings with 18561 characters,
+and the built_in function-call counts, 17930 in all, are:
+= -- 1038
+> -- 539
+< -- 141
++ -- 169
+- -- 149
+* -- 2892
+:= -- 1697
+add.period$ -- 18
+call.type$ -- 18
+change.case$ -- 69
+chr.to.int$ -- 26
+cite$ -- 19
+duplicate$ -- 1690
+empty$ -- 1255
+format.name$ -- 308
+if$ -- 3511
+int.to.chr$ -- 1
+int.to.str$ -- 25
+missing$ -- 224
+newline$ -- 100
+num.names$ -- 48
+pop$ -- 700
+preamble$ -- 1
+purify$ -- 80
+quote$ -- 0
+skip$ -- 622
+stack$ -- 0
+substring$ -- 401
+swap$ -- 1629
+text.length$ -- 63
+text.prefix$ -- 0
+top$ -- 10
+type$ -- 253
+warning$ -- 2
+while$ -- 53
+width$ -- 0
+write$ -- 179
+(There were 2 warnings)
