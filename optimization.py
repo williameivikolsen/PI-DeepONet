@@ -13,10 +13,10 @@ def objective(trial):
     # lambda_res    = trial.suggest_float("lambda_res", 1e-3, 10.0, log=True)
     # lambda_bcs    = trial.suggest_float("lambda_bcs", 1e-3, 10.0, log=True)
     branch_width  = trial.suggest_categorical("branch_width", [50, 100, 250])
-    # trunk_width   = trial.suggest_categorical("trunk_width", [100, 250, 500])
-    trunk_width   = 100
+    trunk_width   = trial.suggest_categorical("trunk_width", [100, 250, 500])
+    # trunk_width   = 100
     n_per_sample  = trial.suggest_categorical("n_per_sample", [500, 750, 1000])
-    n_layers      = trial.suggest_int("n_layers", 5, 8)
+    n_layers      = trial.suggest_int("n_layers", 3, 6)
     n_iter_trial = 50000
     lr_transition_steps = trial.suggest_categorical("lr_transition_steps", [n_iter_trial//20, n_iter_trial//10, n_iter_trial//5])
 
@@ -46,8 +46,8 @@ def objective(trial):
     return float(model.loss_log[-1]) 
 
 study = optuna.create_study(
-    storage="sqlite:///pi_deeponet_tuning_v2.db",
-    study_name="pi_deeponet_tuning_v2",
+    storage="sqlite:///pi_deeponet.db",
+    study_name="pi_deeponet",
     direction="minimize",
     load_if_exists=True,
 )
