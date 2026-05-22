@@ -4,12 +4,12 @@ import jax.numpy as np
 from jax import random, grad, vmap, jit, lax
 from jax import config
 from jax.flatten_util import ravel_pytree
-from jax.nn import relu
+from jax.nn import relu, tanh
 from numpy.polynomial.legendre import leggauss
 import optax 
 from torch.utils import data
 
-def MLP(layers, activation=relu):
+def MLP(layers, activation=tanh):
     """ Vanilla MLP"""
     def init(rng_key):
         def init_layer(key, d_in, d_out):
