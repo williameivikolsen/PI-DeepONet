@@ -212,3 +212,11 @@ class DeepONet:
     def predict_res(self, params, Q_star, Y_star):
         r_pred = vmap(self.residual_net, (None, 0, 0, 0))(params, Q_star, Y_star[:, 0], Y_star[:, 1])
         return r_pred
+
+    @partial(jit, static_argnums=(0,))
+    def predict_phi0(self, params, Q_batch, x_points):
+        f_for_one_Q = vmap(
+            lambda Q_i, x_j: self.operator_net(params, Q_i, x_j),
+            in_axes=(None, 0),
+        )
+        return self.output_scale * vmap(f_for_one_Q, in_axes=(0, None))(Q_batch, x_points)

@@ -458,3 +458,13 @@ class PI_DeepONet:
         # The raw-PDE residual is output_scale times that (linearity).
         r_pred = vmap(self.residual_net, (None, 0, 0, 0))(params, Q_star, Y_star[:, 0], Y_star[:, 1])
         return self.output_scale * r_pred
+
+    @partial(jit, static_argnums=(0,))
+    def predict_phi0(self, params, Q_batch, x_points):
+        def phi0_at(Q_i, x_j):
+            psi_vec = vmap(
+                lambda mu_k: self.operator_net(params, Q_i, x_j, mu_k)
+            )(self.mu_GL)
+            return np.dot(self.w_GL, psi_vec)
+        phi0_for_one_Q = vmap(phi0_at, in_axes=(None, 0))
+        return self.output_scale * vmap(phi0_for_one_Q, in_axes=(0, None))(Q_batch, x_points)
