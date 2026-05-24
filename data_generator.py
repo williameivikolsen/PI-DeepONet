@@ -258,14 +258,17 @@ def generate_dataset(Sigma_t: float,
 
 if __name__ == "__main__":
     # Generate datasets
+    sizes = {"large": 500, "medium": 100, "small": 10}
+    # Choose dataset size:
+    size = "small"
 
-    os.makedirs("datasets", exist_ok=True)
+    os.makedirs("datasets/" + size, exist_ok=True)
 
     # ---- Common GRF training parameters (Section II.D) ----
     GRF_MEAN     = 5.0
     GRF_L        = 0.1
     GRF_VARIANCE = 1.0
-    N_SAMPLES    = 500      # samples per model (200 for M_Para)
+    N_SAMPLES    = sizes[size]
 
     # ------------------------------------------------------------------ #
     # Model 1: Isotropic Scattering  (M_Iso)                             #
@@ -281,8 +284,7 @@ if __name__ == "__main__":
         grf_variance    = GRF_VARIANCE,
         seed            = 42
     )
-    np.savez("datasets/M_Iso_train.npz", **ds_iso)
-    print("  Saved → datasets/M_Iso_train.npz")
+    np.savez("datasets/" + size + "/M_Iso_train.npz", **ds_iso)
 
     # ------------------------------------------------------------------ #
     # Model 2: Anisotropic Scattering  (M_Aniso)                         #
@@ -298,8 +300,7 @@ if __name__ == "__main__":
         grf_variance    = GRF_VARIANCE,
         seed            = 42
     )
-    np.savez("datasets/M_Aniso_train.npz", **ds_aniso)
-    print("  Saved → datasets/M_Aniso_train.npz")
+    np.savez("datasets/" + size + "/M_Aniso_train.npz", **ds_aniso)
 
     # ------------------------------------------------------------------ #
     # Model 3: Pure Scattering  (M_Pure)                                 #
@@ -316,4 +317,3 @@ if __name__ == "__main__":
         seed            = 42
     )
     np.savez("datasets/M_Pure_train.npz", **ds_pure)
-    print("  Saved → datasets/M_Pure_train.npz")
