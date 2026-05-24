@@ -40,8 +40,8 @@ J = int(ds['x'].shape[0])
 data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
 print(f"\nFlux normalization: phi_scale = {phi_scale:.6f}")
 print(f"  Network learns psi/phi_scale; residual uses Q/phi_scale; predict_s un-normalizes.")
-bcs_in,  bcs_out  = build_bcs_arrays(ds, X=X_slab, n_per_sample=50000)
-res_in,  res_out  = build_res_arrays(ds, X=X_slab, n_per_sample=50000)
+bcs_in,  bcs_out  = build_bcs_arrays(ds, X=X_slab, n_per_sample=5000)
+res_in,  res_out  = build_res_arrays(ds, X=X_slab, n_per_sample=5000)
 
 # Validation set (held out from training; used for best-params tracking)
 val_np = onp.load("datasets/M_Iso_val.npz")
@@ -80,7 +80,7 @@ dt = time.time() - t0
 print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
 os.makedirs("trained_models/" + size, exist_ok=True)
-with open("trained_models/" + size + "/pideeponet_no_data.pkl", "wb") as f:
+with open("trained_models/" + size + "/pideeponet.pkl", "wb") as f:
     pickle.dump({
         "params": model.params,
         "config": {
@@ -105,4 +105,4 @@ with open("trained_models/" + size + "/pideeponet_no_data.pkl", "wb") as f:
         "n_iter": n_iter,
         "log_every": log_every,
     }, f)
-print("Saved trained_models/" + size + "/pideeponet_no_data.pkl")
+print("Saved trained_models/" + size + "/pideeponet.pkl")
