@@ -61,7 +61,7 @@ model.train(data_dataset,
 dt = time.time() - t0
 print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
-os.makedirs("trained_models", exist_ok=True)
+os.makedirs("trained_models/" + size, exist_ok=True)
 with open("trained_models/" + size + "/sahadath.pkl", "wb") as f:
     pickle.dump({
         "params": model.params,
