@@ -5,7 +5,7 @@ from model import PI_DeepONet
 from helpers import plot_loss_curves, plot_sample_predictions
 import matplotlib.pyplot as plt
 
-with open("trained_models/PI_test.pkl", "rb") as f:
+with open("trained_models/optimal_model.pkl", "rb") as f:
     ckpt = pickle.load(f)
 
 cfg = ckpt["config"]
@@ -25,15 +25,14 @@ fig1 = plot_loss_curves(
 
 # Plot sample predictions
 
-ds_np = onp.load("datasets/M_Iso_train.npz")
-ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
-
-sample_indices = [1, 2, 3, 4]
+ds_np = onp.load("datasets/test/M_Iso_test_NS.npz")
+ds = {k: jnp.asarray(ds_np[k]) for k in ds_np.files if ds_np[k].dtype.kind in "fiu"}
+sample_index = 0
 
 fig2 = plot_sample_predictions(
     model,
     ds,
-    sample_indices=sample_indices,
+    sample_index=sample_index,
 )
 
 plt.show()

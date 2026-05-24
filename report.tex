@@ -24,6 +24,7 @@
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
 \usepackage{physics}
+\usepackage{booktabs}
 
 \begin{document}
 
@@ -290,6 +291,89 @@ The models of Sahadath et al were set up and trained.
 
 The first model was developed under the assumption of only isotropic scattering in the slab geometry. The cross section parameters were set
 to $\Sigma_t = 1.0 \text{ cm}^{-1}$, $\Sigma_a = 0.5 \text{ cm}^{-1}$, $\Sigma_{s0} = 0.5 \text{ cm}^{-1}$ and $\Sigma_{s1} = 0 \text{ cm}^{-1}$.
+
+Three variants of the Physics Informed DeepONet were trained:
+\begin{itemize}
+    \item Data, physics and boundary condition loss.
+    \item Data loss.
+    \item Physics and boundary condition loss.
+\end{itemize}
+
+For comparison, an ordinary DeepONet using the same parameters as Sahadath et al. was also trained.
+
+\section{Results}
+
+\subsection{Model for Isotropic Scattering Media ($M_{Iso}^{Sc}$)}
+
+\subsubsection{Benchmark}
+
+The benchmark loss is shown in Figure \ref{fig: benchmark loss}. One sample loss along with the true and predicted scalar flux are shown in
+Figure \ref{fig: benchmark sample}.
+
+\begin{table}[ht]
+    \centering
+    \caption{DeepONet performance on the M\textsubscript{Iso} test scenarios from \cite{sahadath2026characterization}. Values are reported as
+    mean $\pm$ standard deviation across the 200 GRF samples per scenario; the LC, NLC, and sinusoidal cases use a single source realization each.}
+    \label{tab:deeponet_results}
+    \begin{tabular}{lrcc}
+        \toprule
+        Scenario & $n$ & $R^2$ & ARE [\%] \\
+        \midrule
+        NS (no shift)         & 200 & $0.989 \pm 0.005$ & $1.1 \pm 0.2$ \\
+        SS$_1$ (small shift)  & 200 & $0.990 \pm 0.006$ & $1.1 \pm 0.2$ \\
+        SS$_2$ (small shift)  & 200 & $0.988 \pm 0.006$ & $1.2 \pm 0.3$ \\
+        SS$_3$ (small shift)  & 200 & $0.990 \pm 0.005$ & $1.1 \pm 0.2$ \\
+        LS$_1$ (large shift)  & 200 & $0.98 \pm 0.01$ & $1.6 \pm 0.4$ \\
+        LS$_2$ (large shift)  & 200 & $0.993 \pm 0.004$ & $0.9 \pm 0.2$ \\
+        LS$_3$ (large shift)  & 200 & $0.9962 \pm 0.0003$ & $0.76 \pm 0.01$ \\
+        LS$_4$ (large shift)  & 200 & $0.9962 \pm 0.0003$ & $0.761 \pm 0.009$ \\
+        LS$_5$ (large shift)  & 200 & $0.9963 \pm 0.0003$ & $0.760 \pm 0.006$ \\
+        LS$_6$ (large shift)  & 200 & $0.9963 \pm 0.0004$ & $0.758 \pm 0.005$ \\
+        \midrule
+        LC (linear comb.)     &   1 & $0.99308$             & $0.847$ \\
+        NLC (nonlinear comb.) &   1 & $0.97514$             & $1.924$ \\
+        SIN$_{\mathrm{LF}}$ ($f = 0.2$) & 1 & $0.99793$    & $0.583$ \\
+        SIN$_{\mathrm{HF}}$ ($f = 0.8$) & 1 & $0.99583$    & $0.658$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{results/loss.pdf}
+    \caption{Benchmark loss.}
+    \label{fig: benchmark loss}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{results/benchmark_sample.pdf}
+    \caption{Benchmark sample.}
+    \label{fig: benchmark sample}
+\end{figure}
+
+\subsubsection{PI DeepONet, Data and Physics Loss}
+
+The data, physics and boundary condition loss are shown in Figure \ref{fig: PI_data_physics_loss}. One sample loss along with the true and predicted scalar flux are shown in
+Figure \ref{fig: PI_data_physics_sample}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{results/PI_data_physics_loss.pdf}
+    \caption{Loss of data, physics and boundary condition trained model.}
+    \label{fig: PI_data_physics_loss}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{results/PI_data_physics_sample.pdf}
+    \caption{Sample of data, physics and boundary condition trained model.}
+    \label{fig: PI_data_physics_sample}
+\end{figure}
+
+\subsubsection{PI DeepONet, Physics Loss}
+
+\subsubsection{PI DeepONet, Data Loss}
 
 
 \section{Conclusion}

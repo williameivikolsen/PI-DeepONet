@@ -8,7 +8,7 @@ from jax import vmap
 
 def plot_loss_curves(model,
                      log_every: int = 100,
-                     figsize=(11, 4.5)):
+                     figsize=(5, 7)):
 
     loss_log      = onp.asarray(model.loss_log)
     loss_data_log = onp.asarray(model.loss_data_log)
@@ -17,7 +17,8 @@ def plot_loss_curves(model,
 
     iters = onp.arange(len(loss_log)) * log_every
 
-    fig, axes = plt.subplots(1, 2, figsize=figsize, sharex=True)
+    fig, axes = plt.subplots(2, 1, figsize=figsize, sharex=True)
+
 
     # Total loss
     axes[0].plot(iters, loss_log, lw=2, color="black", label="Total")
@@ -51,27 +52,20 @@ def predict_phi0(model, Q: jnp.ndarray, x_points: jnp.ndarray) -> jnp.ndarray:
             lambda mu_k: model.operator_net(model.params, Q, x_j, mu_k)
         )(model.mu_GL)
         return jnp.dot(model.w_GL, psi_vec)
+    
+    print("Output scale")
+    print(model.output_scale)
 
     return model.output_scale * vmap(phi0_at)(x_points)
 
 def plot_sample_predictions(model,
                             ds: dict,
-                            sample_indices=None,
-                            figsize=None):
-
-    if sample_indices is None:
-        sample_indices = [0, 1, 2]
-    sample_indices = list(sample_indices)
-    n_rows = len(sample_indices)
-
-    if figsize is None:
-        figsize = (12, 2.6 * n_rows + 0.4)
-
+                            sample_index: int = 0,
+                            figsize=(7, 9)):
     # Pull arrays as numpy for matplotlib.
     Q_all     = onp.asarray(ds['Q'])          # (N, J)
     phi_0_all = onp.asarray(ds['phi_0'])      # (N, J)
     x         = onp.asarray(ds['x'])          # (J,)
-    J         = x.shape[0]
 
     # Use the dataset's sensor grid for predictions so that the true and
     # predicted curves are compared at identical x-points.
@@ -83,44 +77,39 @@ def plot_sample_predictions(model,
     col_pred  = palette[2]
     col_err   = sns.color_palette("flare", 4)[2]
 
-    fig, axes = plt.subplots(n_rows, 3, figsize=figsize, squeeze=False)
+    Q_i     = jnp.asarray(Q_all[sample_index])
+    phi_0_i = phi_0_all[sample_index]
 
-    for row, idx in enumerate(sample_indices):
-        Q_i     = jnp.asarray(Q_all[idx])
-        phi_0_i = phi_0_all[idx]
+    phi_0_pred = onp.asarray(predict_phi0(model, Q_i, x_jax))
 
-        phi_0_pred = onp.asarray(predict_phi0(model, Q_i, x_jax))
+    fig, axes = plt.subplots(3, 1, figsize=figsize, sharex=True)
 
-        # --- column 1: Q(x) -------------------------------------------
-        ax = axes[row, 0]
-        ax.plot(x, Q_all[idx], lw=2, color=col_Q)
-        ax.fill_between(x, 0, Q_all[idx], color=col_Q, alpha=0.15)
-        ax.set_xlabel("x  [cm]")
-        ax.set_ylabel("$Q(x)$")
-        ax.set_title(f"Sample {idx}: source $Q(x)$")
+    # --- row 1: Q(x) -----------------------------------------------------
+    ax = axes[0]
+    ax.plot(x, Q_all[sample_index], lw=2, color=col_Q)
+    ax.fill_between(x, 0, Q_all[sample_index], color=col_Q, alpha=0.15)
+    ax.set_ylabel("$Q(x)$")
+    ax.set_title(f"Sample {sample_index}: source $Q(x)$")
 
-        # --- column 2: true vs predicted phi_0 ------------------------
-        ax = axes[row, 1]
-        ax.plot(x, phi_0_i,    lw=2.0, color=col_true, label="true")
-        ax.plot(x, phi_0_pred, lw=1.8, color=col_pred,
-                linestyle="--", label="predicted")
-        ax.set_xlabel("x  [cm]")
-        ax.set_ylabel("$\\phi_0(x)$")
-        ax.set_title(f"Sample {idx}: scalar flux")
-        ax.legend(frameon=True, loc="best")
+    # --- row 2: true vs predicted phi_0 ----------------------------------
+    ax = axes[1]
+    ax.plot(x, phi_0_i,    lw=2.0, color=col_true, label="true")
+    ax.plot(x, phi_0_pred, lw=1.8, color=col_pred,
+            linestyle="--", label="predicted")
+    ax.set_ylabel("$\\phi_0(x)$")
+    ax.set_title("Scalar flux")
+    ax.legend(frameon=True, loc="best")
 
-        # --- column 3: absolute error ---------------------------------
-        abs_err = onp.abs(phi_0_i - phi_0_pred)
-        # Relative L2 error printed in the title.
-        rel_l2 = float(onp.linalg.norm(phi_0_i - phi_0_pred)
-                       / (onp.linalg.norm(phi_0_i) + 1e-12))
-        ax = axes[row, 2]
-        ax.plot(x, abs_err, lw=2, color=col_err)
-        ax.fill_between(x, 0, abs_err, color=col_err, alpha=0.20)
-        ax.set_xlabel("x  [cm]")
-        ax.set_ylabel("$|\\phi_0^{\\mathrm{true}} - \\phi_0^{\\mathrm{pred}}|$")
-        ax.set_title(f"Sample {idx}: abs err  (rel $L_2$ = {rel_l2:.2e})")
+    # --- row 3: absolute error -------------------------------------------
+    abs_err = onp.abs(phi_0_i - phi_0_pred)
+    rel_l2 = float(onp.linalg.norm(phi_0_i - phi_0_pred)
+                   / (onp.linalg.norm(phi_0_i) + 1e-12))
+    ax = axes[2]
+    ax.plot(x, abs_err, lw=2, color=col_err)
+    ax.fill_between(x, 0, abs_err, color=col_err, alpha=0.20)
+    ax.set_xlabel("x  [cm]")
+    ax.set_ylabel("$|\\phi_0^{\\mathrm{true}} - \\phi_0^{\\mathrm{pred}}|$")
+    ax.set_title(f"Absolute error  (rel $L_2$ = {rel_l2:.2e})")
 
     fig.tight_layout()
-
     return fig
