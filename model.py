@@ -4,12 +4,12 @@ import jax.numpy as np
 from jax import random, grad, vmap, jit, lax
 from jax import config
 from jax.flatten_util import ravel_pytree
-from jax.nn import relu, tanh
+from jax.nn import relu
 from numpy.polynomial.legendre import leggauss
 import optax 
 from torch.utils import data
 
-def MLP(layers, activation=tanh):
+def MLP(layers, activation=relu):
     """ Vanilla MLP"""
     def init(rng_key):
         def init_layer(key, d_in, d_out):
@@ -55,6 +55,20 @@ class DataGenerator(data.Dataset):
         in_batch  = tuple(arr[idx] for arr in self.inputs)
         out_batch = self.output[idx]
         return in_batch, out_batch
+
+
+def build_val_batch(ds, output_scale: float):
+    """
+    Build a single validation (inputs, outputs) tuple.
+    """
+    Q     = np.asarray(ds['Q'])            # (N, J)
+    phi_0 = np.asarray(ds['phi_0'])        # (N, J)
+    x     = np.asarray(ds['x'])            # (J,)
+    N, J  = Q.shape
+    Q_flat   = np.repeat(Q, J, axis=0)
+    x_flat   = np.tile(x, N)
+    phi_flat = (phi_0 / output_scale).reshape(-1)
+    return (Q_flat, x_flat), phi_flat
 
 
 def build_data_arrays(ds, normalize=True):
@@ -381,6 +395,23 @@ class PI_DeepONet:
                 if callback is not None:
                     callback(it, float(l), float(l_data),
                              float(l_bcs), float(l_res))
+
+    @partial(jit, static_argnums=(0,))
+    def val_ARE(self, params, val_batch):
+        """
+        Validation average relative error (%). Used by optimization.py as
+        the Optuna objective.
+        """
+        (Q, x), phi_norm = val_batch
+
+        def phi0_at(Q_i, x_j):
+            psi_vec = vmap(
+                lambda mu_k: self.operator_net(params, Q_i, x_j, mu_k)
+            )(self.mu_GL)
+            return np.dot(self.w_GL, psi_vec)
+
+        phi_pred = vmap(phi0_at)(Q, x)
+        return np.mean(np.abs((phi_norm.flatten() - phi_pred) / phi_norm.flatten())) * 100.0
 
     # Evaluates predictions at test points
     @partial(jit, static_argnums=(0,))
