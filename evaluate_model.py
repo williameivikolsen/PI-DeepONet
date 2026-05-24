@@ -7,7 +7,7 @@ import jax.numpy as jnp
 from jax import vmap
 
 
-CHECKPOINT_PATH = "trained_models/weights.pkl"   # change to PI ckpt as needed
+CHECKPOINT_PATH = "trained_models/small/pideeponet.pkl"   # change to PI ckpt as needed
 TEST_DIR        = "datasets/test"
 
 SCENARIOS = [

@@ -13,7 +13,9 @@ from model import (
 # ---------------------------------------------------------------------------
 # Load datasets once outside the objective
 # ---------------------------------------------------------------------------
-ds_np = onp.load("datasets/M_Iso_train.npz")
+size = "small"
+
+ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
 
 val_np = onp.load("datasets/M_Iso_val.npz")
@@ -76,8 +78,8 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(
-        storage="sqlite:///pi_deeponet.db",
-        study_name="pi_deeponet_val_ARE",
+        storage=f"sqlite:///pi_deeponet_{size}.db",
+        study_name=f"pi_deeponet_val_ARE_{size}",
         direction="minimize",
         load_if_exists=True,
     )
