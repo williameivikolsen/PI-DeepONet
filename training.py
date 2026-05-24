@@ -64,7 +64,8 @@ model = PI_DeepONet(
     N_angles=16,
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
     x_sensors=ds['x'], X=X_slab,
-    lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
+    # lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
+    lambda_data=0, lambda_res=0.9, lambda_bcs=0.1, # No data training
     lr_transition_steps=n_iter//10,
     output_scale=phi_scale,
 )
