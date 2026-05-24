@@ -359,10 +359,21 @@ class PI_DeepONet:
 
     # Optimize parameters in a loop
     def train(self, data_dataset, bcs_dataset, res_dataset,
-              nIter=10000, log_every=100, callback=None):
+              nIter=10000, log_every=100, callback=None,
+              val_batch=None, val_every=None):
         data_iter = iter(data_dataset)
         bcs_iter  = iter(bcs_dataset)
         res_iter  = iter(res_dataset)
+
+        if val_every is None:
+            val_every = log_every
+
+        # Validation bookkeeping
+        self.val_ARE_log    = []
+        self.val_iter_log   = []
+        self.best_params    = self.params
+        self.best_val_ARE   = float("inf")
+        self.best_val_iter  = 0
 
         for it in range(nIter):
             data_batch = next(data_iter)
@@ -385,16 +396,36 @@ class PI_DeepONet:
                 self.loss_bcs_log.append(float(l_bcs))
                 self.loss_res_log.append(float(l_res))
 
-                print(
-                    f"Iter {it:6d}: L={float(l):.3e}  "
-                    f"L_data={float(l_data):.3e}  "
-                    f"L_bcs={float(l_bcs):.3e}  "
-                    f"L_res={float(l_res):.3e}"
-                )
+                line = (f"Iter {it:6d}: L={float(l):.3e}  "
+                        f"L_data={float(l_data):.3e}  "
+                        f"L_bcs={float(l_bcs):.3e}  "
+                        f"L_res={float(l_res):.3e}")
+
+                if val_batch is not None and it % val_every == 0:
+                    v = float(self.val_ARE(self.params, val_batch))
+                    self.val_ARE_log.append(v)
+                    self.val_iter_log.append(it)
+
+                    if v < self.best_val_ARE:
+                        self.best_val_ARE  = v
+                        self.best_val_iter = it
+                        self.best_params   = self.params
+                        flag = " *"
+                    else:
+                        flag = ""
+                    line += f"  val_ARE={v:.3f}%{flag}"
+
+                print(line)
 
                 if callback is not None:
                     callback(it, float(l), float(l_data),
                              float(l_bcs), float(l_res))
+
+        # Restore the parameters that achieved the lowest validation ARE
+        if val_batch is not None:
+            print(f"\nBest validation ARE = {self.best_val_ARE:.3f}% "
+                  f"at iter {self.best_val_iter}; restoring those params.")
+            self.params = self.best_params
 
     @partial(jit, static_argnums=(0,))
     def val_ARE(self, params, val_batch):

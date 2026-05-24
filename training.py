@@ -14,6 +14,7 @@ from model import (
     build_data_arrays,
     build_bcs_arrays,
     build_res_arrays,
+    build_val_batch,
 )
 
 print(jax.devices())
@@ -22,7 +23,7 @@ E = 2000 # Epochs
 B = 1000 # Batch size
 D = 50000 # Number of points in dataset
 n_iter = int(D*E/B)
-log_every = 100
+log_every = n_iter//100
 
 ds_np = onp.load("datasets/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
@@ -40,6 +41,12 @@ print(f"  Network learns psi/phi_scale; residual uses Q/phi_scale; predict_s un-
 bcs_in,  bcs_out  = build_bcs_arrays(ds, X=X_slab, n_per_sample=500)
 res_in,  res_out  = build_res_arrays(ds, X=X_slab, n_per_sample=500)
 
+# Validation set (held out from training; used for best-params tracking)
+val_np = onp.load("datasets/M_Iso_val.npz")
+val_ds = {k: jnp.asarray(val_np[k]) for k in val_np.files}
+val_batch = build_val_batch(val_ds, output_scale=phi_scale)
+print(f"Loaded validation set: {val_ds['Q'].shape[0]} sources")
+
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                              rng_key=random.PRNGKey(101))
 bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
@@ -47,8 +54,8 @@ bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
 res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
                              rng_key=random.PRNGKey(303))
 
-branch_layers = [J] + 6*[250] + [100]
-trunk_layers  = [2] + 6*[250] + [100]
+branch_layers = [J] + 5*[100] + [100]
+trunk_layers  = [2] + 5*[500] + [100]
 
 model = PI_DeepONet(
     branch_layers, trunk_layers,
@@ -56,7 +63,7 @@ model = PI_DeepONet(
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
     x_sensors=ds['x'], X=X_slab,
     lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
-    lr_transition_steps=n_iter//20,
+    lr_transition_steps=n_iter//10,
     output_scale=phi_scale,
 )
 print(f"\nInstantiated PI_DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
@@ -64,7 +71,8 @@ print(f"\nInstantiated PI_DeepONet  (branch {branch_layers}, trunk {trunk_layers
 print(f"\n--- Training for {n_iter} iterations ---")
 t0 = time.time()
 model.train(data_dataset, bcs_dataset, res_dataset,
-            nIter=n_iter, log_every=log_every)
+            nIter=n_iter, log_every=log_every,
+            val_batch=val_batch, val_every=log_every)
 dt = time.time() - t0
 print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
@@ -87,6 +95,10 @@ with open("trained_models/optimal_model.pkl", "wb") as f:
         "loss_data_log": model.loss_data_log,
         "loss_bcs_log":  model.loss_bcs_log,
         "loss_res_log":  model.loss_res_log,
+        "val_ARE_log":   model.val_ARE_log,
+        "val_iter_log":  model.val_iter_log,
+        "best_val_ARE":  model.best_val_ARE,
+        "best_val_iter": model.best_val_iter,
         "n_iter": n_iter,
         "log_every": log_every,
     }, f)

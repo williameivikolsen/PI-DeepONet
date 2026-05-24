@@ -66,11 +66,12 @@ def objective(trial):
     model.train(
         data_dataset, bcs_dataset, res_dataset,
         nIter=n_iter_trial, log_every=500,
+        val_batch=val_batch, val_every=500,
     )
 
-    # Evaluate on the validation set at the end of training
-    val_are = float(model.val_ARE(model.params, val_batch))
-    return val_are
+    # Best validation ARE achieved across training (not final-iter ARE):
+    # rewards configs that reach good generalization at SOME point.
+    return float(model.best_val_ARE)
 
 
 if __name__ == "__main__":
