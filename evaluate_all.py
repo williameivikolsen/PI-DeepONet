@@ -57,50 +57,49 @@ def evaluate_combination(ckpt_path):
 
 
 def _plot_metric(all_results, size, out_dir, metric, ylabel, fname,
-                 yscale=None, clamp_negative=False, legend_loc="upper left"):
-    grf_labels    = [lbl for _, lbl in SCENARIOS_GRF]
-    single_labels = [lbl for _, lbl in SCENARIOS_SINGLE]
-    all_labels    = grf_labels + single_labels
+                 yscale=None, clamp_negative=False, legend_loc="best"):
+    grf_labels = [lbl for _, lbl in SCENARIOS_GRF]
 
-    x_pos = onp.arange(len(all_labels))
-    width = 0.25
+    x_pos = onp.arange(len(grf_labels))
+    width = 0.18
     palette = sns.color_palette("deep", len(MODEL_FILES))
 
-    fig, ax = plt.subplots(figsize=(11, 5))
+    fig, ax = plt.subplots(figsize=(5, 3.5))
 
     for k, (model_name, _) in enumerate(MODEL_FILES.items()):
+        if model_name == "PI-DeepONet (no data)" and size != "small":
+            continue
         results = all_results[size].get(model_name)
         if results is None:
             continue
-        means = onp.array([results[lbl][f"{metric}_mean"] for lbl in all_labels])
-        stds  = onp.array([results[lbl][f"{metric}_std"]  for lbl in all_labels])
-        stds[len(grf_labels):] = 0.0
+        means = onp.array([results[lbl][f"{metric}_mean"] for lbl in grf_labels])
+        stds  = onp.array([results[lbl][f"{metric}_std"]  for lbl in grf_labels])
 
         offset = (k - (len(MODEL_FILES) - 1) / 2) * width
         ax.errorbar(
             x_pos + offset, means, yerr=stds,
-            fmt="o", capsize=3, color=palette[k], label=model_name,
-            markersize=5, lw=1.3,
+            fmt="o", capsize=2, color=palette[k], label=model_name,
+            markersize=3, lw=0.9, elinewidth=0.8,
         )
 
-    ax.axvline(len(grf_labels) - 0.5, color="gray", ls="--", lw=0.8, alpha=0.6)
     ax.set_xticks(x_pos)
-    ax.set_xticklabels(all_labels, rotation=45, ha="right")
-    ax.set_ylabel(ylabel)
-    ax.set_title(f"M$_{{\\mathrm{{Iso}}}}$ test performance — training set: {size}")
+    ax.set_xticklabels(grf_labels, rotation=45, ha="right", fontsize=7)
+    ax.tick_params(axis="y", labelsize=7)
+    ax.set_ylabel(ylabel, fontsize=8)
+    ax.set_title(f"M$_{{\\mathrm{{Iso}}}}$ — training set: {size}", fontsize=8)
     if yscale is not None:
         ax.set_yscale(yscale)
     if clamp_negative:
         ymin, ymax = ax.get_ylim()
         if ymin < -1.0:
             ax.set_ylim(-1.0, max(1.05, ymax))
-        ax.axhline(0.0, color="gray", ls=":", lw=0.6, alpha=0.7)
-    ax.grid(True, axis="y", ls=":", lw=0.5, alpha=0.6)
-    ax.legend(frameon=True, loc=legend_loc)
+        ax.axhline(0.0, color="gray", ls=":", lw=0.5, alpha=0.7)
+    ax.grid(True, axis="y", ls=":", lw=0.4, alpha=0.6)
+    ax.legend(frameon=True, loc=legend_loc, fontsize=6)
 
     fig.tight_layout()
     out_path = os.path.join(out_dir, f"{fname}_{size}.png")
-    fig.savefig(out_path, dpi=150, bbox_inches="tight")
+    fig.savefig(out_path, dpi=200, bbox_inches="tight")
     print(f"  saved {out_path}")
     plt.close(fig)
 
@@ -129,10 +128,10 @@ def main():
             continue
         _plot_metric(all_results, size, out_dir,
                      metric="ARE", ylabel="Average Relative Error [\\%]",
-                     fname="ARE", yscale="log", legend_loc="upper left")
+                     fname="ARE",)
         _plot_metric(all_results, size, out_dir,
                      metric="R2", ylabel="$R^2$",
-                     fname="R2", clamp_negative=True, legend_loc="lower left")
+                     fname="R2", clamp_negative=True)
 
     print("\n=== Summary (ARE %) ===")
     for size in SIZES:
