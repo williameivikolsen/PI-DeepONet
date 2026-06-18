@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.4.16)  18 JUN 2026 15:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.4.16)  18 JUN 2026 18:14
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -319,36 +319,16 @@ File: figures/1D Slab.png Graphic file (type png)
 Package pdftex.def Info: figures/1D Slab.png  used on input line 245.
 (pdftex.def)             Requested size: 246.0pt x 60.2997pt.
  [4 <./figures/1D Slab.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 332--336
+Underfull \hbox (badness 10000) in paragraph at lines 341--345
 \OT1/cmr/m/n/10 The re-sult is a $\OML/cmm/m/it/10 J$\OT1/cmr/m/n/10 -dimensional vec-tor $\OML/cmm/m/it/10 Q \OT1/cmr/m/n/10 =
  []
 
 
-Underfull \hbox (badness 1253) in paragraph at lines 332--336
+Underfull \hbox (badness 1253) in paragraph at lines 341--345
 \OT1/cmr/m/n/10 [\OML/cmm/m/it/10 Q\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x[]\OT1/cmr/m/n/10 )\OML/cmm/m/it/10 ; Q\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x[]\OT1/cmr/m/n/10 )\OML/cmm/m/it/10 ; [] ; Q\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x[]\OT1/cmr/m/n/10 )]$ giv-ing the source value at
  []
 
-<results/loss.pdf, id=42, 433.62pt x 325.215pt>
-File: results/loss.pdf Graphic file (type pdf)
-<use results/loss.pdf>
-Package pdftex.def Info: results/loss.pdf  used on input line 407.
-(pdftex.def)             Requested size: 246.0pt x 184.5011pt.
-<results/benchmark_sample.pdf, id=43, 505.89pt x 650.43pt>
-File: results/benchmark_sample.pdf Graphic file (type pdf)
-<use results/benchmark_sample.pdf>
-Package pdftex.def Info: results/benchmark_sample.pdf  used on input line 414.
-(pdftex.def)             Requested size: 246.0pt x 316.29184pt.
-<results/PI_data_physics_loss.pdf, id=44, 361.35pt x 505.89pt>
-File: results/PI_data_physics_loss.pdf Graphic file (type pdf)
-<use results/PI_data_physics_loss.pdf>
-Package pdftex.def Info: results/PI_data_physics_loss.pdf  used on input line 426.
-(pdftex.def)             Requested size: 246.0pt x 344.40204pt.
-<results/PI_data_physics_sample.pdf, id=45, 505.89pt x 650.43pt>
-File: results/PI_data_physics_sample.pdf Graphic file (type pdf)
-<use results/PI_data_physics_sample.pdf>
-Package pdftex.def Info: results/PI_data_physics_sample.pdf  used on input line 433.
-(pdftex.def)             Requested size: 246.0pt x 316.29184pt.
-(./report.bbl [5]
+[5] (./report.bbl
 Underfull \hbox (badness 1043) in paragraph at lines 54--55
  \OT1/cmr/m/n/9 Rep. (In-ter-na-tional Atomic En-ergy Agency, Vi-enna,
  []
@@ -373,25 +353,25 @@ Overfull \hbox (207.8588pt too wide) in paragraph at lines 84--85
  \OT1/cmtt/m/n/9 operator-[]learning-[]via-[]physics-[]informed-[]deeponet-[]lets-[]implement-[]it-[]from-[]scratch-[]6659f3179887$
  []
 
-) [6 <./results/loss.pdf>] [7 <./results/benchmark_sample.pdf>] [8 <./results/PI_data_physics_loss.pdf>] [9 <./results/PI_data_physics_sample.pdf>] (./report.aux)
+) [6] (./report.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 5595 strings out of 467525
- 79288 string characters out of 5418982
- 531285 words of memory out of 5000000
- 34435 multiletter control sequences out of 15000+600000
+ 5559 strings out of 467525
+ 78035 string characters out of 5418982
+ 518309 words of memory out of 5000000
+ 34399 multiletter control sequences out of 15000+600000
  641390 words of font info for 90 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 73i,11n,79p,935b,392s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on report.pdf (9 pages, 936233 bytes).
+ 73i,11n,79p,935b,428s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
+Output written on report.pdf (6 pages, 797140 bytes).
 PDF statistics:
- 354 PDF objects out of 1000 (max. 8388607)
- 134 compressed objects within 2 object streams
+ 140 PDF objects out of 1000 (max. 8388607)
+ 82 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 41 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 

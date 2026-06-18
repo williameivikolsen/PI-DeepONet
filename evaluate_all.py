@@ -98,7 +98,7 @@ def _plot_metric(all_results, size, out_dir, metric, ylabel, fname,
     ax.legend(frameon=True, loc=legend_loc, fontsize=6)
 
     fig.tight_layout()
-    out_path = os.path.join(out_dir, f"{fname}_{size}.png")
+    out_path = os.path.join(out_dir, f"{fname}_{size}.pdf")
     fig.savefig(out_path, dpi=200, bbox_inches="tight")
     print(f"  saved {out_path}")
     plt.close(fig)

@@ -232,9 +232,9 @@ studied by \cite{sahadath2026characterization}. We will use this model as a benc
 the same problem to compare their performances.
 
 For this specific problem, physics-informed training is not strictly necessary, since we easily
-can generate training data. The core research question of this study is \textit{to which degree physics-informed training can replace labelled
+can generate training data. However, the question we wish to answer in this study is \textit{to which extent physics-informed training can replace labelled
 training}. This will serve as valuable insight for our future efforts of training models for more complicated 2D or 3D problems, where training
-data will be more scarce due to the necessity of using Monte Carlo or Deterministic methods for training data generation.
+data will be scarcer due to the necessity of using Monte Carlo or Deterministic methods for training data generation.
 
 \section{Method}
 
@@ -270,7 +270,16 @@ accounting for linearly anisotropic scattering. The external neutron source dist
 boundary conditions correspond to vacuum (zero incoming current) at both ends of the slab: no neutrons enter from the left at $x = 0$ for
 forward-traveling directions ($\mu > 0$), and none enter from the right at $x = X$ for backward-traveling directions ($\mu < 0$).
 
-\section{Data Generation for Training}
+The angular flux $\psi(x, \mu)$ can be integrated over the angular variable $\mu$ to obtain the \textit{scalar flux} $\varphi_0(x)$,
+\begin{equation} \label{eq: Scalar flux}
+    \varphi_0(x) = \int_{-1}^1 \psi(x, \mu) \dd{x}.
+\end{equation}
+By taking the integral of the angular flux weighted by the angular variable $\mu$, the \textit{scalar current} $\varphi_1(x)$ is obtained,
+\begin{equation} \label{eq: Scalar current}
+    \varphi_1(x) = \int_{-1}^1 \mu \psi(x, \mu) \dd{x}.
+\end{equation}
+
+\subsection{Data Generation}
 
 In the paper by Sahadath et al, a set of source distributions $Q(x)$ were prepared, and the 1D NTE was solved numerically for each of them to
 generate a training dataset for their DeepONet model. This was accomplished by fist applying spatial and angular discretization. The spatial domain
@@ -300,7 +309,7 @@ $\Sigma_{t,j}$, and $\Sigma_{s0,j}$ and $\Sigma_{s1,j}$ are the cell-average zer
 cross section, respectively. The cell-average external source is $Q_j$ and the cell-average scalar flux $\varphi_{0,j}$ and current $\varphi_{1,j}$
 are obtained from the angular flux via Gauss-Legendre quadrature,
 \begin{align}
-    \varphi_{0,j} &= \sum_{n=1}^N \psi_{n,j} w_n, \\
+    \varphi_{0,j} &= \sum_{n=1}^N \psi_{n,j} w_n, \label{eq: GL scalar flux} \\
     \varphi_{1,j} &= \sum_{n=1}^N \psi_{n,j} \mu_n w_n,
 \end{align}
 where $w_n$ are the Gauss-Legendre quadrature weights. The cell-edge and cell-average angular fluxes are related using the diamond difference
@@ -336,104 +345,69 @@ source samples used to train and test the DeepONet.
 
 A total of 500 source distribution samples $Q(x)$ were generated with a mean of 5.0 and a length scale of 0.1, divided into 100 cells.
 
-\subsection{Benchmark Model}
+\subsection{Model Architecture and Training}
 
-For the benchmark model of \cite{sahadath2026characterization}, the model was trained on
+\subsubsection{Benchmark Model}
+
+The benchmark model was implemented according to the description of \cite{sahadath2026characterization}. The input was the source function
+$Q(x)$, with the $Q(\cdot)$ array being fed as input for the Branch net and the $x$ array fed as input for the Trunk net. The dot product
+of the outputs of the Branch and Trunk nets then gives the predicted scalar flux $\varphi_0(x)$. The model was trained on
 \begin{itemize}
-    \item Input data: The 500 source distribution samples $Q(x)$ described above.
-    \item Output data: The corresponding scalar flux $\varphi(x)$ for each source distribution, given by equation 
+    \item Input data: The source distribution samples $Q(x)$ described above.
+    \item Output data: The corresponding scalar flux $\varphi_0(x)$ for each source distribution, given by equation \eqref{eq: Scalar flux}.
 \end{itemize}
 
-\section{Training}
+\subsubsection{Physics-Informed DeepONet}
 
-The models of Sahadath et al were set up and trained.
+For the Physics-Informed DeepONet, the architecture must differ from the benchmark model to incorporate the Physics-Informed loss. The benchmark
+model predicts the scalar flux directly, but the 1D NTE \eqref{eq: 1D NTE} is formulated in terms of the angular flux $\psi(x, \mu)$. To implement
+this loss funciton, the Physics-Informed DeepONet must therefore predict the angular flux $\psi(x,\mu)$ instead of the scalar flux $\varphi_0(x)$.
 
-\subsection{Model for Isotropic Scattering Media ($M_{Iso}^{Sc}$)}
-
-The first model was developed under the assumption of only isotropic scattering in the slab geometry. The cross section parameters were set
-to $\Sigma_t = 1.0 \text{ cm}^{-1}$, $\Sigma_a = 0.5 \text{ cm}^{-1}$, $\Sigma_{s0} = 0.5 \text{ cm}^{-1}$ and $\Sigma_{s1} = 0 \text{ cm}^{-1}$.
-
-Three variants of the Physics Informed DeepONet were trained:
+This forces a decision for training. The model can either:
 \begin{itemize}
-    \item Data, physics and boundary condition loss.
-    \item Data loss.
-    \item Physics and boundary condition loss.
+    \item Train on the same dataset as the benchmark model. The model must then predict an angular flux $\psi(x,\mu)$ and feed the angular flux into
+    the GL quadrature \eqref{eq: GL scalar flux} to calculate the scalar flux $\varphi_0(x)$.
+    \item Train on a separate dataset from the benchmark problem. This dataset will containt the angular flux $\psi(x,\mu)$ for each source
+    function $Q(x)$. The two datasets will share the same input, but have different outputs.
 \end{itemize}
 
-For comparison, an ordinary DeepONet using the same parameters as Sahadath et al. was also trained.
+The first option would give a true comparison to training a model on the exact same data as the benchmark problem. A potential issue with this
+is that this dataset will lack the dimensionality of the output predicted by the model. This might prevent the model from learning sufficiently
+well compared to the benchmark model, which prevents the scalar flux directly. It is therefore worth testing both training regimes for the
+Physics-Informed DeepONet. We therefore have one Physics-Informed DeepONet trained on
+\begin{itemize}
+    \item Input data: The source distribution samples $Q(x)$ described above.
+    \item Output data: The corresponding scalar flux $\varphi_0(x)$ for each source distribution, given by equation \eqref{eq: Scalar flux}.
+\end{itemize}
+The other Physics-Informed DeepONet is trained on
+\begin{itemize}
+    \item Input data: The source distribution samples $Q(x)$ described above.
+    \item Output data: The corresponding angular flux $\psi(x, \mu)$ for each source distribution.
+\end{itemize}
+
+The model was developed under the assumption of only isotropic scattering in the slab geometry. The cross section parameters were set
+The parameters for the NTE were set to the first problem considered in \cite{sahadath2026characterization}, which corresponds to isotropic
+scattering. The cross sections were then given by
+$\Sigma_t = 1.0 \text{ cm}^{-1}$, $\Sigma_a = 0.5 \text{ cm}^{-1}$, $\Sigma_{s0} = 0.5 \text{ cm}^{-1}$ and $\Sigma_{s1} = 0 \text{ cm}^{-1}$.
+
+To test wether physics-informed loss can replace labelled training, the models were trained on datasets of three different sizes:
+\begin{itemize}
+    \item The original dataset of 500 source distributions $Q(x)$.
+    \item A medium sized dataset of a subset of 100 source distributions $Q(x)$ from the original dataset.
+    \item A small dataset of a subset of 10 source distributions $Q(x)$ from the original dataset.
+\end{itemize}
+
+\subsection{Model Evaluation}
 
 \section{Results and Discussion}
 
-\subsection{Model for Isotropic Scattering Media ($M_{Iso}^{Sc}$)}
+\subsection{Benchmark}
 
-\subsubsection{Benchmark}
 
-The benchmark loss is shown in Figure \ref{fig: benchmark loss}. One sample loss along with the true and predicted scalar flux are shown in
-Figure \ref{fig: benchmark sample}. The model was tested by the scenarios described by \cite{sahadath2026characterization}, with the results
-shown in Table \ref{tab:deeponet_results}. NOTE: Include Sahadath results in this table.
-
-We observe that our DeepONet model performs similarly to that of Sahadath. The benchmark model has therefore been successfully implemented.
-
-\begin{table}[ht]
-    \centering
-    \caption{DeepONet performance on the M\textsubscript{Iso} test scenarios from \cite{sahadath2026characterization}. Values are reported as
-    mean $\pm$ standard deviation across the 200 GRF samples per scenario; the LC, NLC, and sinusoidal cases use a single source realization each.}
-    \label{tab:deeponet_results}
-    \begin{tabular}{lrcc}
-        \toprule
-        Scenario & $n$ & $R^2$ & ARE [\%] \\
-        \midrule
-        NS (no shift)         & 200 & $0.989 \pm 0.005$ & $1.1 \pm 0.2$ \\
-        SS$_1$ (small shift)  & 200 & $0.990 \pm 0.006$ & $1.1 \pm 0.2$ \\
-        SS$_2$ (small shift)  & 200 & $0.988 \pm 0.006$ & $1.2 \pm 0.3$ \\
-        SS$_3$ (small shift)  & 200 & $0.990 \pm 0.005$ & $1.1 \pm 0.2$ \\
-        LS$_1$ (large shift)  & 200 & $0.98 \pm 0.01$ & $1.6 \pm 0.4$ \\
-        LS$_2$ (large shift)  & 200 & $0.993 \pm 0.004$ & $0.9 \pm 0.2$ \\
-        LS$_3$ (large shift)  & 200 & $0.9962 \pm 0.0003$ & $0.76 \pm 0.01$ \\
-        LS$_4$ (large shift)  & 200 & $0.9962 \pm 0.0003$ & $0.761 \pm 0.009$ \\
-        LS$_5$ (large shift)  & 200 & $0.9963 \pm 0.0003$ & $0.760 \pm 0.006$ \\
-        LS$_6$ (large shift)  & 200 & $0.9963 \pm 0.0004$ & $0.758 \pm 0.005$ \\
-        \midrule
-        LC (linear comb.)     &   1 & $0.99308$             & $0.847$ \\
-        NLC (nonlinear comb.) &   1 & $0.97514$             & $1.924$ \\
-        SIN$_{\mathrm{LF}}$ ($f = 0.2$) & 1 & $0.99793$    & $0.583$ \\
-        SIN$_{\mathrm{HF}}$ ($f = 0.8$) & 1 & $0.99583$    & $0.658$ \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{results/loss.pdf}
-    \caption{Benchmark loss.}
-    \label{fig: benchmark loss}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{results/benchmark_sample.pdf}
-    \caption{Benchmark sample.}
-    \label{fig: benchmark sample}
-\end{figure}
 
 \subsubsection{PI DeepONet, Data and Physics Loss}
 
-The data, physics and boundary condition loss are shown in Figure \ref{fig: PI_data_physics_loss}. One sample loss along with the true and predicted scalar flux are shown in
-Figure \ref{fig: PI_data_physics_sample}.
 
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{results/PI_data_physics_loss.pdf}
-    \caption{Loss of data, physics and boundary condition trained model.}
-    \label{fig: PI_data_physics_loss}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{results/PI_data_physics_sample.pdf}
-    \caption{Sample of data, physics and boundary condition trained model.}
-    \label{fig: PI_data_physics_sample}
-\end{figure}
 
 \subsubsection{PI DeepONet, Physics Loss}
 
