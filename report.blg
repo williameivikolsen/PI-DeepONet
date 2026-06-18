@@ -24,45 +24,45 @@ Control: page (0) single
 Control: year (1) truncated
 Control: production of eprint (0) enabled
 Warning--missing journal in nuproship
-You've used 18 entries,
+You've used 17 entries,
             5847 wiz_defined-function locations,
-            1713 strings with 18561 characters,
-and the built_in function-call counts, 17930 in all, are:
-= -- 1038
-> -- 539
-< -- 141
-+ -- 169
-- -- 149
-* -- 2892
-:= -- 1697
-add.period$ -- 18
-call.type$ -- 18
-change.case$ -- 69
-chr.to.int$ -- 26
-cite$ -- 19
-duplicate$ -- 1690
-empty$ -- 1255
-format.name$ -- 308
-if$ -- 3511
+            1709 strings with 18364 characters,
+and the built_in function-call counts, 17034 in all, are:
+= -- 971
+> -- 514
+< -- 137
++ -- 161
+- -- 143
+* -- 2743
+:= -- 1606
+add.period$ -- 16
+call.type$ -- 17
+change.case$ -- 63
+chr.to.int$ -- 25
+cite$ -- 18
+duplicate$ -- 1607
+empty$ -- 1195
+format.name$ -- 293
+if$ -- 3337
 int.to.chr$ -- 1
-int.to.str$ -- 25
-missing$ -- 224
-newline$ -- 100
-num.names$ -- 48
-pop$ -- 700
+int.to.str$ -- 24
+missing$ -- 216
+newline$ -- 97
+num.names$ -- 45
+pop$ -- 671
 preamble$ -- 1
-purify$ -- 80
+purify$ -- 75
 quote$ -- 0
-skip$ -- 622
+skip$ -- 591
 stack$ -- 0
-substring$ -- 401
-swap$ -- 1629
-text.length$ -- 63
+substring$ -- 385
+swap$ -- 1550
+text.length$ -- 60
 text.prefix$ -- 0
 top$ -- 10
-type$ -- 253
+type$ -- 239
 warning$ -- 2
-while$ -- 53
+while$ -- 51
 width$ -- 0
-write$ -- 179
+write$ -- 170
 (There were 2 warnings)

@@ -125,25 +125,25 @@ INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy6.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmbx9.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmti10.tfm
-INPUT ./figures/PINN.png
-INPUT ./figures/PINN.png
-INPUT ./figures/PINN.png
-INPUT ./figures/PINN.png
 OUTPUT report.pdf
-INPUT ./figures/PINN.png
 INPUT /usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map
+INPUT ./figures/PINN.png
+INPUT ./figures/PINN.png
+INPUT ./figures/PINN.png
+INPUT ./figures/PINN.png
+INPUT ./figures/PINN.png
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm
-INPUT ./figures/DeepONet.png
-INPUT ./figures/DeepONet.png
-INPUT ./figures/DeepONet.png
-INPUT ./figures/DeepONet.png
-INPUT ./figures/DeepONet.png
-INPUT ./figures/PI DeepONet.png
-INPUT ./figures/PI DeepONet.png
-INPUT ./figures/PI DeepONet.png
-INPUT ./figures/PI DeepONet.png
-INPUT ./figures/PI DeepONet.png
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
+INPUT ./figures/DeepONet.png
+INPUT ./figures/DeepONet.png
+INPUT ./figures/DeepONet.png
+INPUT ./figures/DeepONet.png
+INPUT ./figures/DeepONet.png
+INPUT ./figures/PI DeepONet.png
+INPUT ./figures/PI DeepONet.png
+INPUT ./figures/PI DeepONet.png
+INPUT ./figures/PI DeepONet.png
+INPUT ./figures/PI DeepONet.png
 INPUT ./figures/1D Slab.png
 INPUT ./figures/1D Slab.png
 INPUT ./figures/1D Slab.png

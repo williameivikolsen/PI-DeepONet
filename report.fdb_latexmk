@@ -1,15 +1,15 @@
 # Fdb version 4
-["bibtex report"] 1779461824.95648 "report.aux" "report.bbl" "report" 1779461825.90697 0
+["bibtex report"] 1781784209.25859 "report.aux" "report.bbl" "report" 1781789838.84121 0
   "./bibliography.bib" 1779349999.03034 9539 b776c0dda94ee10fa6fd899f15f0f889 ""
-  "./reportNotes.bib" 1779461825.62497 103 48ad29797468f16e2853d8797278d7af ""
+  "./reportNotes.bib" 1781789838.46787 103 48ad29797468f16e2853d8797278d7af ""
   "/usr/local/texlive/2026/texmf-dist/bibtex/bst/revtex4-1/apsrev4-1.bst" 1602107945 71515 e333383ed72bf24aa6de7e8cabb55f84 ""
-  "report.aux" 1779461825.6218 6513 f142f6a294d601e25fa42e36895aa38a "pdflatex"
+  "report.aux" 1781789838.46576 6873 49b41de56466e157e01790a9a58c36d6 "pdflatex"
   (generated)
   "report.bbl"
   "report.blg"
   (rewritten before read)
-["pdflatex"] 1779461825.11358 "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" "report.pdf" "report" 1779461825.90746 0
-  "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" 1779461823.81266 23114 c250c4bf9b85af351564ce1e6e046029 ""
+["pdflatex"] 1781789837.46773 "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" "report.pdf" "report" 1781789838.84205 0
+  "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" 1781789837.10839 28065 de4e9033978c96d60920c5750fa2b66d ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm" 1136768653 1536 e07581a4bb3136ece9eeb4c3ffab8233 ""
@@ -121,9 +121,9 @@
   "figures/DeepONet.png" 1779350042.22228 109118 2367561366846fd3d0754526f55ce1de ""
   "figures/PI DeepONet.png" 1779350037.23076 97547 d36850f73ad9a8c393b88d2528c5662e ""
   "figures/PINN.png" 1779350024.36891 56756 5808e0aec07d2636a21120de446a5dbc ""
-  "report.aux" 1779461825.6218 6513 f142f6a294d601e25fa42e36895aa38a "pdflatex"
-  "report.bbl" 1779461825.08226 12848 304c2483b93a56d23433555b8db746e3 "bibtex report"
-  "report.tex" 1779461823.81266 23114 c250c4bf9b85af351564ce1e6e046029 ""
+  "report.aux" 1781789838.46576 6873 49b41de56466e157e01790a9a58c36d6 "pdflatex"
+  "report.bbl" 1781784209.38136 12159 1a2133a0172ce674145ce4ddd9267f71 "bibtex report"
+  "report.tex" 1781789837.10839 28065 de4e9033978c96d60920c5750fa2b66d ""
   "results/PI_data_physics_loss.pdf" 1779461014.64902 48545 1aad517a7eebc8523222d3160109ff08 ""
   "results/PI_data_physics_sample.pdf" 1779461026.79106 23897 25165a8d4540ccd46edbd26d98159f0a ""
   "results/benchmark_sample.pdf" 1779459123.8257 24367 1187a5162001022ed1699afcf9f17e63 ""
