@@ -25,6 +25,7 @@
 \usepackage{bm}% bold math
 \usepackage{physics}
 \usepackage{booktabs}
+\usepackage{xcolor}
 
 \begin{document}
 
@@ -399,20 +400,65 @@ To test wether physics-informed loss can replace labelled training, the models w
 
 \subsection{Model Evaluation}
 
+We follow the model evaluation of \cite{sahadath2026characterization}. The model is tested on never-seen data. That includes datasets
+generated with the same GRF parameters as the model was trained on, and datasets generated with small or large shifts in the GRF parameters.
+The test cases are summarized in Table \ref{tab: Model evaluation}. For each of these testing cases, 200 source distributions were generated
+using the specified GRF parameter settings.
+
+\begin{table}
+    \centering
+    \label{tab: Model evaluation}
+    \caption{Test datasets for model evaluation.}
+    \resizebox{\linewidth}{!}{
+    \begin{tabular}{ |c|c| }
+        \hline
+        Type of source & Cases \\
+        \hline
+        NS: No shift in GRF parameters & $l = 0.10$, Mean$ = 5.0$, $\sigma^2 = 1.0$ \\ 
+        \hline
+        & $l = 0.11$, Mean$ = 5.5$, $\sigma^2 = 1.1$ \\
+        SS: Small shift in GRF parameters & $l = 0.09$, Mean$ = 4.5$, $\sigma^2 = 0.9$ \\
+        & $l = 0.09$, Mean$ = 5.5$, $\sigma^2 = 1.1$ \\
+        \hline
+        & $l = 0.08$, Mean$ = 2.5$, $\sigma^2 = 0.5$ \\
+        & $l = 0.20$, Mean$ = 10$, $\sigma^2 = 2.0$ \\
+        LS: Large shift in GRF parameters & $l = 0.30$, Mean$ = 50$, $\sigma^2 = 2.0$ \\
+        & $l = 0.50$, Mean$ = 50$, $\sigma^2 = 2.0$ \\
+        & $l = 0.80$, Mean$ = 50$, $\sigma^2 = 2.0$ \\
+        & $l = 1.00$, Mean$ = 50$, $\sigma^2 = 2.0$ \\
+        \hline
+    \end{tabular}
+    }
+\end{table}
+
+The performance of the model was assessed by calculating two evaluation metrics: The coefficient of determination $R^2$ and the average relative
+error. The $R^2$ score measures the quality of fit of a regression model and is given by
+\begin{equation}
+    R^2 = 1 - \frac{\sum_{i=1}^{N} (T_{ri} - P_{ri})^2}{\sum_{i=1}^{N} (T_{ri} - \bar{T}_r)^2},
+\end{equation}
+where $T_{ri}$ and $P_{ri}$ represent the true value and predicted value of the scalar or angular flux \textcolor{red}{!!!}, respectively, and
+$\bar{T}_r$ is the mean of the true flux. The $R^2$ score ranges up to 1, where higher values indicate better predictive accuracy. However, a
+high $R^2$ score does not necessarily imply a causal connection or guarantee that overfitting is absent. It should therefore be reported with
+other error metrics. We therefore also computed the average relative error (ARE) by
+\begin{equation}
+    \text{ARE} = \sum_{i=1}^{N} \frac{T_{ri} - P_{ri}}{T_{ri}}.
+\end{equation}
+
 \section{Results and Discussion}
 
-\subsection{Benchmark}
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/R2_large.pdf}
+    \caption{$R^2$ score.}
+    \label{fig: R2 large}
+\end{figure}
 
-
-
-\subsubsection{PI DeepONet, Data and Physics Loss}
-
-
-
-\subsubsection{PI DeepONet, Physics Loss}
-
-\subsubsection{PI DeepONet, Data Loss}
-
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/ARE_large.pdf}
+    \caption{ARE score.}
+    \label{fig: ARE large}
+\end{figure}
 
 \section{Conclusion}
 

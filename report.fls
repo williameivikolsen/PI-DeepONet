@@ -64,6 +64,14 @@ INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-pdftex.de
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/booktabs/booktabs.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/booktabs/booktabs.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
 INPUT ./report.aux
 INPUT ./report.aux
 INPUT report.aux
@@ -149,10 +157,6 @@ INPUT ./figures/1D Slab.png
 INPUT ./figures/1D Slab.png
 INPUT ./figures/1D Slab.png
 INPUT ./figures/1D Slab.png
-INPUT ./report.bbl
-INPUT ./report.bbl
-INPUT report.bbl
-INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmtt9.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmmi9.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmsy9.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex9.tfm
@@ -160,6 +164,20 @@ INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam1
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmmib9.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy9.tfm
+INPUT ./figures/R2_large.pdf
+INPUT ./figures/R2_large.pdf
+INPUT ./figures/R2_large.pdf
+INPUT ./figures/R2_large.pdf
+INPUT ./figures/R2_large.pdf
+INPUT ./figures/ARE_large.pdf
+INPUT ./figures/ARE_large.pdf
+INPUT ./figures/ARE_large.pdf
+INPUT ./figures/ARE_large.pdf
+INPUT ./figures/ARE_large.pdf
+INPUT ./report.bbl
+INPUT ./report.bbl
+INPUT report.bbl
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmtt9.tfm
 INPUT report.aux
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
@@ -169,8 +187,10 @@ INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.p
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb
