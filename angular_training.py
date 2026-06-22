@@ -20,7 +20,7 @@ from model import (
 
 print(jax.devices())
 
-size = "small"
+size = "large"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
@@ -28,7 +28,7 @@ print(f"Loaded datasets/{size}/M_Iso_train.npz")
 for k in ds:
     print(f"  {k:<10s} shape={tuple(ds[k].shape)}  dtype={ds[k].dtype}")
 
-E = 2000  # Epochs
+E = 100000  # Epochs
 B = 1000  # Batch size
 D = len(ds["Q"]) * len(ds["x"])   # N*J, matched to training.py (not N*J*A)
 n_iter = int(D * E / B)
@@ -74,7 +74,7 @@ model = PI_DeepONet_Angular(
     lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
     output_scale=phi_scale,
-    # activation=tanh
+    activation=tanh
 )
 print(f"\nInstantiated PI_DeepONet_Angular  (branch {branch_layers}, trunk {trunk_layers})")
 
