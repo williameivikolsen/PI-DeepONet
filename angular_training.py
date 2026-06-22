@@ -47,8 +47,8 @@ print(f"  residual uses Q/phi_scale; predict_s un-normalizes.")
 print(f"  psi-supervision points: {data_out.shape[0]}  (= N*J*A)")
 
 # --- Physics collocation sets: identical construction to training.py ---
-bcs_in, bcs_out = build_bcs_arrays(ds, X=X_slab, n_per_sample=50000)
-res_in, res_out = build_res_arrays(ds, X=X_slab, n_per_sample=5000)
+bcs_in, bcs_out = build_bcs_arrays(ds, X=X_slab, n_per_sample=500)
+res_in, res_out = build_res_arrays(ds, X=X_slab, n_per_sample=500)
 
 # --- Validation set (phi_0 form; ARE on phi_0 as in training.py) ---
 val_np = onp.load("datasets/M_Iso_val.npz")
