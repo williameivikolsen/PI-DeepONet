@@ -21,7 +21,7 @@ def solve_batch(Q_samples: np.ndarray, label: str) -> np.ndarray:
     for i, Q_j in enumerate(Q_samples):
         if (i + 1) % 50 == 0 or i == n - 1:
             print(f"    [{label}] sample {i+1}/{n}")
-        phi_0, _ = solve_sn_1d(
+        phi_0, _, _ = solve_sn_1d(
             Q_j=Q_j, Sigma_t=SIGMA_T, Sigma_s0=SIGMA_S0, Sigma_s1=SIGMA_S1,
             mu=mu_all, w=w_all, h=h,
         )

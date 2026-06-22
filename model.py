@@ -468,3 +468,102 @@ class PI_DeepONet:
             return np.dot(self.w_GL, psi_vec)
         phi0_for_one_Q = vmap(phi0_at, in_axes=(None, 0))
         return self.output_scale * vmap(phi0_for_one_Q, in_axes=(0, None))(Q_batch, x_points)
+
+
+def build_psi_data_arrays(ds, normalize=True):
+    """
+    Flatten an angular-flux dataset into per-(sample, x, mu) supervision.
+
+    The dataset must contain a 'psi' key of shape (N, N_angles, J) — i.e.
+    one produced by the merged data_generator.generate_dataset.
+
+    inputs = (Q_flat, y_flat)
+        Q_flat : (N*J*A, J)   branch input, repeated per (x, mu) point
+        y_flat : (N*J*A, 2)   trunk input columns [x, mu]
+    outputs = psi_flat : (N*J*A,)  angular-flux targets, psi / phi_scale
+    where A = N_angles, J = #cells, N = #sources.
+
+    CRITICAL normalization note. psi is divided by phi_scale = mean(phi_0),
+    the SAME constant the scalar pipeline uses in build_data_arrays — NOT
+    by mean(psi). The linearity argument rescales every field (psi, phi_0,
+    phi_1) by the single constant phi_bar; residual_net and predict_s both
+    assume that one scale. Dividing psi by its own mean would silently
+    desynchronize the residual term from the data term.
+
+    Returns
+    -------
+    inputs, outputs, phi_scale
+        phi_scale = mean(phi_0) (==1.0 if normalize=False). Pass it as
+        output_scale to the model so loss_bcs/loss_res/predict_s stay
+        consistent with the data term.
+    """
+    Q     = np.asarray(ds['Q'])        # (N, J)
+    psi   = np.asarray(ds['psi'])      # (N, A, J)
+    phi_0 = np.asarray(ds['phi_0'])    # (N, J)
+    x     = np.asarray(ds['x'])        # (J,)
+    mu    = np.asarray(ds['mu_GL'])    # (A,)
+
+    N, A, J = psi.shape
+
+    if normalize:
+        phi_scale = float(np.mean(phi_0))
+    else:
+        phi_scale = 1.0
+
+    # (x, mu) grid: outer over x (J), inner over mu (A).
+    x_grid  = np.repeat(x, A)                  # (J*A,)
+    mu_grid = np.tile(mu, J)                   # (J*A,)
+    y_one   = np.stack([x_grid, mu_grid], -1)  # (J*A, 2)
+
+    # psi is (N, A, J); reorder to (N, J, A) so the flatten matches
+    # (x outer, mu inner).
+    psi_xa   = np.transpose(psi, (0, 2, 1))    # (N, J, A)
+    psi_flat = (psi_xa.reshape(N, J * A) / phi_scale).reshape(-1)
+
+    Q_flat = np.repeat(Q, J * A, axis=0)       # (N*J*A, J)
+    y_flat = np.tile(y_one, (N, 1))            # (N*J*A, 2)
+
+    return (Q_flat, y_flat), psi_flat, phi_scale
+
+
+def build_psi_val_batch(ds, output_scale: float):
+    """
+    Validation batch for the angular regime's best-params tracking.
+
+    val_ARE in PI_DeepONet measures phi_0 ARE (angle-integrated), which is
+    the quantity we ultimately care about and keeps the early-stopping
+    criterion identical across all regimes. So the val batch is built in
+    the phi_0 form expected by PI_DeepONet.val_ARE: ((Q_flat, x_flat),
+    phi_norm). This is identical to build_val_batch; kept as a separate
+    name so the angular training script reads self-documentingly.
+    """
+    return build_val_batch(ds, output_scale=output_scale)
+
+
+class PI_DeepONet_Angular(PI_DeepONet):
+    """
+    PI-DeepONet whose supervised data loss is on psi(x, mu) directly,
+    rather than on the GL-quadrature-recovered phi_0. All physics terms
+    (BC, residual) are inherited unchanged from PI_DeepONet, so the total
+    loss is still
+
+        lambda_data * L_data + lambda_bcs * L_bcs + lambda_res * L_res
+
+    with the physics terms identical to the scalar-flux PI model. Only
+    loss_data is overridden.
+    """
+
+    def loss_data(self, params, batch):
+        """
+        Direct MSE on angular flux at the GL nodes.
+
+            batch = ((Q, y), psi_target)
+            y[:, 0] = x,  y[:, 1] = mu
+            prediction = operator_net(params, Q, x, mu)  (== psi_tilde)
+        """
+        inputs, outputs = batch
+        Q, y = inputs
+        psi_pred = vmap(self.operator_net, (None, 0, 0, 0))(
+            params, Q, y[:, 0], y[:, 1]
+        )
+        return np.mean((outputs.flatten() - psi_pred) ** 2)

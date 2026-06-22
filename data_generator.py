@@ -92,7 +92,7 @@ def solve_sn_1d(Q_j: np.ndarray,
                 w: np.ndarray,
                 h: float,
                 max_iter: int = 10000,
-                tol: float = 1e-10) -> tuple[np.ndarray, np.ndarray]:
+                tol: float = 1e-10) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Solve the steady-state 1D NTE for a given source distribution Q(x).
 
@@ -113,7 +113,6 @@ def solve_sn_1d(Q_j: np.ndarray,
     Sigma_t  : total macroscopic cross section (cm^-1)
     Sigma_s0 : zeroth Legendre moment of scattering XS (cm^-1)
     Sigma_s1 : first Legendre moment of scattering XS (cm^-1), 0 = isotropic
-    x_centres: cell-centre coordinates (used only for shape/reference)
     mu       : quadrature cosines, shape (N,)
     w        : quadrature weights,  shape (N,)
     h        : uniform cell width (cm)
@@ -122,8 +121,9 @@ def solve_sn_1d(Q_j: np.ndarray,
 
     Returns
     -------
-    phi_0 : cell-average scalar flux  [Eq. 7], shape (J,)
-    phi_1 : cell-average neutron current [Eq. 8], shape (J,)
+    phi_0      : (J,)            cell-average scalar flux   [Eq. 11]
+    phi_1      : (J,)            cell-average current       [Eq. 12]
+    psi_centre : (N_angles, J)   cell-average angular flux  [Eq. 13]
     """
     J = len(Q_j)
     N = len(mu)
@@ -192,7 +192,7 @@ def solve_sn_1d(Q_j: np.ndarray,
         if rel_change < tol:
             break
 
-    return phi_0, phi_1
+    return phi_0, phi_1, psi_centre
 
 def generate_dataset(Sigma_t: float,
                      Sigma_s0: float,
@@ -203,11 +203,11 @@ def generate_dataset(Sigma_t: float,
                      grf_variance: float,
                      seed: int = 42) -> dict:
     """
-    Generate a complete (source, flux) training dataset for one model.
+    Generate a complete (source, scalar flux, angular flux) training dataset.
 
-    Returns a dict with keys:
       'Q'        : source distributions, shape (N_total, J)
       'phi_0'    : scalar flux,          shape (N_total, J)
+      'psi'      : angular flux,         shape (N_total, N_angles, J)   [NEW]
       'mu_GL'    : quadrature cosines,   shape (N_angles,)
       'w_GL'     : quadrature weights,   shape (N_angles,)
       'x'        : cell centres,         shape (J,)
@@ -228,12 +228,13 @@ def generate_dataset(Sigma_t: float,
 
     all_Q     = []
     all_phi0  = []
+    all_psi   = []
 
     for i, Q_j in enumerate(Q_samples):
         if (i + 1) % 100 == 0:
             print(f"    Sample {i+1}/{n_samples} ...")
 
-        phi_0, _ = solve_sn_1d(
+        phi_0, _, psi_centre = solve_sn_1d(
             Q_j=Q_j,
             Sigma_t=Sigma_t,
             Sigma_s0=Sigma_s0,
@@ -244,76 +245,59 @@ def generate_dataset(Sigma_t: float,
         )
         all_Q.append(Q_j)
         all_phi0.append(phi_0)
+        all_psi.append(psi_centre)
+
+    Q_arr    = np.array(all_Q)       # (N_total, J)
+    phi0_arr = np.array(all_phi0)    # (N_total, J)
+    psi_arr  = np.array(all_psi)     # (N_total, N_angles, J)
+
+    # Consistency guarantee: GL quadrature of the saved psi must reproduce
+    # the saved phi_0. If this fails, the angular targets and the scalar
+    # targets would disagree, breaking the controlled comparison.
+    phi0_from_psi = np.einsum('n,inj->ij', w_all, psi_arr)
+    max_abs = np.max(np.abs(phi0_from_psi - phi0_arr))
+    assert max_abs < 1e-10, f"phi_0 vs quadrature(psi) mismatch: {max_abs:.2e}"
 
     dataset = {
-        'Q':        np.array(all_Q),      # (N_total, J)
-        'phi_0':    np.array(all_phi0),   # (N_total, J)
-        'mu_GL':    mu_all.copy(),        # (N_angles,)
-        'w_GL':     w_all.copy(),         # (N_angles,)
-        'x':        x_centres.copy(),     # (J,)
+        'Q':        Q_arr,            # (N_total, J)
+        'phi_0':    phi0_arr,         # (N_total, J)
+        'psi':      psi_arr,          # (N_total, N_angles, J)
+        'mu_GL':    mu_all.copy(),    # (N_angles,)
+        'w_GL':     w_all.copy(),     # (N_angles,)
+        'x':        x_centres.copy(), # (J,)
     }
 
-    print(f"  Done. Dataset shape: Q={dataset['Q'].shape}, phi_0={dataset['phi_0'].shape}")
+    print(f"  Done. Dataset shape: Q={dataset['Q'].shape}, "
+          f"phi_0={dataset['phi_0'].shape}, psi={dataset['psi'].shape}")
+    print(f"  Consistency check passed: max|phi_0 - quad(psi)| = {max_abs:.2e}")
     return dataset
 
 if __name__ == "__main__":
     # Generate datasets
     sizes = {"large": 500, "medium": 100, "small": 10}
-    # Choose dataset size:
-    size = "small"
-
-    os.makedirs("datasets/" + size, exist_ok=True)
 
     # ---- Common GRF training parameters (Section II.D) ----
     GRF_MEAN     = 5.0
     GRF_L        = 0.1
     GRF_VARIANCE = 1.0
-    N_SAMPLES    = sizes[size]
 
-    # ------------------------------------------------------------------ #
-    # Model 1: Isotropic Scattering  (M_Iso)                             #
-    # Sigma_t=1.0, Sigma_a=0.5, Sigma_s0=0.5, Sigma_s1=0.0              #
-    # ------------------------------------------------------------------ #
-    ds_iso = generate_dataset(
-        Sigma_t         = 1.0,
-        Sigma_s0        = 0.5,
-        Sigma_s1        = 0.0,
-        n_samples       = N_SAMPLES,
-        grf_mean        = GRF_MEAN,
-        grf_length_scale= GRF_L,
-        grf_variance    = GRF_VARIANCE,
-        seed            = 42
-    )
-    np.savez("datasets/" + size + "/M_Iso_train.npz", **ds_iso)
+    for size, n_samples in sizes.items():
+        print(f"\n=== size: {size}  (n={n_samples}) ===")
+        os.makedirs("datasets/" + size, exist_ok=True)
 
-    # ------------------------------------------------------------------ #
-    # Model 2: Anisotropic Scattering  (M_Aniso)                         #
-    # Sigma_t=1.0, Sigma_a=0.5, Sigma_s0=0.5, Sigma_s1=0.15             #
-    # ------------------------------------------------------------------ #
-    ds_aniso = generate_dataset(
-        Sigma_t         = 1.0,
-        Sigma_s0        = 0.5,
-        Sigma_s1        = 0.15,
-        n_samples       = N_SAMPLES,
-        grf_mean        = GRF_MEAN,
-        grf_length_scale= GRF_L,
-        grf_variance    = GRF_VARIANCE,
-        seed            = 42
-    )
-    np.savez("datasets/" + size + "/M_Aniso_train.npz", **ds_aniso)
-
-    # ------------------------------------------------------------------ #
-    # Model 3: Pure Scattering  (M_Pure)                                 #
-    # Sigma_t=1.0, Sigma_a=0.0, Sigma_s0=1.0, Sigma_s1=0.33             #
-    # ------------------------------------------------------------------ #
-    ds_pure = generate_dataset(
-        Sigma_t         = 1.0,
-        Sigma_s0        = 1.0,
-        Sigma_s1        = 0.33,
-        n_samples       = N_SAMPLES,
-        grf_mean        = GRF_MEAN,
-        grf_length_scale= GRF_L,
-        grf_variance    = GRF_VARIANCE,
-        seed            = 42
-    )
-    np.savez("datasets/M_Pure_train.npz", **ds_pure)
+        # ------------------------------------------------------------------ #
+        # Model 1: Isotropic Scattering  (M_Iso)                             #
+        # Sigma_t=1.0, Sigma_a=0.5, Sigma_s0=0.5, Sigma_s1=0.0              #
+        # ------------------------------------------------------------------ #
+        ds_iso = generate_dataset(
+            Sigma_t         = 1.0,
+            Sigma_s0        = 0.5,
+            Sigma_s1        = 0.0,
+            n_samples       = n_samples,
+            grf_mean        = GRF_MEAN,
+            grf_length_scale= GRF_L,
+            grf_variance    = GRF_VARIANCE,
+            seed            = 42
+        )
+        np.savez("datasets/" + size + "/M_Iso_train.npz", **ds_iso)
+        print("  saved datasets/" + size + "/M_Iso_train.npz")

@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from helpers import load_model, plot_loss_curves, plot_sample_predictions
 
 
-CHECKPOINT = "trained_models/large/pideeponet.pkl"
+CHECKPOINT = "trained_models/small/pideeponet_angular.pkl"
 TEST_FILE  = "datasets/test/M_Iso_test_NS.npz"
-SAMPLE_IDX = 2
+SAMPLE_IDX = 3
 
 
 model, kind, ckpt = load_model(CHECKPOINT)

@@ -11,9 +11,10 @@ from helpers import load_model, r2_score, are
 TEST_DIR    = "datasets/test"
 SIZES       = ["small", "medium", "large"]
 MODEL_FILES = {
-    "DeepONet":              "deeponet.pkl",
-    "PI-DeepONet":           "pideeponet.pkl",
-    "PI-DeepONet (no data)": "pideeponet_no_data.pkl",
+    "DeepONet":               "deeponet.pkl",
+    "PI-DeepONet":            "pideeponet.pkl",
+    "PI-DeepONet (angular)":  "pideeponet_angular.pkl",
+    "PI-DeepONet (no data)":  "pideeponet_no_data.pkl",
 }
 
 SCENARIOS_GRF = [

@@ -20,7 +20,7 @@ size = "small"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
-print(f"Loaded datasets/M_Iso_train.npz")
+print(f"Loaded datasets/" + size + "/M_Iso_train.npz")
 for k in ds:
     print(f"  {k:<10s} shape={tuple(ds[k].shape)}  dtype={ds[k].dtype}")
 
@@ -52,7 +52,7 @@ model = DeepONet(
     lr_transition_steps=n_iter//20,
     output_scale=phi_scale,
 )
-print(f"\nInstantiated PI_DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
+print(f"\nInstantiated DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
 
 print(f"\n--- Training for {n_iter} iterations ---")
 t0 = time.time()
