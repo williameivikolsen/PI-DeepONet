@@ -2,17 +2,20 @@ import optuna
 import jax.numpy as jnp
 import numpy as onp
 from jax import random
+from jax.nn import relu, tanh, gelu
 
 from model import (
-    PI_DeepONet, DataGenerator,
-    build_data_arrays, build_bcs_arrays, build_res_arrays,
-    build_val_batch,
+    PI_DeepONet, DataGenerator, PI_DeepONet_Angular,
+    build_psi_data_arrays, build_bcs_arrays, build_res_arrays,
+    build_psi_val_batch,
 )
 
+activations = {
+    "relu": relu,
+    "tanh": tanh,
+    "gelu": gelu,
+}
 
-# ---------------------------------------------------------------------------
-# Load datasets once outside the objective
-# ---------------------------------------------------------------------------
 size = "small"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
@@ -30,6 +33,8 @@ def objective(trial):
     branch_width  = trial.suggest_categorical("branch_width", [50, 100, 250])
     trunk_width   = trial.suggest_categorical("trunk_width", [100, 250, 500])
     n_per_sample  = trial.suggest_categorical("n_per_sample", [500, 750, 1000])
+    activation_name = trial.suggest_categorical("activation", list(activations))
+    activation    = activations[activation_name]
     n_layers      = trial.suggest_int("n_layers", 2, 6)
     n_iter_trial  = 20000   # shorter than the full 100k for tractable search
     lr_transition_steps = trial.suggest_categorical(
@@ -40,7 +45,7 @@ def objective(trial):
     trunk_layers  = [2] + [trunk_width]  * n_layers + [100]
 
     # Build data
-    data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
+    data_in, data_out, phi_scale = build_psi_data_arrays(ds, normalize=True)
     bcs_in, bcs_out = build_bcs_arrays(ds, X=X_slab, n_per_sample=n_per_sample)
     res_in, res_out = build_res_arrays(ds, X=X_slab, n_per_sample=n_per_sample)
 
@@ -51,10 +56,10 @@ def objective(trial):
     res_dataset  = DataGenerator(res_in,  res_out,  batch_size=1000,
                                  rng_key=random.PRNGKey(303))
 
-    val_batch = build_val_batch(val_ds, output_scale=phi_scale)
+    val_batch = build_psi_val_batch(val_ds, output_scale=phi_scale)
 
     # Build model
-    model = PI_DeepONet(
+    model = PI_DeepONet_Angular(
         branch_layers, trunk_layers,
         N_angles=16,
         Sigma_t=1.0, Sigma_s0=0.5, Sigma_s1=0.0,
@@ -62,6 +67,7 @@ def objective(trial):
         lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
         output_scale=phi_scale,
         lr_transition_steps=lr_transition_steps,
+        activation=activation
     )
 
     # Train
@@ -79,7 +85,7 @@ def objective(trial):
 if __name__ == "__main__":
     study = optuna.create_study(
         storage=f"sqlite:///pi_deeponet_{size}.db",
-        study_name=f"pi_deeponet_val_ARE_{size}",
+        study_name=f"angular_pi_deeponet_val_ARE_{size}",
         direction="minimize",
         load_if_exists=True,
     )
