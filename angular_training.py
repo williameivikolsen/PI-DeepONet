@@ -63,8 +63,9 @@ bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
 res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
                              rng_key=random.PRNGKey(303))
 
-branch_layers = [J] + 5 * [100] + [100]
-trunk_layers  = [2] + 5 * [500] + [100]
+p_latent      = 100
+branch_layers = [J] + 5 * [100] + [p_latent]
+trunk_layers  = [1] + 5 * [500] + [A * p_latent]
 
 model = PI_DeepONet_Angular(
     branch_layers, trunk_layers,
@@ -74,7 +75,7 @@ model = PI_DeepONet_Angular(
     lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
     output_scale=phi_scale,
-    activation=gelu
+    activation=tanh
 )
 print(f"\nInstantiated PI_DeepONet_Angular  (branch {branch_layers}, trunk {trunk_layers})")
 
@@ -92,6 +93,7 @@ with open(out_path, "wb") as f:
     pickle.dump({
         "params": model.params,
         "config": {
+            "model_type":    "angular_vec",
             "branch_layers": branch_layers,
             "trunk_layers":  trunk_layers,
             "N_angles":      A,

@@ -14,11 +14,27 @@ def load_model(path: str):
 
     is_PI = "N_angles" in cfg
     if is_PI:
-        from model import PI_DeepONet
-        model = PI_DeepONet(**cfg)
-        kind = "PI"
+        # Distinguish the vector-output angular model from the scalar PI
+        # model. Prefer an explicit marker written at training time; fall
+        # back to the trunk input dimension (vector model's trunk takes x
+        # only -> input dim 1; scalar PI's trunk takes (x, mu) -> dim 2).
+        model_type = cfg.pop("model_type", None)
+        trunk_in = cfg["trunk_layers"][0] if "trunk_layers" in cfg else 2
+        is_angular_vec = (model_type == "angular_vec") or \
+                         (model_type is None and trunk_in == 1)
+
+        if is_angular_vec:
+            from model import PI_DeepONet_Angular
+            model = PI_DeepONet_Angular(**cfg)
+            kind = "PI_angular"
+        else:
+            from model import PI_DeepONet
+            model = PI_DeepONet(**cfg)
+            kind = "PI"
     else:
         from nonPI_model import DeepONet
+        # model_type, if present, is not a DeepONet constructor arg.
+        cfg.pop("model_type", None)
         model = DeepONet(**cfg)
         kind = "nonPI"
 

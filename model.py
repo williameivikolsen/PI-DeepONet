@@ -116,25 +116,28 @@ def build_data_arrays(ds, normalize=True):
 
 
 def build_bcs_arrays(ds, X, n_per_sample=50,
-                     rng_key=random.PRNGKey(2025)):
+                     rng_key=random.PRNGKey(2025), N_angles=16):
     """
-    Random vacuum-BC evaluation points.
+    Vacuum-BC evaluation points, with mu drawn from the Gauss-Legendre
+    quadrature nodes.
 
     Half the points are at x=0 with mu > 0 (incoming from left is zero),
     the other half at x=X with mu < 0 (incoming from right is zero).
     Target is zero for every point.
-
-    mu is sampled with a small epsilon away from 0 to avoid the grazing
-    direction.
     """
     Q    = np.asarray(ds['Q'])
     N, J = Q.shape
     total = N * n_per_sample
     half  = total // 2
 
+    mu_nodes, _ = leggauss(N_angles)
+    mu_nodes = np.asarray(mu_nodes)
+    pos_nodes = mu_nodes[mu_nodes > 0.0]      # left-boundary angles
+    neg_nodes = mu_nodes[mu_nodes < 0.0]      # right-boundary angles
+
     k1, k2 = random.split(rng_key)
-    mu_left  = random.uniform(k1, (half,),          minval=1e-4, maxval=1.0)
-    mu_right = random.uniform(k2, (total - half,),  minval=-1.0, maxval=-1e-4)
+    mu_left  = random.choice(k1, pos_nodes, (half,))
+    mu_right = random.choice(k2, neg_nodes, (total - half,))
 
     x_left   = np.zeros((half,))
     x_right  = np.full((total - half,), X)
@@ -156,19 +159,29 @@ def build_bcs_arrays(ds, X, n_per_sample=50,
 
 
 def build_res_arrays(ds, X, n_per_sample=100,
-                     rng_key=random.PRNGKey(2026)):
+                     rng_key=random.PRNGKey(2026), N_angles=16):
     """
-    Random interior collocation points in (0, X) x (-1, 1) for the PDE
-    residual loss. Target is zero because residual_net already absorbs
-    Q/2 via jnp.interp.
+    Interior collocation points for the PDE residual loss: x continuous in
+    (0, X), mu drawn from the Gauss-Legendre nodes. Target is zero because
+    residual_net already absorbs Q/2 via jnp.interp.
+
+    mu is restricted to the GL nodes (not continuous on (-1, 1)) for the
+    same reason as build_bcs_arrays: the vector-output angular model only
+    defines psi on the nodes. This costs no physics fidelity — the transport
+    residual's only derivative is in x, and its scattering source is a node
+    quadrature sum, so the residual is fully determined by the node angles.
+    x stays continuous because the residual DOES differentiate in x.
     """
     Q    = np.asarray(ds['Q'])
     N, J = Q.shape
     total = N * n_per_sample
 
+    mu_nodes, _ = leggauss(N_angles)
+    mu_nodes = np.asarray(mu_nodes)
+
     k1, k2 = random.split(rng_key)
     x_r  = random.uniform(k1, (total,), minval=0.0, maxval=X)
-    mu_r = random.uniform(k2, (total,), minval=-1.0, maxval=1.0)
+    mu_r = random.choice(k2, mu_nodes, (total,))
 
     sample_idx = np.repeat(np.arange(N), n_per_sample)
     Q_flat     = Q[sample_idx]              # (total, J)
@@ -472,36 +485,23 @@ class PI_DeepONet:
 
 def build_psi_data_arrays(ds, normalize=True):
     """
-    Flatten an angular-flux dataset into per-(sample, x, mu) supervision.
+    Flatten an angular-flux dataset into per-(sample, x) supervision with a
+    full angular vector target.
 
-    The dataset must contain a 'psi' key of shape (N, N_angles, J) — i.e.
-    one produced by the merged data_generator.generate_dataset.
-
-    inputs = (Q_flat, y_flat)
-        Q_flat : (N*J*A, J)   branch input, repeated per (x, mu) point
-        y_flat : (N*J*A, 2)   trunk input columns [x, mu]
-    outputs = psi_flat : (N*J*A,)  angular-flux targets, psi / phi_scale
+    inputs = (Q_flat, x_flat)
+        Q_flat : (N*J, J)   branch input, one row per (sample, x-point)
+        x_flat : (N*J,)     scalar spatial coordinate
+    outputs = psi_flat : (N*J, A)   angular-flux targets, psi / phi_scale
     where A = N_angles, J = #cells, N = #sources.
-
-    CRITICAL normalization note. psi is divided by phi_scale = mean(phi_0),
-    the SAME constant the scalar pipeline uses in build_data_arrays — NOT
-    by mean(psi). The linearity argument rescales every field (psi, phi_0,
-    phi_1) by the single constant phi_bar; residual_net and predict_s both
-    assume that one scale. Dividing psi by its own mean would silently
-    desynchronize the residual term from the data term.
 
     Returns
     -------
     inputs, outputs, phi_scale
-        phi_scale = mean(phi_0) (==1.0 if normalize=False). Pass it as
-        output_scale to the model so loss_bcs/loss_res/predict_s stay
-        consistent with the data term.
     """
     Q     = np.asarray(ds['Q'])        # (N, J)
     psi   = np.asarray(ds['psi'])      # (N, A, J)
     phi_0 = np.asarray(ds['phi_0'])    # (N, J)
     x     = np.asarray(ds['x'])        # (J,)
-    mu    = np.asarray(ds['mu_GL'])    # (A,)
 
     N, A, J = psi.shape
 
@@ -510,20 +510,15 @@ def build_psi_data_arrays(ds, normalize=True):
     else:
         phi_scale = 1.0
 
-    # (x, mu) grid: outer over x (J), inner over mu (A).
-    x_grid  = np.repeat(x, A)                  # (J*A,)
-    mu_grid = np.tile(mu, J)                   # (J*A,)
-    y_one   = np.stack([x_grid, mu_grid], -1)  # (J*A, 2)
+    # psi is (N, A, J); we want one A-vector per (sample, x), so reorder to
+    # (N, J, A) and flatten the (N, J) axes -> (N*J, A).
+    psi_xa   = np.transpose(psi, (0, 2, 1))            # (N, J, A)
+    psi_flat = (psi_xa.reshape(N * J, A) / phi_scale)  # (N*J, A)
 
-    # psi is (N, A, J); reorder to (N, J, A) so the flatten matches
-    # (x outer, mu inner).
-    psi_xa   = np.transpose(psi, (0, 2, 1))    # (N, J, A)
-    psi_flat = (psi_xa.reshape(N, J * A) / phi_scale).reshape(-1)
+    Q_flat = np.repeat(Q, J, axis=0)   # (N*J, J)
+    x_flat = np.tile(x, N)             # (N*J,)
 
-    Q_flat = np.repeat(Q, J * A, axis=0)       # (N*J*A, J)
-    y_flat = np.tile(y_one, (N, 1))            # (N*J*A, 2)
-
-    return (Q_flat, y_flat), psi_flat, phi_scale
+    return (Q_flat, x_flat), psi_flat, phi_scale
 
 
 def build_psi_val_batch(ds, output_scale: float):
@@ -541,29 +536,52 @@ def build_psi_val_batch(ds, output_scale: float):
 
 
 class PI_DeepONet_Angular(PI_DeepONet):
-    """
-    PI-DeepONet whose supervised data loss is on psi(x, mu) directly,
-    rather than on the GL-quadrature-recovered phi_0. All physics terms
-    (BC, residual) are inherited unchanged from PI_DeepONet, so the total
-    loss is still
+    def angular_net(self, params, Q, x):
+        """
+        Full angular flux vector at (Q, x): psi_tilde(x, mu_1..mu_A).
 
-        lambda_data * L_data + lambda_bcs * L_bcs + lambda_res * L_res
+        Returns shape (A,).
+        """
+        branch_params, trunk_params = params
+        y = np.atleast_1d(x)                       # trunk input is x only, shape (1,)
+        B = self.branch_apply(branch_params, Q)    # (p,)
+        T = self.trunk_apply(trunk_params, y)      # (A*p,)
+        p = B.shape[0]
+        T = T.reshape(self.N_angles, p)            # (A, p)
+        return T @ B                               # (A,)
 
-    with the physics terms identical to the scalar-flux PI model. Only
-    loss_data is overridden.
-    """
+    def operator_net(self, params, Q, x, mu):
+        """
+        Scalar psi_tilde(x, mu) for a single node angle mu, by selecting the
+        matching channel from angular_net.
+
+        mu is expected to be one of the GL nodes (the data, BC and residual
+        builders all sample on the nodes). Selection uses a one-hot dot so
+        the result stays differentiable in x (grad argnums=2 in residual_net
+        flows through angular_net; the channel mask does not depend on x).
+        """
+        psi_vec = self.angular_net(params, Q, x)               # (A,)
+        onehot  = (self.mu_GL == mu).astype(psi_vec.dtype)     # (A,)
+        # Fallback to nearest node if mu is not exactly a node (robustness);
+        # exact-match is the normal path and yields a true one-hot.
+        onehot = lax.cond(
+            np.sum(onehot) > 0,
+            lambda _: onehot,
+            lambda _: (np.argmin(np.abs(self.mu_GL - mu))
+                       == np.arange(self.N_angles)).astype(psi_vec.dtype),
+            operand=None,
+        )
+        return np.dot(onehot, psi_vec)
 
     def loss_data(self, params, batch):
         """
-        Direct MSE on angular flux at the GL nodes.
+        Vector data loss: MSE over the full angular vector at each (Q, x).
 
-            batch = ((Q, y), psi_target)
-            y[:, 0] = x,  y[:, 1] = mu
-            prediction = operator_net(params, Q, x, mu)  (== psi_tilde)
+            batch = ((Q, x), psi_target)
+            Q : (B, J)    x : (B,)    psi_target : (B, A)
+            prediction = angular_net(params, Q, x)   -> (B, A)
         """
         inputs, outputs = batch
-        Q, y = inputs
-        psi_pred = vmap(self.operator_net, (None, 0, 0, 0))(
-            params, Q, y[:, 0], y[:, 1]
-        )
-        return np.mean((outputs.flatten() - psi_pred) ** 2)
+        Q, x = inputs
+        psi_pred = vmap(self.angular_net, (None, 0, 0))(params, Q, x)  # (B, A)
+        return np.mean((outputs - psi_pred) ** 2)

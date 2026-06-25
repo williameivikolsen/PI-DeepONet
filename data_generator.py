@@ -207,7 +207,7 @@ def generate_dataset(Sigma_t: float,
 
       'Q'        : source distributions, shape (N_total, J)
       'phi_0'    : scalar flux,          shape (N_total, J)
-      'psi'      : angular flux,         shape (N_total, N_angles, J)   [NEW]
+      'psi'      : angular flux,         shape (N_total, N_angles, J)
       'mu_GL'    : quadrature cosines,   shape (N_angles,)
       'w_GL'     : quadrature weights,   shape (N_angles,)
       'x'        : cell centres,         shape (J,)
