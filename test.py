@@ -1,8 +1,10 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
-size = "medium"
-
-ds_np = np.load("datasets/" + size + "/M_Iso_train.npz")
-ds    = {k: np.asarray(ds_np[k]) for k in ds_np.files}
-n = len(ds["Q"])*len(ds["x"])
-print(n)
+x = np.linspace(-10, 20, 1000)
+softplus = np.log(1 + np.exp(x))
+dfdx = np.exp(x)*1/(1 + np.exp(x))
+plt.plot(x, softplus, label="Softplus")
+plt.plot(x, dfdx, label="Derivative")
+plt.legend()
+plt.show()

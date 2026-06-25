@@ -5,7 +5,7 @@ import numpy as onp
 import jax
 import jax.numpy as jnp
 from jax import random
-from jax.nn import tanh, gelu
+from jax.nn import tanh, gelu, softplus
 
 import pickle
 
@@ -75,7 +75,7 @@ model = PI_DeepONet_Angular(
     lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
     output_scale=phi_scale,
-    activation=gelu
+    activation=softplus
 )
 print(f"\nInstantiated PI_DeepONet_Angular  (branch {branch_layers}, trunk {trunk_layers})")
 
