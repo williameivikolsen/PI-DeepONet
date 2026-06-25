@@ -75,7 +75,7 @@ model = PI_DeepONet_Angular(
     lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
     output_scale=phi_scale,
-    activation=tanh
+    activation=gelu
 )
 print(f"\nInstantiated PI_DeepONet_Angular  (branch {branch_layers}, trunk {trunk_layers})")
 

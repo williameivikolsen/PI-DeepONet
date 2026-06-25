@@ -98,8 +98,8 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(
-        storage=f"sqlite:///pi_deeponet_{size}.db",
-        study_name=f"pi_deeponet_val_ARE_{size}",
+        storage=f"sqlite:///angular_pi_deeponet_{size}.db",
+        study_name=f"angular_pi_deeponet_val_ARE_{size}",
         direction="minimize",
         load_if_exists=True,
     )
