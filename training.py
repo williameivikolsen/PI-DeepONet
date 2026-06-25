@@ -40,8 +40,8 @@ J = int(ds['x'].shape[0])
 data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
 print(f"\nFlux normalization: phi_scale = {phi_scale:.6f}")
 print(f"  Network learns psi/phi_scale; residual uses Q/phi_scale; predict_s un-normalizes.")
-bcs_in,  bcs_out  = build_bcs_arrays(ds, X=X_slab, n_per_sample=50000)
-res_in,  res_out  = build_res_arrays(ds, X=X_slab, n_per_sample=5000)
+bcs_in,  bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=50000)
+res_in,  res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=5000)
 
 # Validation set (held out from training; used for best-params tracking)
 val_np = onp.load("datasets/M_Iso_val.npz")
@@ -52,9 +52,9 @@ print(f"Loaded validation set: {val_ds['Q'].shape[0]} sources")
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                              rng_key=random.PRNGKey(101))
 bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
-                             rng_key=random.PRNGKey(202))
+                             rng_key=random.PRNGKey(202), branch_table=bcs_Q)
 res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
-                             rng_key=random.PRNGKey(303))
+                             rng_key=random.PRNGKey(303), branch_table=res_Q)
 
 branch_layers = [J] + 5*[100] + [100]
 trunk_layers  = [2] + 5*[500] + [100]

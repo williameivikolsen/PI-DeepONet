@@ -35,13 +35,14 @@ def MLP(layers, activation=relu):
 
 class DataGenerator(data.Dataset):
     def __init__(self, inputs, output, batch_size=1024,
-                 rng_key=random.PRNGKey(1234)):
+                 rng_key=random.PRNGKey(1234), branch_table=None):
         # Initialization
         self.inputs     = inputs
         self.output     = output
         self.N          = output.shape[0]
         self.batch_size = batch_size
         self.key        = rng_key
+        self.branch_table = branch_table
 
     def __getitem__(self, index):
         # Generate one batch of data
@@ -52,7 +53,15 @@ class DataGenerator(data.Dataset):
     def _batch(self, key):
         # Generates data containing batch_size samples
         idx = random.choice(key, self.N, (self.batch_size,), replace=False)
-        in_batch  = tuple(arr[idx] for arr in self.inputs)
+        if self.branch_table is None:
+            in_batch = tuple(arr[idx] for arr in self.inputs)
+        else:
+            # inputs[0] is an index array; gather the actual branch rows from
+            # the unique table. Remaining inputs are sliced normally.
+            branch_idx = self.inputs[0][idx]               # (batch,)
+            branch     = self.branch_table[branch_idx]     # (batch, J)
+            rest       = tuple(arr[idx] for arr in self.inputs[1:])
+            in_batch   = (branch,) + rest
         out_batch = self.output[idx]
         return in_batch, out_batch
 
@@ -152,10 +161,15 @@ def build_bcs_arrays(ds, X, n_per_sample=50,
     x_bc       = x_bc[perm]
     mu_bc      = mu_bc[perm]
 
-    Q_flat = Q[sample_idx]                  # (total, J)
-    y      = np.stack([x_bc, mu_bc], axis=-1)   # (total, 2)
-    s      = np.zeros((total,))
-    return (Q_flat, y), s
+    # Memory note: we do NOT materialize Q[sample_idx] (which would be
+    # (total, J) and explodes as N*n_per_sample*J — 100 MB+ at the large
+    # dataset). Instead we return the integer sample index and the unique
+    # source table Q (N, J); DataGenerator gathers the per-batch branch
+    # rows on the fly. The returned inputs[0] is the INDEX, and the table
+    # is the third return value, to be passed to DataGenerator(branch_table=...).
+    y = np.stack([x_bc, mu_bc], axis=-1)   # (total, 2)
+    s = np.zeros((total,))
+    return (sample_idx, y), s, Q
 
 
 def build_res_arrays(ds, X, n_per_sample=100,
@@ -184,10 +198,11 @@ def build_res_arrays(ds, X, n_per_sample=100,
     mu_r = random.choice(k2, mu_nodes, (total,))
 
     sample_idx = np.repeat(np.arange(N), n_per_sample)
-    Q_flat     = Q[sample_idx]              # (total, J)
-    y          = np.stack([x_r, mu_r], axis=-1)
-    s          = np.zeros((total,))
-    return (Q_flat, y), s
+    # See build_bcs_arrays: return the index + unique Q table rather than
+    # materializing Q[sample_idx], so memory stays O(N*J) not O(total*J).
+    y = np.stack([x_r, mu_r], axis=-1)
+    s = np.zeros((total,))
+    return (sample_idx, y), s, Q
 
 
 class PI_DeepONet:

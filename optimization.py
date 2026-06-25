@@ -60,15 +60,15 @@ def objective(trial):
 
     # Build data
     data_in, data_out, phi_scale = build_psi_data_arrays(ds, normalize=True)
-    bcs_in, bcs_out = build_bcs_arrays(ds, X=X_slab, n_per_sample=n_per_sample)
-    res_in, res_out = build_res_arrays(ds, X=X_slab, n_per_sample=n_per_sample)
+    bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=n_per_sample)
+    res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=n_per_sample)
 
     data_dataset = DataGenerator(data_in, data_out, batch_size=1000,
                                  rng_key=random.PRNGKey(101))
     bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=1000,
-                                 rng_key=random.PRNGKey(202))
+                                 rng_key=random.PRNGKey(202), branch_table=bcs_Q)
     res_dataset  = DataGenerator(res_in,  res_out,  batch_size=1000,
-                                 rng_key=random.PRNGKey(303))
+                                 rng_key=random.PRNGKey(303), branch_table=res_Q)
 
     val_batch = build_psi_val_batch(val_ds, output_scale=phi_scale)
 
@@ -98,8 +98,8 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(
-        storage=f"sqlite:///angular_pi_deeponet_{size}.db",
-        study_name=f"angular_pi_deeponet_val_ARE_{size}",
+        storage=f"sqlite:///pi_deeponet_{size}.db",
+        study_name=f"pi_deeponet_val_ARE_{size}",
         direction="minimize",
         load_if_exists=True,
     )

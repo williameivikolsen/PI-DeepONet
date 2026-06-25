@@ -47,8 +47,8 @@ print(f"  residual uses Q/phi_scale; predict_s un-normalizes.")
 print(f"  psi-supervision points: {data_out.shape[0]}  (= N*J*A)")
 
 # --- Physics collocation sets: identical construction to training.py ---
-bcs_in, bcs_out = build_bcs_arrays(ds, X=X_slab, n_per_sample=500)
-res_in, res_out = build_res_arrays(ds, X=X_slab, n_per_sample=500)
+bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=500)
+res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=500)
 
 # --- Validation set (phi_0 form; ARE on phi_0 as in training.py) ---
 val_np = onp.load("datasets/M_Iso_val.npz")
@@ -59,9 +59,9 @@ print(f"Loaded validation set: {val_ds['Q'].shape[0]} sources")
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                              rng_key=random.PRNGKey(101))
 bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
-                             rng_key=random.PRNGKey(202))
+                             rng_key=random.PRNGKey(202), branch_table=bcs_Q)
 res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
-                             rng_key=random.PRNGKey(303))
+                             rng_key=random.PRNGKey(303), branch_table=res_Q)
 
 p_latent      = 100
 branch_layers = [J] + 5 * [100] + [p_latent]
