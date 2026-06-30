@@ -20,7 +20,6 @@ size = "small"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
-print(f"Loaded datasets/" + size + "/M_Iso_train.npz")
 for k in ds:
     print(f"  {k:<10s} shape={tuple(ds[k].shape)}  dtype={ds[k].dtype}")
 
@@ -66,6 +65,7 @@ with open("trained_models/" + size + "/deeponet.pkl", "wb") as f:
     pickle.dump({
         "params": model.params,
         "config": {
+            "activation":    model.activation_name,
             "branch_layers": branch_layers,
             "trunk_layers":  trunk_layers,
             "Sigma_t":       Sigma_t,

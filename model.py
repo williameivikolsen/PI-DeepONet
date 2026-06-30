@@ -4,10 +4,33 @@ import jax.numpy as np
 from jax import random, grad, vmap, jit, lax
 from jax import config
 from jax.flatten_util import ravel_pytree
-from jax.nn import relu
+from jax.nn import relu, tanh, gelu, softplus, sigmoid, elu, swish
 from numpy.polynomial.legendre import leggauss
 import optax 
 from torch.utils import data
+
+ACTIVATIONS = {
+    "relu": relu,
+    "tanh": tanh,
+    "gelu": gelu,
+    "softplus": softplus,
+    "sigmoid": sigmoid,
+    "elu": elu,
+    "swish": swish,
+    "silu": swish,   # alias
+}
+_ACT_TO_NAME = {f: n for n, f in ACTIVATIONS.items()}
+
+
+def resolve_activation(activation):
+    if isinstance(activation, str):
+        if activation not in ACTIVATIONS:
+            raise ValueError(
+                f"Unknown activation name '{activation}'. "
+                f"Known: {sorted(ACTIVATIONS)}"
+            )
+        return ACTIVATIONS[activation], activation
+    return activation, _ACT_TO_NAME.get(activation, "custom")
 
 def MLP(layers, activation=relu):
     """ Vanilla MLP"""
@@ -216,6 +239,9 @@ class PI_DeepONet:
                  lr_transition_steps=2000,
                  output_scale=1.0,
                  seed=None):
+        activation, self.activation_name = resolve_activation(activation)
+        self.activation = activation
+
         # Network initialization and evaluation functions
         self.branch_init, self.branch_apply = MLP(branch_layers, activation=activation)
         self.trunk_init, self.trunk_apply = MLP(trunk_layers, activation=activation)

@@ -19,7 +19,7 @@ from model import (
 
 print(jax.devices())
 
-size = "small"
+size = "large"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
@@ -40,8 +40,8 @@ J = int(ds['x'].shape[0])
 data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
 print(f"\nFlux normalization: phi_scale = {phi_scale:.6f}")
 print(f"  Network learns psi/phi_scale; residual uses Q/phi_scale; predict_s un-normalizes.")
-bcs_in,  bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=50000)
-res_in,  res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=5000)
+bcs_in,  bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=500)
+res_in,  res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=500)
 
 # Validation set (held out from training; used for best-params tracking)
 val_np = onp.load("datasets/M_Iso_val.npz")
@@ -68,6 +68,7 @@ model = PI_DeepONet(
     # lambda_data=0, lambda_res=0.9, lambda_bcs=0.1, # No data training
     lr_transition_steps=n_iter//10,
     output_scale=phi_scale,
+    activation="softplus"
 )
 print(f"\nInstantiated PI_DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
 
@@ -84,6 +85,7 @@ with open("trained_models/" + size + "/pideeponet.pkl", "wb") as f:
     pickle.dump({
         "params": model.params,
         "config": {
+            "activation": model.activation_name,
             "branch_layers": branch_layers,
             "trunk_layers":  trunk_layers,
             "N_angles":      16,

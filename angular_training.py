@@ -5,7 +5,6 @@ import numpy as onp
 import jax
 import jax.numpy as jnp
 from jax import random
-from jax.nn import tanh, gelu, softplus
 
 import pickle
 
@@ -75,7 +74,7 @@ model = PI_DeepONet_Angular(
     lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
     output_scale=phi_scale,
-    activation=softplus
+    activation="softplus"   # string name -> saved in config -> reconstructed on load
 )
 print(f"\nInstantiated PI_DeepONet_Angular  (branch {branch_layers}, trunk {trunk_layers})")
 
@@ -161,6 +160,7 @@ with open(out_path, "wb") as f:
         "params": model.params,
         "config": {
             "model_type":    "angular_vec",
+            "activation":    model.activation_name,
             "branch_layers": branch_layers,
             "trunk_layers":  trunk_layers,
             "N_angles":      A,
