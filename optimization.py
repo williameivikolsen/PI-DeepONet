@@ -2,7 +2,7 @@ import optuna
 import jax.numpy as jnp
 import numpy as onp
 from jax import random
-from jax.nn import relu, tanh, gelu
+from jax.nn import relu, tanh, gelu, softplus
 
 from model import (
     PI_DeepONet, DataGenerator, PI_DeepONet_Angular,
@@ -19,6 +19,7 @@ ACTIVATIONS = {
     "relu": relu,
     "tanh": tanh,
     "gelu": gelu,
+    "softplus": softplus
 }
 
 
