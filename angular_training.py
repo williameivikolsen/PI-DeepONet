@@ -63,8 +63,9 @@ res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
                              rng_key=random.PRNGKey(303), branch_table=res_Q)
 
 p_latent      = 100
-branch_layers = [J] + 5 * [100] + [p_latent]
-trunk_layers  = [1] + 5 * [500] + [A * p_latent]
+n_layers      = 4
+branch_layers = [J] + n_layers * [100] + [p_latent]
+trunk_layers  = [1] + n_layers * [500] + [A * p_latent]
 
 model = PI_DeepONet_Angular(
     branch_layers, trunk_layers,
@@ -74,7 +75,7 @@ model = PI_DeepONet_Angular(
     lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
     output_scale=phi_scale,
-    activation="softplus"   # string name -> saved in config -> reconstructed on load
+    activation="gelu"   # string name -> saved in config -> reconstructed on load
 )
 print(f"\nInstantiated PI_DeepONet_Angular  (branch {branch_layers}, trunk {trunk_layers})")
 
@@ -154,7 +155,7 @@ if _fail:
 print("  guard passed: restored params reproduce best_val_ARE on both paths.\n")
 
 os.makedirs("trained_models/" + size, exist_ok=True)
-out_path = "trained_models/" + size + "/pideeponet_angular.pkl"
+out_path = "trained_models/" + size + "/pideeponet_angular_" + model.activation_name + ".pkl"
 with open(out_path, "wb") as f:
     pickle.dump({
         "params": model.params,
