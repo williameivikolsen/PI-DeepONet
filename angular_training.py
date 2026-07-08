@@ -64,8 +64,8 @@ res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
 
 p_latent      = 100
 n_layers      = 4
-branch_layers = [J] + n_layers * [100] + [p_latent]
-trunk_layers  = [1] + n_layers * [500] + [A * p_latent]
+branch_layers = [J] + n_layers * [250] + [p_latent]
+trunk_layers  = [1] + n_layers * [250] + [A * p_latent]
 
 model = PI_DeepONet_Angular(
     branch_layers, trunk_layers,

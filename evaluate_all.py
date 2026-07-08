@@ -15,6 +15,8 @@ MODEL_FILES = {
     "PI-DeepONet":            "pideeponet.pkl",
     "PI-DeepONet (angular)":  "pideeponet_angular.pkl",
     "PI-DeepONet (no data)":  "pideeponet_no_data.pkl",
+    "PI-DeepONet (angular, GELU)": "pideeponet_angular_gelu.pkl",
+    "PI-DeepONet (angular, Softplus)": "pideeponet_angular_softplus.pkl",
 }
 
 SCENARIOS_GRF = [
