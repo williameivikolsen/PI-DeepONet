@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex report"] 1781876533.71012 "report.aux" "report.bbl" "report" 1783512882.98689 0
+["bibtex report"] 1781876533.71012 "report.aux" "report.bbl" "report" 1783513534.66759 0
   "./bibliography.bib" 1779349999.03034 9539 b776c0dda94ee10fa6fd899f15f0f889 ""
-  "./reportNotes.bib" 1783512882.62525 103 48ad29797468f16e2853d8797278d7af ""
+  "./reportNotes.bib" 1783513534.29046 103 48ad29797468f16e2853d8797278d7af ""
   "/usr/local/texlive/2026/texmf-dist/bibtex/bst/revtex4-1/apsrev4-1.bst" 1602107945 71515 e333383ed72bf24aa6de7e8cabb55f84 ""
-  "report.aux" 1783512882.62309 5905 fda1d99d46455b700f9a33f4bf8e8253 "pdflatex"
+  "report.aux" 1783513534.28856 5905 fda1d99d46455b700f9a33f4bf8e8253 "pdflatex"
   (generated)
   "report.bbl"
   "report.blg"
   (rewritten before read)
-["pdflatex"] 1783512881.81519 "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" "report.pdf" "report" 1783512882.98758 0
+["pdflatex"] 1783513533.05859 "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" "report.pdf" "report" 1783513534.66814 0
   "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" 1781876532.60215 30609 e98af378267f3a348adbdc70e53984ee ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -119,12 +119,12 @@
   "/usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt" 1776356108 3636773 c964adf206a6e0c0620d4da1d21241ca ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
   "figures/1D Slab.png" 1779364041.34467 366960 847e1367e06a9a28ea3b007697fb80ff ""
-  "figures/ARE_large.pdf" 1783512880.95862 24346 72a0596047713831db83c99592900518 ""
+  "figures/ARE_large.pdf" 1783513532.31306 24344 8d73b01f7758dec391622e35f1967267 ""
   "figures/DeepONet.png" 1779350042.22228 109118 2367561366846fd3d0754526f55ce1de ""
   "figures/PI DeepONet.png" 1779350037.23076 97547 d36850f73ad9a8c393b88d2528c5662e ""
   "figures/PINN.png" 1779350024.36891 56756 5808e0aec07d2636a21120de446a5dbc ""
-  "figures/R2_large.pdf" 1783512881.09746 24608 e99b11d23a7d7d20ffd845a877af2288 ""
-  "report.aux" 1783512882.62309 5905 fda1d99d46455b700f9a33f4bf8e8253 "pdflatex"
+  "figures/R2_large.pdf" 1783513532.45954 24402 441d2528ea9adb6063b02a97738acffa ""
+  "report.aux" 1783513534.28856 5905 fda1d99d46455b700f9a33f4bf8e8253 "pdflatex"
   "report.bbl" 1781876533.85752 12159 1a2133a0172ce674145ce4ddd9267f71 "bibtex report"
   "report.tex" 1781876532.60215 30609 e98af378267f3a348adbdc70e53984ee ""
   (generated)

@@ -6,7 +6,7 @@ from helpers import load_model, plot_loss_curves, plot_sample_predictions
 
 
 CHECKPOINT = "trained_models/large/pideeponet_angular_softplus.pkl"
-TEST_FILE  = "datasets/test/M_Iso_test_NS.npz"
+TEST_FILE  = "datasets/test/M_Iso_test_LS6.npz"
 SAMPLE_IDX = 3
 
 
