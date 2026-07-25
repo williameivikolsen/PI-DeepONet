@@ -50,6 +50,7 @@ model = DeepONet(
     lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
     lr_transition_steps=n_iter//20,
     output_scale=phi_scale,
+    Q_ref=float(jnp.mean(ds['Q'])),
 )
 print(f"\nInstantiated DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
 
@@ -74,6 +75,7 @@ with open("trained_models/" + size + "/deeponet.pkl", "wb") as f:
             "x_sensors":     onp.asarray(ds['x']),
             "X":             X_slab,
             "output_scale":  phi_scale,
+            "Q_ref":         model.Q_ref,
         },
         "loss_log":      model.loss_log,
         "n_iter": n_iter,

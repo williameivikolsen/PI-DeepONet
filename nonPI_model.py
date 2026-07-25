@@ -105,6 +105,7 @@ class DeepONet:
                  lr_decay_rate=0.9,
                  lr_transition_steps=5000,
                  output_scale=1.0,
+                 Q_ref=None,
                  seed=None):
         # Network initialization and evaluation functions
         if isinstance(activation, str):
@@ -138,6 +139,9 @@ class DeepONet:
         # Network learns phi_0 / output_scale; predict_s multiplies back.
         # Loss is computed on normalized values (targets already divided).
         self.output_scale = float(output_scale)
+
+        # Reference source amplitude: mean(Q) on the training set.
+        self.Q_ref = None if Q_ref is None else float(Q_ref)
 
         # 1. Define schedule
         self.lr_schedule = optax.exponential_decay(
@@ -214,8 +218,13 @@ class DeepONet:
     def predict_s(self, params, Q_star, x_star):
         # Network is trained on phi_0 / output_scale, so multiply back
         # to return predictions in the original (un-normalized) units.
-        phi_norm = vmap(self.operator_net, (None, 0, 0))(params, Q_star, x_star)
-        return self.output_scale * phi_norm
+        phi_fn = vmap(self.operator_net, (None, 0, 0))
+        if self.Q_ref is None:
+            return self.output_scale * phi_fn(params, Q_star, x_star)
+        # Homogeneity correction: evaluate at training
+        # amplitude, scale back by the per-sample amplitude ratio.
+        a = np.mean(Q_star, axis=1) / self.Q_ref
+        return self.output_scale * a * phi_fn(params, Q_star / a[:, None], x_star)
 
     @partial(jit, static_argnums=(0,))
     def predict_res(self, params, Q_star, Y_star):
@@ -228,4 +237,10 @@ class DeepONet:
             lambda Q_i, x_j: self.operator_net(params, Q_i, x_j),
             in_axes=(None, 0),
         )
-        return self.output_scale * vmap(f_for_one_Q, in_axes=(0, None))(Q_batch, x_points)
+        phi0_all = vmap(f_for_one_Q, in_axes=(0, None))
+        if self.Q_ref is None:
+            return self.output_scale * phi0_all(Q_batch, x_points)
+        # Homogeneity correction: evaluate at training
+        # amplitude, scale back by the per-sample amplitude ratio.
+        a = np.mean(Q_batch, axis=1, keepdims=True) / self.Q_ref   # (N, 1)
+        return self.output_scale * a * phi0_all(Q_batch / a, x_points)
