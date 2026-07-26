@@ -148,7 +148,8 @@ def build_data_arrays(ds, normalize=True):
 
 
 def build_bcs_arrays(ds, X, n_per_sample=50,
-                     rng_key=random.PRNGKey(2025), N_angles=16):
+                     rng_key=random.PRNGKey(2025), N_angles=16,
+                     alpha_range=(0.5, 20.0)):
     """
     Vacuum-BC evaluation points, with mu drawn from the Gauss-Legendre
     quadrature nodes.
@@ -156,6 +157,11 @@ def build_bcs_arrays(ds, X, n_per_sample=50,
     Half the points are at x=0 with mu > 0 (incoming from left is zero),
     the other half at x=X with mu < 0 (incoming from right is zero).
     Target is zero for every point.
+
+    Each point also carries an amplitude factor `alpha`, log-uniform on
+    alpha_range, applied to the gathered branch Q at loss time. This lets
+    the network learn the BC across a wider amplitude range than the labeled
+    data sources Q cover.
     """
     Q    = np.asarray(ds['Q'])
     N, J = Q.shape
@@ -167,7 +173,7 @@ def build_bcs_arrays(ds, X, n_per_sample=50,
     pos_nodes = mu_nodes[mu_nodes > 0.0]      # left-boundary angles
     neg_nodes = mu_nodes[mu_nodes < 0.0]      # right-boundary angles
 
-    k1, k2 = random.split(rng_key)
+    k1, k2, k3 = random.split(rng_key, 3)
     mu_left  = random.choice(k1, pos_nodes, (half,))
     mu_right = random.choice(k2, neg_nodes, (total - half,))
 
@@ -184,19 +190,23 @@ def build_bcs_arrays(ds, X, n_per_sample=50,
     x_bc       = x_bc[perm]
     mu_bc      = mu_bc[perm]
 
+    log_lo, log_hi = float(np.log(alpha_range[0])), float(np.log(alpha_range[1]))
+    alpha = np.exp(random.uniform(k3, (total,), minval=log_lo, maxval=log_hi))
+
     # Memory note: we do NOT materialize Q[sample_idx] (which would be
     # (total, J) and explodes as N*n_per_sample*J — 100 MB+ at the large
     # dataset). Instead we return the integer sample index and the unique
     # source table Q (N, J); DataGenerator gathers the per-batch branch
     # rows on the fly. The returned inputs[0] is the INDEX, and the table
     # is the third return value, to be passed to DataGenerator(branch_table=...).
-    y = np.stack([x_bc, mu_bc], axis=-1)   # (total, 2)
+    y = np.stack([x_bc, mu_bc, alpha], axis=-1)   # (total, 3)
     s = np.zeros((total,))
     return (sample_idx, y), s, Q
 
 
 def build_res_arrays(ds, X, n_per_sample=100,
-                     rng_key=random.PRNGKey(2026), N_angles=16):
+                     rng_key=random.PRNGKey(2026), N_angles=16,
+                     alpha_range=(0.5, 20.0)):
     """
     Interior collocation points for the PDE residual loss: x continuous in
     (0, X), mu drawn from the Gauss-Legendre nodes. Target is zero because
@@ -208,6 +218,11 @@ def build_res_arrays(ds, X, n_per_sample=100,
     residual's only derivative is in x, and its scattering source is a node
     quadrature sum, so the residual is fully determined by the node angles.
     x stays continuous because the residual DOES differentiate in x.
+
+    Each point also carries an amplitude factor `alpha`, log-uniform on
+    alpha_range, applied to the gathered branch Q before evaluating the
+    residual. This lets the network learn the PDE across a wider amplitude
+    range than the labeled data sources Q cover.
     """
     Q    = np.asarray(ds['Q'])
     N, J = Q.shape
@@ -216,14 +231,17 @@ def build_res_arrays(ds, X, n_per_sample=100,
     mu_nodes, _ = leggauss(N_angles)
     mu_nodes = np.asarray(mu_nodes)
 
-    k1, k2 = random.split(rng_key)
+    k1, k2, k3 = random.split(rng_key, 3)
     x_r  = random.uniform(k1, (total,), minval=0.0, maxval=X)
     mu_r = random.choice(k2, mu_nodes, (total,))
+
+    log_lo, log_hi = float(np.log(alpha_range[0])), float(np.log(alpha_range[1]))
+    alpha = np.exp(random.uniform(k3, (total,), minval=log_lo, maxval=log_hi))
 
     sample_idx = np.repeat(np.arange(N), n_per_sample)
     # See build_bcs_arrays: return the index + unique Q table rather than
     # materializing Q[sample_idx], so memory stays O(N*J) not O(total*J).
-    y = np.stack([x_r, mu_r], axis=-1)
+    y = np.stack([x_r, mu_r, alpha], axis=-1)
     s = np.zeros((total,))
     return (sample_idx, y), s, Q
 
@@ -366,16 +384,22 @@ class PI_DeepONet:
     def loss_bcs(self, params, batch):
         inputs, outputs = batch
         Q, y = inputs
-        phi_pred = vmap(self.operator_net, (None, 0, 0, 0))(params, Q, y[:, 0], y[:, 1])
-        loss = np.mean((outputs.flatten() - phi_pred) ** 2)
+        # Scaling with the alpha parameter.
+        alpha = y[:, 2]
+        Q_scaled = Q * alpha[:, None]
+        phi_pred = vmap(self.operator_net, (None, 0, 0, 0))(params, Q_scaled, y[:, 0], y[:, 1])
+        loss = np.mean(((outputs.flatten() - phi_pred) / alpha) ** 2)
         return loss
 
     # Residual loss
     def loss_res(self, params, batch):
         inputs, outputs = batch
         Q, y = inputs
-        pred = vmap(self.residual_net, (None, 0, 0, 0))(params, Q, y[:, 0], y[:, 1])
-        loss = np.mean((outputs.flatten() - pred) ** 2)
+        # y[:, 2] is the amplitude factor from build_res_arrays; see loss_bcs.
+        alpha = y[:, 2]
+        Q_scaled = Q * alpha[:, None]
+        pred = vmap(self.residual_net, (None, 0, 0, 0))(params, Q_scaled, y[:, 0], y[:, 1])
+        loss = np.mean(((outputs.flatten() - pred) / alpha) ** 2)
         return loss
 
     # Supervised data loss on the scalar flux phi_0.

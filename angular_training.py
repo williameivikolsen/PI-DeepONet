@@ -48,6 +48,7 @@ print(f"  psi-supervision points: {data_out.shape[0]}  (= N*J, each carrying an 
 # --- Physics collocation sets: identical construction to training.py ---
 bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=500)
 res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=500)
+print(f"  BC/residual collocation Q amplitude-augmented, alpha log-uniform in [0.5, 20]")
 
 # --- Validation set (phi_0 form; ARE on phi_0 as in training.py) ---
 val_np = onp.load("datasets/M_Iso_val.npz")
@@ -155,8 +156,8 @@ if _fail:
     )
 print("  guard passed: restored params reproduce best_val_ARE on both paths.\n")
 
-os.makedirs("trained_models/" + size, exist_ok=True)
-out_path = "trained_models/" + size + "/pideeponet_angular_" + model.activation_name + ".pkl"
+os.makedirs("trained_models/" + "alpha" + size, exist_ok=True)
+out_path = "trained_models/" + "alpha" + size + "/pideeponet_angular_" + model.activation_name + ".pkl"
 with open(out_path, "wb") as f:
     pickle.dump({
         "params": model.params,
