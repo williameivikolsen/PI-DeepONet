@@ -1,4 +1,3 @@
 pinn/
 inspect_checkpoint.py
 verify_checkpoint_eval.py
-CLAUDE_CODE_CONTEXT.md

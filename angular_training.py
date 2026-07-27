@@ -76,7 +76,6 @@ model = PI_DeepONet_Angular(
     lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
     output_scale=phi_scale,
-    Q_ref=float(jnp.mean(ds['Q'])),
     activation="gelu"   # string name -> saved in config -> reconstructed on load
 )
 print(f"\nInstantiated PI_DeepONet_Angular  (branch {branch_layers}, trunk {trunk_layers})")
@@ -173,7 +172,6 @@ with open(out_path, "wb") as f:
             "x_sensors":     onp.asarray(ds['x']),
             "X":             X_slab,
             "output_scale":  phi_scale,
-            "Q_ref":         model.Q_ref,
         },
         "loss_log":      model.loss_log,
         "loss_data_log": model.loss_data_log,
