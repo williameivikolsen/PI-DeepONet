@@ -5,9 +5,9 @@ from jax import random
 from jax.nn import relu, tanh, gelu, softplus, elu
 
 from model import (
-    PI_DeepONet, DataGenerator, PI_DeepONet_Angular,
-    build_psi_data_arrays, build_bcs_arrays, build_res_arrays,
-    build_psi_val_batch,
+    PI_DeepONet, DataGenerator,
+    build_data_arrays, build_bcs_arrays, build_res_arrays,
+    build_val_batch,
 )
 
 
@@ -66,16 +66,13 @@ def objective(trial):
         "lr_transition_steps", [n_iter_trial // 20, n_iter_trial // 10, n_iter_trial // 5]
     )
 
-    # Vector-output angular model: trunk takes x only (input dim 1) and
-    # emits A*p outputs, reshaped to (A, p) inside the model. p is the shared
-    # latent width = branch's final width (the [p_latent] tail below).
     A_angles = 16
     p_latent = 100
     branch_layers = [J] + [branch_width] * n_layers + [p_latent]
-    trunk_layers  = [1] + [trunk_width]  * n_layers + [A_angles * p_latent]
+    trunk_layers  = [2] + [trunk_width]  * n_layers + [p_latent]
 
     # Build data
-    data_in, data_out, phi_scale = build_psi_data_arrays(ds, normalize=True)
+    data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
     bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=n_per_sample)
     res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=n_per_sample)
 
@@ -86,7 +83,7 @@ def objective(trial):
     res_dataset  = DataGenerator(res_in,  res_out,  batch_size=1000,
                                  rng_key=random.PRNGKey(303), branch_table=res_Q)
 
-    val_batch = build_psi_val_batch(val_ds, output_scale=phi_scale)
+    val_batch = build_val_batch(val_ds, output_scale=phi_scale)
 
     # Build model
     model = PI_DeepONet(
