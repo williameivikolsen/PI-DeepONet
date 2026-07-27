@@ -56,20 +56,20 @@ bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
 res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
                              rng_key=random.PRNGKey(303), branch_table=res_Q)
 
-branch_layers = [J] + 5*[100] + [100]
-trunk_layers  = [2] + 5*[500] + [100]
+branch_layers = [J] + 5*[250] + [100]
+trunk_layers  = [2] + 5*[250] + [100]
 
 model = PI_DeepONet(
     branch_layers, trunk_layers,
     N_angles=16,
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
     x_sensors=ds['x'], X=X_slab,
-    lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
+    lambda_data=0.1, lambda_res=0.85, lambda_bcs=0.05,
     # lambda_data=0, lambda_res=0.9, lambda_bcs=0.1, # No data training
     lr_transition_steps=n_iter//10,
     output_scale=phi_scale,
     Q_ref=float(jnp.mean(ds['Q'])),
-    activation="softplus"
+    activation="relu"
 )
 print(f"\nInstantiated PI_DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
 
