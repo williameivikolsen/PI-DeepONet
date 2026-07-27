@@ -69,6 +69,7 @@ model = PI_DeepONet(
     # lambda_data=0, lambda_res=0.9, lambda_bcs=0.1, # No data training
     lr_transition_steps=n_iter//10,
     output_scale=phi_scale,
+    Q_ref=float(jnp.mean(ds['Q'])),
     activation="softplus"
 )
 print(f"\nInstantiated PI_DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
@@ -96,6 +97,7 @@ with open("trained_models/" + "alpha" + size + "/pideeponet.pkl", "wb") as f:
             "x_sensors":     onp.asarray(ds['x']),
             "X":             X_slab,
             "output_scale":  phi_scale,
+            "Q_ref":         model.Q_ref,
         },
         "loss_log":      model.loss_log,
         "loss_data_log": model.loss_data_log,

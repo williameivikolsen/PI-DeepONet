@@ -256,6 +256,7 @@ class PI_DeepONet:
                  lr_decay_rate=0.9,
                  lr_transition_steps=2000,
                  output_scale=1.0,
+                 Q_ref=None,
                  seed=None):
         activation, self.activation_name = resolve_activation(activation)
         self.activation = activation
@@ -300,6 +301,9 @@ class PI_DeepONet:
         # - predict_s:  multiplies network output by output_scale to
         #               return raw psi.
         self.output_scale = float(output_scale)
+
+        # Reference source amplitude: mean(Q) on the training set.
+        self.Q_ref = None if Q_ref is None else float(Q_ref)
 
         # Loss-term weights
         self.lambda_data = float(lambda_data)
@@ -527,8 +531,15 @@ class PI_DeepONet:
     def predict_s(self, params, Q_star, Y_star):
         # Network outputs psi_tilde = psi/output_scale; multiply back to
         # return raw psi in original units.
-        psi_norm = vmap(self.operator_net, (None, 0, 0, 0))(params, Q_star, Y_star[:, 0], Y_star[:, 1])
-        return self.output_scale * psi_norm
+        psi_fn = vmap(self.operator_net, (None, 0, 0, 0))
+        if self.Q_ref is None:
+            psi_norm = psi_fn(params, Q_star, Y_star[:, 0], Y_star[:, 1])
+            return self.output_scale * psi_norm
+        # Homogeneity correction: evaluate at training
+        # amplitude, scale back by the per-sample amplitude ratio.
+        a = np.mean(Q_star, axis=1) / self.Q_ref
+        psi_norm = psi_fn(params, Q_star / a[:, None], Y_star[:, 0], Y_star[:, 1])
+        return self.output_scale * a * psi_norm
 
     @partial(jit, static_argnums=(0,))
     def predict_res(self, params, Q_star, Y_star):
@@ -545,7 +556,13 @@ class PI_DeepONet:
             )(self.mu_GL)
             return np.dot(self.w_GL, psi_vec)
         phi0_for_one_Q = vmap(phi0_at, in_axes=(None, 0))
-        return self.output_scale * vmap(phi0_for_one_Q, in_axes=(0, None))(Q_batch, x_points)
+        phi0_all = vmap(phi0_for_one_Q, in_axes=(0, None))
+        if self.Q_ref is None:
+            return self.output_scale * phi0_all(Q_batch, x_points)
+        # Homogeneity correction: evaluate at training
+        # amplitude, scale back by the per-sample amplitude ratio.
+        a = np.mean(Q_batch, axis=1, keepdims=True) / self.Q_ref   # (N, 1)
+        return self.output_scale * a * phi0_all(Q_batch / a, x_points)
 
 
 def build_psi_data_arrays(ds, normalize=True):
