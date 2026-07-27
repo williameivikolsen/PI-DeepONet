@@ -89,7 +89,7 @@ def objective(trial):
     val_batch = build_psi_val_batch(val_ds, output_scale=phi_scale)
 
     # Build model
-    model = PI_DeepONet_Angular(
+    model = PI_DeepONet(
         branch_layers, trunk_layers,
         N_angles=A_angles,
         Sigma_t=1.0, Sigma_s0=0.5, Sigma_s1=0.0,
@@ -114,8 +114,8 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(
-        storage=f"sqlite:///angular_pi_deeponet_final.db",
-        study_name=f"angular_pi_deeponet_final",
+        storage=f"sqlite:///pi_deeponet_final.db",
+        study_name=f"pi_deeponet_final",
         direction="minimize",
         load_if_exists=True,
     )
