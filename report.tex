@@ -318,7 +318,7 @@ approximation,
 \begin{equation}
     \psi_{n,j} = \frac{1}{2} \left( \psi_{n, j+\frac{1}{2}} + \psi_{n, j-\frac{1}{2}} \right).
 \end{equation}
-The algebraic equation \eqref{eq: Discretized NTE} can be solved by making an initial assumption of $\varphi_{0,j}$, $\varphi_{1,j}$ and
+The algebraic equation \eqref{eq: Discretized NTE} can be solved by making an initial assumption of $\varphi_{0,j}$, $\varphi_{0,j}$ and
 $\psi_{n,j}$, then updating each of them iteratively according to \eqref{eq: Discretized NTE} until convergence.
 
 The spatially varying neutron source $Q(x)$ is modeled as a sample drawn from a Gaussian random field (GRF). A GRF is a stochastic process in which
@@ -374,7 +374,7 @@ This forces a decision for training. The model can either:
 
 The first option would give a true comparison to training a model on the exact same data as the benchmark problem. A potential issue with this
 is that this dataset will lack the dimensionality of the output predicted by the model. This might prevent the model from learning sufficiently
-well compared to the benchmark model, which predicts the scalar flux directly. It is therefore worth testing both training regimes for the
+well compared to the benchmark model, which prevents the scalar flux directly. It is therefore worth testing both training regimes for the
 Physics-Informed DeepONet. We therefore have one Physics-Informed DeepONet trained on
 \begin{itemize}
     \item Input data: The source distribution samples $Q(x)$ described above.
@@ -386,6 +386,7 @@ The other Physics-Informed DeepONet is trained on
     \item Output data: The corresponding angular flux $\psi(x, \mu)$ for each source distribution.
 \end{itemize}
 
+The model was developed under the assumption of only isotropic scattering in the slab geometry. The cross section parameters were set
 The parameters for the NTE were set to the first problem considered in \cite{sahadath2026characterization}, which corresponds to isotropic
 scattering. The cross sections were then given by
 $\Sigma_t = 1.0 \text{ cm}^{-1}$, $\Sigma_a = 0.5 \text{ cm}^{-1}$, $\Sigma_{s0} = 0.5 \text{ cm}^{-1}$ and $\Sigma_{s1} = 0 \text{ cm}^{-1}$.
