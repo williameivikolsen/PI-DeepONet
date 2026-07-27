@@ -2,7 +2,7 @@ import optuna
 import jax.numpy as jnp
 import numpy as onp
 from jax import random
-from jax.nn import relu, tanh, gelu, softplus
+from jax.nn import relu, tanh, gelu, softplus, elu
 
 from model import (
     PI_DeepONet, DataGenerator, PI_DeepONet_Angular,
@@ -11,17 +11,30 @@ from model import (
 )
 
 
-# Optuna categorical choices must be primitives (None/bool/int/float/str)
-# because they are serialized into the SQLite study DB. Activation FUNCTIONS
-# cannot be persisted, so we suggest a string NAME and resolve it to the
-# function here. To add an activation to the sweep, add it to this map.
+SOFTPLUS_BETA = 5.0   # sharpness of the temperature-scaled softplus candidate
+
+def sharpened_softplus(x, beta=SOFTPLUS_BETA):
+    # (1/beta)*softplus(beta*x) -> exact ReLU as beta -> inf, while staying
+    # C-infinity smooth for any finite beta (see plot_activations.py).
+    return softplus(beta * x) / beta
+
 ACTIVATIONS = {
     "relu": relu,
     "tanh": tanh,
     "gelu": gelu,
-    "softplus": softplus
+    "softplus": softplus,
+    "elu": elu,
+    "softplus_beta5": sharpened_softplus,
 }
 
+LOSS_WEIGHTS = {
+    "current_default": (0.25, 0.70, 0.05),
+    "data_heavy":      (0.70, 0.25, 0.05),
+    "balanced":        (0.50, 0.45, 0.05),
+    "residual_heavy":  (0.10, 0.85, 0.05),
+    "no_data":         (0.00, 0.90, 0.10),
+    "bc_heavy":        (0.25, 0.55, 0.20),
+}
 
 # ---------------------------------------------------------------------------
 # Load datasets once outside the objective
@@ -45,6 +58,8 @@ def objective(trial):
     n_per_sample  = trial.suggest_categorical("n_per_sample", [500, 750, 1000])
     activation_name = trial.suggest_categorical("activation", list(ACTIVATIONS))
     activation    = ACTIVATIONS[activation_name]
+    loss_weights_name = trial.suggest_categorical("loss_weights", list(LOSS_WEIGHTS))
+    lambda_data, lambda_res, lambda_bcs = LOSS_WEIGHTS[loss_weights_name]
     n_layers      = trial.suggest_int("n_layers", 2, 6)
     n_iter_trial  = 20000   # shorter than the full 100k for tractable search
     lr_transition_steps = trial.suggest_categorical(
@@ -79,7 +94,7 @@ def objective(trial):
         N_angles=A_angles,
         Sigma_t=1.0, Sigma_s0=0.5, Sigma_s1=0.0,
         x_sensors=ds['x'], X=X_slab,
-        lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
+        lambda_data=lambda_data, lambda_res=lambda_res, lambda_bcs=lambda_bcs,
         output_scale=phi_scale,
         lr_transition_steps=lr_transition_steps,
         activation=activation
