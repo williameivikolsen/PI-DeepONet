@@ -27,7 +27,7 @@ print(f"Loaded datasets/{size}/M_Iso_train.npz")
 for k in ds:
     print(f"  {k:<10s} shape={tuple(ds[k].shape)}  dtype={ds[k].dtype}")
 
-E = 200   # Epochs
+E = 2000  # Epochs
 B = 1000  # Batch size
 D = len(ds["Q"]) * len(ds["x"])   # N*J, matched to training.py (not N*J*A)
 n_iter = int(D * E / B)
@@ -46,8 +46,8 @@ print(f"  residual uses Q/phi_scale; predict_s un-normalizes.")
 print(f"  psi-supervision points: {data_out.shape[0]}  (= N*J, each carrying an A-vector target)")
 
 # --- Physics collocation sets: identical construction to training.py ---
-bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=500)
-res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=500)
+bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=1000)
+res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=1000)
 
 # --- Validation set (phi_0 form; ARE on phi_0 as in training.py) ---
 val_np = onp.load("datasets/M_Iso_val.npz")
@@ -65,18 +65,18 @@ res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
 p_latent      = 100
 n_layers      = 4
 branch_layers = [J] + n_layers * [250] + [p_latent]
-trunk_layers  = [1] + n_layers * [250] + [A * p_latent]
+trunk_layers  = [1] + n_layers * [500] + [A * p_latent]
 
 model = PI_DeepONet_Angular(
     branch_layers, trunk_layers,
     N_angles=A,
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
     x_sensors=ds['x'], X=X_slab,
-    lambda_data=0.25, lambda_res=0.7, lambda_bcs=0.05,
+    lambda_data=0.7, lambda_res=0.25, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
     output_scale=phi_scale,
     Q_ref=float(jnp.mean(ds['Q'])),
-    activation="gelu"   # string name -> saved in config -> reconstructed on load
+    activation="relu"   # string name -> saved in config -> reconstructed on load
 )
 print(f"\nInstantiated PI_DeepONet_Angular  (branch {branch_layers}, trunk {trunk_layers})")
 
