@@ -23,7 +23,13 @@ def load_model(path: str):
         is_angular_vec = (model_type == "angular_vec") or \
                          (model_type is None and trunk_in == 1)
 
-        if is_angular_vec:
+        if model_type == "angular_vec_scalar_data":
+            # Same vector-output trunk as PI_DeepONet_Angular, but trained
+            # on scalar phi_0 labels; see model_angular_scalar.py.
+            from model_angular_scalar import PI_DeepONet_AngularScalar
+            model = PI_DeepONet_AngularScalar(**cfg)
+            kind = "PI_angular_scalar_data"
+        elif is_angular_vec:
             from model import PI_DeepONet_Angular
             model = PI_DeepONet_Angular(**cfg)
             kind = "PI_angular"
