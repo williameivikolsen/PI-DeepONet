@@ -19,7 +19,7 @@ from model_angular_scalar import PI_DeepONet_AngularScalar
 
 print(jax.devices())
 
-size = "large"
+size = "medium"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
