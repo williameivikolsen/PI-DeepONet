@@ -37,44 +37,52 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Illustration of a Physics-Informed DeepONet. Adapted from \cite  {deeponet_medium_2023}.}}{3}{}}
 \newlabel{fig: PI DeepONet}{{3}{3}{}{}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3}Physics-Informed DeepONets}{3}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {III}Problem Statement}{3}{}}
+\newlabel{eq: Loss Function}{{4}{3}{}{}{}}
 \citation{sahadath2026characterization}
 \citation{sahadath2026characterization}
 \citation{sahadath2026characterization}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Illustration of the 1D slab geometry. Adapted from \cite  {sahadath2026characterization}.}}{4}{}}
 \newlabel{fig: 1D Slab}{{4}{4}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Problem Statement}{4}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {IV}Method}{4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {A}Neutron Transport Problem}{4}{}}
-\newlabel{eq: 1D NTE}{{4}{4}{}{}{}}
-\newlabel{eq: Scalar flux}{{5}{4}{}{}{}}
-\newlabel{eq: Scalar current}{{6}{4}{}{}{}}
+\newlabel{eq: 1D NTE}{{5}{4}{}{}{}}
+\newlabel{eq: Scalar flux}{{6}{4}{}{}{}}
+\newlabel{eq: Scalar current}{{7}{4}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {B}Data Generation}{4}{}}
-\newlabel{eq: Discretized NTE}{{10}{4}{}{}{}}
+\newlabel{eq: Discretized NTE}{{11}{4}{}{}{}}
 \citation{sahadath2026characterization}
 \citation{sahadath2026characterization}
-\newlabel{eq: GL scalar flux}{{11}{5}{}{}{}}
+\newlabel{eq: GL scalar flux}{{12}{5}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {C}Model Architecture and Training}{5}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {1}Benchmark Model}{5}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2}Physics-Informed DeepONet}{5}{}}
 \citation{sahadath2026characterization}
 \citation{sahadath2026characterization}
+\citation{sahadath2026characterization}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3}Large DeepONet}{6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4}Training}{6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D}Model Evaluation}{6}{}}
+\citation{sahadath2026characterization}
 \bibdata{reportNotes,bibliography}
 \bibcite{IAEA_2024_SMR}{{1}{2024}{{{International Atomic Energy Agency}}}{{}}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Test datasets for model evaluation. GRF sources are defined by length scale $l$, mean $m$ and variance $\sigma ^2$. The combined sources use $Q_1$: $l{=}0.08$, $m{=}2.5$, $\sigma ^2{=}0.5$; $Q_2$: $l{=}0.10$, $m{=}5.0$, $\sigma ^2{=}1.0$; $Q_3$: $l{=}0.20$, $m{=}10$, $\sigma ^2{=}2.0$. Sinusoidal sources are $Q(x) = 12.5 + \sin (2\pi f x)$.}}{7}{}}
+\newlabel{tab: Model evaluation}{{I}{7}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Results}{7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Discussion}{7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusion}{7}{}}
 \bibcite{black2023prospects}{{2}{2023}{{Black\ \emph  {et~al.}}}{{Black, Shropshire, Ara{\'u}jo,\ and\ van Heek}}}
-\newlabel{tab: Model evaluation}{{IV\,D}{6}{}{}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Test datasets for model evaluation.}}{6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {D}Model Evaluation}{6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces $R^2$ score.}}{6}{}}
-\newlabel{fig: R2 large}{{5}{6}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {V}Results and Discussion}{6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {VI}Conclusion}{6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {}References}{6}{}}
 \bibcite{nuproship}{{3}{2024}{{Emblemsv{\r a}g\ \emph  {et~al.}}}{{Emblemsv{\r a}g, Ordonez, Tamm, Ortigosa, Colilles, P{\'e}rez, Thoresen, Ovrum, Jordahl, Laanke \emph  {et~al.}}}}
 \bibcite{MAGNET}{{4}{2023}{{Wilsdon\ \emph  {et~al.}}}{{Wilsdon, Hansel, Kunz,\ and\ Browning}}}
 \bibcite{DT2024review}{{5}{2024}{{Mengyan\ \emph  {et~al.}}}{{Mengyan, Xueyan, Cuiting, Yixuan,\ and\ Jun}}}
 \bibcite{kochunas2021digital}{{6}{2021}{{Kochunas\ and\ Huan}}{{}}}
 \bibcite{SHEN2022108861}{{7}{2022}{{Shen\ \emph  {et~al.}}}{{Shen, Guo, Li, Huang, Zheng, Pan,\ and\ Wang}}}
 \bibcite{ZHOU2024110759}{{8}{2024}{{Zhou\ \emph  {et~al.}}}{{Zhou, Yang, Wu, Fang, Liang, Lai, Guo, Zhu,\ and\ Yang}}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces $R^2$ score of models trained on Dataset 1, the original dataset of 500 source distributions $Q(x)$.}}{8}{}}
+\newlabel{fig: R2 large}{{5}{8}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces ARE score of models trained on Dataset 1, the original dataset of 500 source distributions $Q(x)$.}}{8}{}}
+\newlabel{fig: ARE large}{{6}{8}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {}References}{8}{}}
 \bibcite{sahadath2026characterization}{{9}{2026}{{Sahadath\ \emph  {et~al.}}}{{Sahadath, Cheng, Pan,\ and\ Ji}}}
 \bibcite{wang2021learning}{{10}{2021}{{Wang\ \emph  {et~al.}}}{{Wang, Wang,\ and\ Perdikaris}}}
 \bibcite{deeponet_medium_2023}{{11}{2023}{{Mousavi}}{{}}}
@@ -85,8 +93,14 @@
 \bibstyle{apsrev4-1}
 \citation{REVTEX41Control}
 \citation{apsrev41Control}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces ARE score.}}{7}{}}
-\newlabel{fig: ARE large}{{6}{7}{}{}{}}
-\newlabel{LastBibItem}{{15}{7}{}{}{}}
-\newlabel{LastPage}{{}{7}{}{}{}}
-\gdef \@abspage@last{7}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces $R^2$ score of models trained on Dataset 2, the medium sized dataset of 100 source distributions $Q(x)$.}}{9}{}}
+\newlabel{fig: R2 medium}{{7}{9}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces ARE score of models trained on Dataset 2, the medium sized dataset of 100 source distributions $Q(x)$.}}{9}{}}
+\newlabel{fig: ARE medium}{{8}{9}{}{}{}}
+\newlabel{LastBibItem}{{15}{9}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces $R^2$ score of models trained on Dataset 3, the small dataset of 10 source distributions $Q(x)$.}}{10}{}}
+\newlabel{fig: R2 small}{{9}{10}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces ARE score of models trained on Dataset 3, the small dataset of 10 source distributions $Q(x)$.}}{10}{}}
+\newlabel{fig: ARE small}{{10}{10}{}{}{}}
+\newlabel{LastPage}{{}{10}{}{}{}}
+\gdef \@abspage@last{10}

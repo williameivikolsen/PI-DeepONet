@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 from helpers import load_model, plot_loss_curves, plot_sample_predictions
 
 
-CHECKPOINT = "trained_models/small/pideeponet_angular_relu.pkl"
-# CHECKPOINT = "trained_models/small/deeponet.pkl"
+# CHECKPOINT = "trained_models/small/pideeponet_angular_relu.pkl"
+CHECKPOINT = "trained_models/large/large_deeponet.pkl"
 # CHECKPOINT = "trained_models/small/pideeponet.pkl"
-TEST_FILE  = "datasets/test/M_Iso_test_SIN_LF.npz"
+TEST_FILE  = "datasets/test/M_Iso_test_LS1.npz"
 SAMPLE_IDX = 0
 
 

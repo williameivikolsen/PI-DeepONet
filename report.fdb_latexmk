@@ -1,15 +1,15 @@
 # Fdb version 4
-["bibtex report"] 1785144272.80415 "report.aux" "report.bbl" "report" 1785166790.36965 0
+["bibtex report"] 1785435837.29429 "report.aux" "report.bbl" "report" 1785435945.48102 0
   "./bibliography.bib" 1779349999.03034 9539 b776c0dda94ee10fa6fd899f15f0f889 ""
-  "./reportNotes.bib" 1785166789.93556 103 48ad29797468f16e2853d8797278d7af ""
+  "./reportNotes.bib" 1785435945.15665 103 48ad29797468f16e2853d8797278d7af ""
   "/usr/local/texlive/2026/texmf-dist/bibtex/bst/revtex4-1/apsrev4-1.bst" 1602107945 71515 e333383ed72bf24aa6de7e8cabb55f84 ""
-  "report.aux" 1785166789.9332 5905 59147bdef3a9cccb03e18a576487418b "pdflatex"
+  "report.aux" 1785435945.15334 7610 82ee1e428c7ea997626f1348917db1eb "pdflatex"
   (generated)
   "report.bbl"
   "report.blg"
   (rewritten before read)
-["pdflatex"] 1785166789.00635 "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" "report.pdf" "report" 1785166790.3702 0
-  "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" 1785144271.66159 30475 af671e0328d530dabaddc1a6443ad59b ""
+["pdflatex"] 1785435944.56712 "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" "report.pdf" "report" 1785435945.48154 0
+  "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" 1785435944.32055 40209 1e4d58a27bcc0e9a8588e7bf0a38031b ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm" 1136768653 1536 e07581a4bb3136ece9eeb4c3ffab8233 ""
@@ -61,6 +61,7 @@
   "/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb" 1248133631 30251 6afa5cb1d0204815a708a080681d4674 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb" 1248133631 36299 5f9df58c2139e7edcf37c8fca4bd384d ""
   "/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb" 1248133631 37912 77d683123f92148345f3fc36a38d9ab1 ""
+  "/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb" 1248133631 37166 8ab3487cbe3ab49ebce74c29ea2418db ""
   "/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb" 1248133631 36281 c355509802a035cadc5f15869451dcee ""
   "/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb" 1248133631 36094 798f80770b3b148ceedd006d487db67c ""
   "/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb" 1248133631 35752 024fb6c41858982481f6968b5fc26508 ""
@@ -119,14 +120,18 @@
   "/usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt" 1776356108 3636773 c964adf206a6e0c0620d4da1d21241ca ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
   "figures/1D Slab.png" 1779364041.34467 366960 847e1367e06a9a28ea3b007697fb80ff ""
-  "figures/ARE_large.pdf" 1785156882.80636 25763 7f3c04765c9b744935e835c58c399b2a ""
   "figures/DeepONet.png" 1779350042.22228 109118 2367561366846fd3d0754526f55ce1de ""
   "figures/PI DeepONet.png" 1779350037.23076 97547 d36850f73ad9a8c393b88d2528c5662e ""
   "figures/PINN.png" 1779350024.36891 56756 5808e0aec07d2636a21120de446a5dbc ""
-  "figures/R2_large.pdf" 1785156882.89691 26931 d3ec9c596a6d34f8c46ebbbe036c4a0d ""
-  "report.aux" 1785166789.9332 5905 59147bdef3a9cccb03e18a576487418b "pdflatex"
-  "report.bbl" 1785144272.88786 12159 1a2133a0172ce674145ce4ddd9267f71 "bibtex report"
-  "report.tex" 1785144271.66159 30475 af671e0328d530dabaddc1a6443ad59b ""
+  "report.aux" 1785435945.15334 7610 82ee1e428c7ea997626f1348917db1eb "pdflatex"
+  "report.bbl" 1785435837.37858 12159 1a2133a0172ce674145ce4ddd9267f71 "bibtex report"
+  "report.tex" 1785435944.32055 40209 1e4d58a27bcc0e9a8588e7bf0a38031b ""
+  "results/ARE_large.pdf" 1785399831.78423 23998 a69df1cf89063ee56ec1583f2a720da1 ""
+  "results/ARE_medium.pdf" 1785399889.85955 24397 58aa8023b983b221a722d62d18a02fda ""
+  "results/ARE_small.pdf" 1785400012.76351 23874 a1aac0ebe56afa8661161aca93e838e5 ""
+  "results/R2_large.pdf" 1785399820.39305 23161 7d6bf3b008acf580cff0ccb7321c3b31 ""
+  "results/R2_medium.pdf" 1785399872.03708 23110 2b260ec5a7317619412e104282347014 ""
+  "results/R2_small.pdf" 1785399951.30902 22195 5d9e3b83b3c6b3639cc80c505e2be577 ""
   (generated)
   "report.aux"
   "report.log"

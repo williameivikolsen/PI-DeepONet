@@ -218,9 +218,16 @@ we have seen, each of them have their drawbacks:
 \end{itemize}
 A promising method to circumvent this issue is to combine these two methods into a single framework: A Physics-Informed DeepONet.
 The architecture is visualized in figure \ref{fig: PI DeepONet}. In addition to the Branch and Trunk net, the model incorporates the governing
-differential equation in its loss function. The architecture was first suggested by \cite{wang2021learning}, who demonstrated its effectiveness
-on various types of PDEs, including a diffusion model.
+differential equation in its loss function. Its loss function is given by
+\begin{equation} \label{eq: Loss Function}
+    \mathcal{L} = \lambda_\text{data} \mathcal{L}_{\text{data}} + \lambda_\text{PDE} \mathcal{L}_{\text{PDE}} + \lambda_\text{BC} \mathcal{L}_{\text{BC}},
+\end{equation}
+where $\mathcal{L}_{\text{data}}$ is the loss term for the labelled data, given by the mean squared error between the model predictions and the true values.
+The term $\mathcal{L}_{\text{PDE}}$ is the loss term for the governing PDE, and $\mathcal{L}_{\text{BC}}$ is the loss term for the boundary conditions.
+These loss terms will be defined following the problem statement. The $\lambda$ weights control the relative importance of each loss term.
 
+The architecture was first suggested by \cite{wang2021learning}, who demonstrated its effectiveness
+on various types of PDEs, including a diffusion model.
 The framework is able to combine the advantages of PINNs and DeepONets: They keep the low-data requirement of the PINN methods while being able
 to generalize like a DeepONet. The physics constraint makes the model more robust to handle inputs outside the training distribution.
 For these reasons, we believe Physics-Informed DeepONets to be the most promising architecture for our usecase.
@@ -352,7 +359,9 @@ A total of 500 source distribution samples $Q(x)$ were generated with a mean of 
 
 The benchmark model was implemented according to the description of \cite{sahadath2026characterization}. The input was the source function
 $Q(x)$, with the $Q(\cdot)$ array being fed as input for the Branch net and the $x$ array fed as input for the Trunk net. The dot product
-of the outputs of the Branch and Trunk nets then gives the predicted scalar flux $\varphi_0(x)$. The model was trained on
+of the outputs of the Branch and Trunk nets then gives the predicted scalar flux $\varphi_0(x)$. The DeepONet architecture had a branch net with
+layer dimensions (100, 200, 200, 100) and a trunk net with dimensions (1, 200, 200, 100). Both are fully connected feedforward neural networks with
+ReLU activation functions. The model was trained on
 \begin{itemize}
     \item Input data: The source distribution samples $Q(x)$ described above.
     \item Output data: The corresponding scalar flux $\varphi_0(x)$ for each source distribution, given by equation \eqref{eq: Scalar flux}.
@@ -360,17 +369,34 @@ of the outputs of the Branch and Trunk nets then gives the predicted scalar flux
 
 \subsubsection{Physics-Informed DeepONet}
 
-For the Physics-Informed DeepONet, the architecture must differ from the benchmark model to incorporate the Physics-Informed loss. The benchmark
-model predicts the scalar flux directly, but the 1D NTE \eqref{eq: 1D NTE} is formulated in terms of the angular flux $\psi(x, \mu)$. To implement
-this loss funciton, the Physics-Informed DeepONet must therefore predict the angular flux $\psi(x,\mu)$ instead of the scalar flux $\varphi_0(x)$.
+For the Physics-Informed DeepONet, the architecture must differ from the benchmark model to incorporate the PDE loss. The benchmark
+model predicts the scalar flux directly, but the 1D NTE \eqref{eq: 1D NTE} is formulated in terms of the angular flux $\psi(x, \mu)$. The PDE loss term
+$\mathcal{L}_{\text{PDE}}$ measures how far \eqref{eq: 1D NTE} is from being satisfied by the model's predictions. It is calculated by drawing $M$ random
+samples of $\tilde{\psi}_{n,j}$ and calculating the residual
+\begin{align}
+R_j &= \frac{\mu_n}{h_j} \left( \tilde{\psi}_{n, j+\frac{1}{2}} - \tilde{\psi}_{n, j-\frac{1}{2}} \right) + \Sigma_{t,j} \, \tilde{\psi}_{n,j} \nonumber \\
+&- \frac{1}{2} \left( \Sigma_{s0,j} \, \tilde{\varphi}_{0,j} + 3 \mu_n \Sigma_{s1,j} \, \tilde{\varphi}_{1,j} + Q_j \right),
+\end{align}
+where $\tilde{\psi}_{n,j}$, $\tilde{\varphi}_{0,j}$ and $\tilde{\varphi}_{1,j}$ are the model's predictions for the angular flux, scalar flux and scalar current, respectively.
+The PDE loss term is then given by
+\begin{equation}
+\mathcal{L}_{\text{PDE}} = \frac{1}{M} \sum_{j=1}^M R_j^2.
+\end{equation}
+Likewise, the boundary condition loss term $\mathcal{L}_{\text{BC}}$ measures how far the model's predictions are from satisfying the boundary conditions.
+It is calculated by drawing $M$ random samples of $\tilde{\psi}_{n,j}$ at the boundaries $x = 0$, $x=10$, and evaluating how far the model is from predicting
+the correct boundary condition $\psi(x=0, \mu) = 0$ for $\mu > 0$ and $\psi(x=10, \mu) = 0$ for $\mu < 0$. The loss term is then given by
+\begin{equation}
+\mathcal{L}_{\text{BC}} = \frac{1}{M} \sum_{j=1}^M \tilde{\psi}_{n,j}^2.
+\end{equation}
 
+To implement this loss funciton, the Physics-Informed DeepONet must therefore predict the angular flux $\psi(x,\mu)$ instead of the scalar flux $\varphi_0(x)$.
 This forces a decision for training. The model can either:
-\begin{itemize}
+\begin{enumerate}
     \item Train on the same dataset as the benchmark model. The model must then predict an angular flux $\psi(x,\mu)$ and feed the angular flux into
     the GL quadrature \eqref{eq: GL scalar flux} to calculate the scalar flux $\varphi_0(x)$.
     \item Train on a separate dataset from the benchmark problem. This dataset will containt the angular flux $\psi(x,\mu)$ for each source
     function $Q(x)$. The two datasets will share the same input, but have different outputs.
-\end{itemize}
+\end{enumerate}
 
 The first option would give a true comparison to training a model on the exact same data as the benchmark problem. A potential issue with this
 is that this dataset will lack the dimensionality of the output predicted by the model. This might prevent the model from learning sufficiently
@@ -380,54 +406,87 @@ Physics-Informed DeepONet. We therefore have one Physics-Informed DeepONet train
     \item Input data: The source distribution samples $Q(x)$ described above.
     \item Output data: The corresponding scalar flux $\varphi_0(x)$ for each source distribution, given by equation \eqref{eq: Scalar flux}.
 \end{itemize}
+We will refer to this model as “PI DeepONet 1". It has an architecture with a branch net with layer dimensions
+(100, 250, 250, 250, 250, 100) and a trunk net with dimensions (1, 500, 500, 500, 500, 1600). Both are fully connected feedforward
+neural networks with ReLU activation functions.
+Note that the output of the trunk net is larger than the branch net. The output of the trunk net is reshaped into a (100, 16) matrix. The matrix
+product of the trunk and branch net then gives a vector of length 16, corresponding to the 16 angular bins for each spatial point $x$.
+
 The other Physics-Informed DeepONet is trained on
 \begin{itemize}
     \item Input data: The source distribution samples $Q(x)$ described above.
     \item Output data: The corresponding angular flux $\psi(x, \mu)$ for each source distribution.
 \end{itemize}
+We will refer to this model as “PI DeepONet 2". It shares the same architecture as PI DeepONet 1. Both have loss weights $\lambda_\text{data} = 0.7$,
+$\lambda_\text{PDE} = 0.25$ and $\lambda_\text{BC} = 0.05$.
 
 The parameters for the NTE were set to the first problem considered in \cite{sahadath2026characterization}, which corresponds to isotropic
 scattering. The cross sections were then given by
 $\Sigma_t = 1.0 \text{ cm}^{-1}$, $\Sigma_a = 0.5 \text{ cm}^{-1}$, $\Sigma_{s0} = 0.5 \text{ cm}^{-1}$ and $\Sigma_{s1} = 0 \text{ cm}^{-1}$.
 
 To test wether physics-informed loss can replace labelled training, the models were trained on datasets of three different sizes:
-\begin{itemize}
+\begin{enumerate}
     \item The original dataset of 500 source distributions $Q(x)$.
     \item A medium sized dataset of a subset of 100 source distributions $Q(x)$ from the original dataset.
     \item A small dataset of a subset of 10 source distributions $Q(x)$ from the original dataset.
-\end{itemize}
+\end{enumerate}
+
+\subsubsection{Large DeepONet}
+
+The architecture of the PI DeepONets were determined after a hyperparameter search to find the best performing model. Since the model that was chosen
+contains more parameters than the benchmark model, there is a possibility that the model performs better simply because it has more parameters. We
+therefore trained an additional ordinary DeepONet with corresponding architecture to the PI DeepONets; a branch net with layer dimensions
+(100, 250, 250, 250, 250, 100) and a trunk net with dimensions (1, 500, 500, 500, 500, 100). We will refer to this model as “Large DeepONet".
+
+\subsubsection{Training}
+
+All models were trained in accordance with the training procedure of \cite{sahadath2026characterization} in which the models were trained for 2000 epochs using
+the Adam optimizer. The paper did not report a learning schedule. We chose to use an exponential decay learning rate schedule, starting with a learning
+rate of 0.001 and a decay rate of 0.9. For the Physics-Informed DeepONets, the number of transition steps was 200 epochs. For the benchmark and Large
+DeepONet, the number of transition steps was 100 epochs.
 
 \subsection{Model Evaluation}
 
 We follow the model evaluation of \cite{sahadath2026characterization}. The model is tested on never-seen data. That includes datasets
 generated with the same GRF parameters as the model was trained on, and datasets generated with small or large shifts in the GRF parameters.
-The test cases are summarized in Table \ref{tab: Model evaluation}. For each of these testing cases, 200 source distributions were generated
-using the specified GRF parameter settings.
+The test cases are summarized in Table \ref{tab: Model evaluation}. For each of the NS, SS and LS cases, 200 source distributions were generated
+using the specified GRF parameter settings. For the rest of the cases, a single source distribution was generated for each.
 
-\begin{table}
+\begin{table}[t]
     \centering
+    \caption{Test datasets for model evaluation. GRF sources are defined by
+    length scale $l$, mean $m$ and variance $\sigma^2$. The combined sources use
+    $Q_1$: $l{=}0.08$, $m{=}2.5$, $\sigma^2{=}0.5$;
+    $Q_2$: $l{=}0.10$, $m{=}5.0$, $\sigma^2{=}1.0$;
+    $Q_3$: $l{=}0.20$, $m{=}10$, $\sigma^2{=}2.0$.
+    Sinusoidal sources are $Q(x) = 12.5 + \sin(2\pi f x)$.}
     \label{tab: Model evaluation}
-    \caption{Test datasets for model evaluation.}
-    \resizebox{\linewidth}{!}{
-    \begin{tabular}{ |c|c| }
+    \small
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{|c|l|l|}
         \hline
-        Type of source & Cases \\
+        ID & Source type & Parameters \\
         \hline
-        NS: No shift in GRF parameters & $l = 0.10$, Mean$ = 5.0$, $\sigma^2 = 1.0$ \\ 
+        NS          & No shift        & $l = 0.10$, $m = 5.0$, $\sigma^2 = 1.0$ \\
         \hline
-        & $l = 0.11$, Mean$ = 5.5$, $\sigma^2 = 1.1$ \\
-        SS: Small shift in GRF parameters & $l = 0.09$, Mean$ = 4.5$, $\sigma^2 = 0.9$ \\
-        & $l = 0.09$, Mean$ = 5.5$, $\sigma^2 = 1.1$ \\
+        SS$_1$      &                 & $l = 0.11$, $m = 5.5$, $\sigma^2 = 1.1$ \\
+        SS$_2$      & Small shift     & $l = 0.09$, $m = 4.5$, $\sigma^2 = 0.9$ \\
+        SS$_3$      &                 & $l = 0.09$, $m = 5.5$, $\sigma^2 = 1.1$ \\
         \hline
-        & $l = 0.08$, Mean$ = 2.5$, $\sigma^2 = 0.5$ \\
-        & $l = 0.20$, Mean$ = 10$, $\sigma^2 = 2.0$ \\
-        LS: Large shift in GRF parameters & $l = 0.30$, Mean$ = 50$, $\sigma^2 = 2.0$ \\
-        & $l = 0.50$, Mean$ = 50$, $\sigma^2 = 2.0$ \\
-        & $l = 0.80$, Mean$ = 50$, $\sigma^2 = 2.0$ \\
-        & $l = 1.00$, Mean$ = 50$, $\sigma^2 = 2.0$ \\
+        LS$_1$      &                 & $l = 0.08$, $m = 2.5$, $\sigma^2 = 0.5$ \\
+        LS$_2$      &                 & $l = 0.20$, $m = 10$,  $\sigma^2 = 2.0$ \\
+        LS$_3$      & Large shift     & $l = 0.30$, $m = 50$,  $\sigma^2 = 2.0$ \\
+        LS$_4$      &                 & $l = 0.50$, $m = 50$,  $\sigma^2 = 2.0$ \\
+        LS$_5$      &                 & $l = 0.80$, $m = 50$,  $\sigma^2 = 2.0$ \\
+        LS$_6$      &                 & $l = 1.00$, $m = 50$,  $\sigma^2 = 2.0$ \\
+        \hline
+        LC          & Linear comb.    & $a_1 Q_1 + a_2 Q_2 + a_3 Q_3$ \\
+        NLC         & Nonlinear comb. & $Q_1 Q_2$ \\
+        \hline
+        SIN$_{LF}$  & Sinusoidal      & $f = 0.2$ \\
+        SIN$_{HF}$  &                 & $f = 0.8$ \\
         \hline
     \end{tabular}
-    }
 \end{table}
 
 The performance of the model was assessed by calculating two evaluation metrics: The coefficient of determination $R^2$ and the average relative
@@ -435,29 +494,95 @@ error. The $R^2$ score measures the quality of fit of a regression model and is 
 \begin{equation}
     R^2 = 1 - \frac{\sum_{i=1}^{N} (T_{ri} - P_{ri})^2}{\sum_{i=1}^{N} (T_{ri} - \bar{T}_r)^2},
 \end{equation}
-where $T_{ri}$ and $P_{ri}$ represent the true value and predicted value of the scalar or angular flux \textcolor{red}{!!!}, respectively, and
-$\bar{T}_r$ is the mean of the true flux. The $R^2$ score ranges up to 1, where higher values indicate better predictive accuracy. However, a
+where $T_{ri}$ and $P_{ri}$ represent the true value and predicted value of the scalar flux $\tilde{\varphi}(x)$ and
+$\bar{T}_r$ is the mean of the true scalar flux $\varphi(x)$. The $R^2$ score ranges up to 1, where higher values indicate better predictive accuracy. However, a
 high $R^2$ score does not necessarily imply a causal connection or guarantee that overfitting is absent. It should therefore be reported with
 other error metrics. We therefore also computed the average relative error (ARE) by
 \begin{equation}
     \text{ARE} = \sum_{i=1}^{N} \frac{T_{ri} - P_{ri}}{T_{ri}}.
 \end{equation}
 
-\section{Results and Discussion}
+\section{Results}
 
-\begin{figure}
+The results of the model evaluation are shown in Figures \ref{fig: R2 large} to \ref{fig: ARE small}. The figures show the $R^2$ and ARE scores for
+the benchmark DeepONet, the Large DeepONet, and the two Physics-Informed DeepONets, trained on the three different datasets.
+
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=\linewidth]{figures/R2_large.pdf}
-    \caption{$R^2$ score.}
+    \includegraphics[width=\linewidth]{results/R2_large.pdf}
+    \caption{$R^2$ score of models trained on Dataset 1, the original dataset of 500 source distributions $Q(x)$.}
     \label{fig: R2 large}
-\end{figure}
+\end{figure*}
 
-\begin{figure}
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=\linewidth]{figures/ARE_large.pdf}
-    \caption{ARE score.}
+    \includegraphics[width=\linewidth]{results/ARE_large.pdf}
+    \caption{ARE score of models trained on Dataset 1, the original dataset of 500 source distributions $Q(x)$.}
     \label{fig: ARE large}
-\end{figure}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\linewidth]{results/R2_medium.pdf}
+    \caption{$R^2$ score of models trained on Dataset 2, the medium sized dataset of 100 source distributions $Q(x)$.}
+    \label{fig: R2 medium}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\linewidth]{results/ARE_medium.pdf}
+    \caption{ARE score of models trained on Dataset 2, the medium sized dataset of 100 source distributions $Q(x)$.}
+    \label{fig: ARE medium}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\linewidth]{results/R2_small.pdf}
+    \caption{$R^2$ score of models trained on Dataset 3, the small dataset of 10 source distributions $Q(x)$.}
+    \label{fig: R2 small}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\linewidth]{results/ARE_small.pdf}
+    \caption{ARE score of models trained on Dataset 3, the small dataset of 10 source distributions $Q(x)$.}
+    \label{fig: ARE small}
+\end{figure*}
+
+\section{Discussion}
+
+The true benchmark model is the DeepONet trained on the original dataset of 500 source distributions. Its performance is shown in
+Figures \ref{fig: R2 large} and \ref{fig: ARE large}. We see that it achieved an $R^2$ score of $0.999 \pm 0.005$ and ARE score of $(1.1 \pm 0.2)\%$ 
+on the non-shifted dataset. Although this must be considered a good performance, it does not quite live up to the performance reported by Sahadath et al.
+\cite{sahadath2026characterization}, who achieved an $R^2$ score of $0.9979 \pm 0.0009$ and ARE of $(0.50 \pm 0.09)\%$. The discrepancy is likely due to
+differences in the training procedure; the learning rate schedule was not reported in the paper and may have differed from the one we used. For the rest
+of the tests, the pattern of the benchmark's performance is similar enough to the results reported by Sahadath et al. to be considered a valid benchmark.
+
+For the other models trained on the original dataset, we see performances similar or better than the benchmark model. Interestingly, PI DeepONet 1 appears
+to perform better than PI DeepONet 2. Recall that the difference was that PI DeepONet 2 had its labelled training data in the form of angular flux
+$\psi(x, \mu)$, while PI DeepONet 1 had its labelled training data in the form of scalar flux $\varphi_0(x)$. In our discussion of the model architecture,
+we speculated that the lower dimensionality of the scalar flux might make it harder for the model to learn. However, these results suggest that the opposite
+is true, at least in the case of training on the original dataset. One might speculate that since the model's performance is tested in terms of only the
+scalar flux $\varphi_0(x)$, it is more important for the model to learn this quantity well than the angular flux $\psi(x, \mu)$.
+
+Another interesting observation is that the best performing model is the Large DeepONet. This model was included in our testing to factor out the possibility
+that the PI DeepONets would perform better than the benchmark model simply because they had more parameters. This appears to be exactly what happened,
+with the PDE loss contributing negatively to the models' performance when trained on the original dataset.
+
+For all models, we see that the small shifts in GRF parameters do not have a significant effect on the performance. Among the large shifts, the performance
+appears to be worst for LS1. This is likely because the source distributions in this case have the lowest mean value among the datasets, 2.5, which is
+half the value of the mean in the training dataset. This corresponds to a lower scalar flux, giving higher relative errors. Likewise, for the rest of the large
+shifts, were the mean of the source distributions are higher, the performance appears to be better, likely because of the higher mean scalar flux.
+For the single test cases, the performance is worst for the nonlinear combination of two source distributions.
+
+\section{Conclusion}
+
+\bibliography{bibliography}
+
+\end{document}
+    \caption{ARE score of models trained on Dataset 1, the original dataset of 500 source distributions $Q(x)$.}
+    \label{fig: ARE large}
+\end{figure*}
 
 \section{Conclusion}
 
