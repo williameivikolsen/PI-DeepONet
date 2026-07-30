@@ -559,7 +559,7 @@ differences in the training procedure; the learning rate schedule was not report
 of the tests, the pattern of the benchmark's performance is similar enough to the results reported by Sahadath et al. to be considered a valid benchmark.
 
 For the other models trained on the original dataset, we see performances similar or better than the benchmark model. Interestingly, PI DeepONet 1 appears
-to perform better than PI DeepONet 2. Recall that the difference was that PI DeepONet 2 had its labelled training data in the form of angular flux
+to perform better than PI DeepONet 2. Recall that their difference was that PI DeepONet 2 had its labelled training data in the form of angular flux
 $\psi(x, \mu)$, while PI DeepONet 1 had its labelled training data in the form of scalar flux $\varphi_0(x)$. In our discussion of the model architecture,
 we speculated that the lower dimensionality of the scalar flux might make it harder for the model to learn. However, these results suggest that the opposite
 is true, at least in the case of training on the original dataset. One might speculate that since the model's performance is tested in terms of only the
@@ -572,19 +572,25 @@ with the PDE loss contributing negatively to the models' performance when traine
 For all models, we see that the small shifts in GRF parameters do not have a significant effect on the performance. Among the large shifts, the performance
 appears to be worst for LS1. This is likely because the source distributions in this case have the lowest mean value among the datasets, 2.5, which is
 half the value of the mean in the training dataset. This corresponds to a lower scalar flux, giving higher relative errors. Likewise, for the rest of the large
-shifts, were the mean of the source distributions are higher, the performance appears to be better, likely because of the higher mean scalar flux.
+shifts, where the mean of the source distributions are higher, the performance appears to be better, likely because of the higher mean scalar flux.
 For the single test cases, the performance is worst for the nonlinear combination of two source distributions.
 
+For the models trained on the medium sized dataset, shown in Figures \ref{fig: R2 medium} and \ref{fig: ARE medium}, we see a change in which models
+perform well. Unsurpisingly, the general performance is worse than for the models trained on the original dataset. The benchmark model performs significantly
+worse, 
+
 \section{Conclusion}
 
-\bibliography{bibliography}
+\appendix
 
-\end{document}
-    \caption{ARE score of models trained on Dataset 1, the original dataset of 500 source distributions $Q(x)$.}
-    \label{fig: ARE large}
+\section*{Appendix}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\linewidth]{results/pideeponet_angular_scalar_data_relu_samples.pdf}
+    \caption{Samples of predictions made by PI DeepONet 1 trained on original dataset along with source distribution $Q(x)$ and true scalar flux $\varphi_0(x)$.}
+    \label{fig: PI DeepONet 1 samples}
 \end{figure*}
-
-\section{Conclusion}
 
 \bibliography{bibliography}
 

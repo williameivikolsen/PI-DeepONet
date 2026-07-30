@@ -194,6 +194,11 @@ INPUT ./results/ARE_small.pdf
 INPUT ./results/ARE_small.pdf
 INPUT ./results/ARE_small.pdf
 INPUT ./results/ARE_small.pdf
+INPUT ./results/pideeponet_angular_scalar_data_relu_samples.pdf
+INPUT ./results/pideeponet_angular_scalar_data_relu_samples.pdf
+INPUT ./results/pideeponet_angular_scalar_data_relu_samples.pdf
+INPUT ./results/pideeponet_angular_scalar_data_relu_samples.pdf
+INPUT ./results/pideeponet_angular_scalar_data_relu_samples.pdf
 INPUT ./report.bbl
 INPUT ./report.bbl
 INPUT report.bbl
