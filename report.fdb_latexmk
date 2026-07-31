@@ -1,15 +1,15 @@
 # Fdb version 4
-["bibtex report"] 1785504634.63632 "report.aux" "report.bbl" "report" 1785506330.18558 0
+["bibtex report"] 1785507569.91927 "report.aux" "report.bbl" "report" 1785507570.90935 0
   "./bibliography.bib" 1785504614.7975 10364 ee58b5cd66bda4868f29da0aef72d994 ""
-  "./reportNotes.bib" 1785506329.82359 103 48ad29797468f16e2853d8797278d7af ""
+  "./reportNotes.bib" 1785507570.59454 103 48ad29797468f16e2853d8797278d7af ""
   "/usr/local/texlive/2026/texmf-dist/bibtex/bst/revtex4-1/apsrev4-1.bst" 1602107945 71515 e333383ed72bf24aa6de7e8cabb55f84 ""
-  "report.aux" 1785506329.81054 8599 6ce774f5c100a8694e7dc3b9e4f404c0 "pdflatex"
+  "report.aux" 1785507570.57946 8599 6ce774f5c100a8694e7dc3b9e4f404c0 "pdflatex"
   (generated)
   "report.bbl"
   "report.blg"
   (rewritten before read)
-["pdflatex"] 1785506329.15674 "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" "report.pdf" "report" 1785506330.18637 0
-  "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" 1785506328.91055 47360 21068f6ad1b2f3f182d026ee738a4a71 ""
+["pdflatex"] 1785507570.01977 "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" "report.pdf" "report" 1785507570.91131 0
+  "/Users/william.olsen@ife.no/Documents/PhD/PI-DeepONet/report.tex" 1785507567.74769 47599 3037e175680a9262efedffde9362a6f2 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm" 1136768653 1536 e07581a4bb3136ece9eeb4c3ffab8233 ""
@@ -124,9 +124,9 @@
   "figures/DeepONet.png" 1779350042.22228 109118 2367561366846fd3d0754526f55ce1de ""
   "figures/PI DeepONet.png" 1779350037.23076 97547 d36850f73ad9a8c393b88d2528c5662e ""
   "figures/PINN.png" 1779350024.36891 56756 5808e0aec07d2636a21120de446a5dbc ""
-  "report.aux" 1785506329.81054 8599 6ce774f5c100a8694e7dc3b9e4f404c0 "pdflatex"
-  "report.bbl" 1785504634.71962 13348 69298e4f3d5e0051fb71a058e0c977e5 "bibtex report"
-  "report.tex" 1785506328.91055 47360 21068f6ad1b2f3f182d026ee738a4a71 ""
+  "report.aux" 1785507570.57946 8599 6ce774f5c100a8694e7dc3b9e4f404c0 "pdflatex"
+  "report.bbl" 1785507570.00118 13348 69298e4f3d5e0051fb71a058e0c977e5 "bibtex report"
+  "report.tex" 1785507567.74769 47599 3037e175680a9262efedffde9362a6f2 ""
   "results/ARE_large.pdf" 1785399831.78423 23998 a69df1cf89063ee56ec1583f2a720da1 ""
   "results/ARE_medium.pdf" 1785399889.85955 24397 58aa8023b983b221a722d62d18a02fda ""
   "results/ARE_small.pdf" 1785400012.76351 23874 a1aac0ebe56afa8661161aca93e838e5 ""
