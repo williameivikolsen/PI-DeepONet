@@ -141,17 +141,17 @@ INPUT ./figures/PINN.png
 INPUT ./figures/PINN.png
 INPUT ./figures/PINN.png
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm
+INPUT ./figures/DeepONet.png
+INPUT ./figures/DeepONet.png
+INPUT ./figures/DeepONet.png
+INPUT ./figures/DeepONet.png
+INPUT ./figures/DeepONet.png
+INPUT ./figures/PI DeepONet.png
+INPUT ./figures/PI DeepONet.png
+INPUT ./figures/PI DeepONet.png
+INPUT ./figures/PI DeepONet.png
+INPUT ./figures/PI DeepONet.png
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
-INPUT ./figures/DeepONet.png
-INPUT ./figures/DeepONet.png
-INPUT ./figures/DeepONet.png
-INPUT ./figures/DeepONet.png
-INPUT ./figures/DeepONet.png
-INPUT ./figures/PI DeepONet.png
-INPUT ./figures/PI DeepONet.png
-INPUT ./figures/PI DeepONet.png
-INPUT ./figures/PI DeepONet.png
-INPUT ./figures/PI DeepONet.png
 INPUT ./figures/1D Slab.png
 INPUT ./figures/1D Slab.png
 INPUT ./figures/1D Slab.png

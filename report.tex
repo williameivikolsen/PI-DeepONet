@@ -40,8 +40,11 @@
 \date{\today}
 
 \begin{abstract}
-An article usually includes an abstract, a concise summary of the work
-covered at length in the main body of the article. 
+We study the effect of physics-informed training for the performance of a DeepONet on the Neutron Transport problem of a 1D slab. The main research question
+is to which extent physics-informed training can replace labelled training. The performance is compared for a benchmark DeepONet, a larger DeepONet and two
+physics-informed DeepONets. To investigate the effect of physics-informed training, the four models are trained on three datasets of different sizes. We find
+that among the models trained on the largest dataset, the large DeepONet performed the best. As the size of the training datasets were decreased, the
+physics-informed models performed better. We conclude that physics-informed training does, to some extent, replace labelled training.
 \end{abstract}
 
 \maketitle
@@ -494,8 +497,8 @@ error. The $R^2$ score measures the quality of fit of a regression model and is 
 \begin{equation}
     R^2 = 1 - \frac{\sum_{i=1}^{N} (T_{ri} - P_{ri})^2}{\sum_{i=1}^{N} (T_{ri} - \bar{T}_r)^2},
 \end{equation}
-where $T_{ri}$ and $P_{ri}$ represent the true value and predicted value of the scalar flux $\tilde{\varphi}(x)$ and
-$\bar{T}_r$ is the mean of the true scalar flux $\varphi(x)$. The $R^2$ score ranges up to 1, where higher values indicate better predictive accuracy. However, a
+where $T_{ri}$ and $P_{ri}$ represent the true value and predicted value of the scalar flux $\tilde{\varphi}_0(x)$ and
+$\bar{T}_r$ is the mean of the true scalar flux $\varphi_0(x)$. The $R^2$ score ranges up to 1, where higher values indicate better predictive accuracy. However, a
 high $R^2$ score does not necessarily imply a causal connection or guarantee that overfitting is absent. It should therefore be reported with
 other error metrics. We therefore also computed the average relative error (ARE) by
 \begin{equation}
@@ -596,9 +599,28 @@ their higher $R^2$ scores indicate that they are still able to recover more of t
 
 \section{Conclusion}
 
-\appendix
+In this paper, we have investigated the effect of adding physics-informed training for the performance of a DeepONet on the Neutron Transport problem of
+a 1D slab geometry. We were especially interested in studying to which extent physics-informed training can compensate for a lack of training data.
+We compared the performance of four models. The DeepONet of Sahadath et al. \cite{sahadath2026characterization} served as a benchmark. We developed two
+variants of physics-informed DeepONets; one trained on the same scalar flux data as the benchmark, the other on the corresponding angular flux data. Since
+the two models had more parameters than the benchmark, we also trained a DeepONet of the same size to rule out performance improvement caused by the models'
+size. To assess the question of how well training data can be replaced by physics-informed training, we generated three training datasets of different sizes.
+The largest dataset matched the size of the original dataset used by Sahadath et al. of 500 source distributions $Q(x)$ and their corresponding scalar flux
+$\varphi_0(x)$ (angular flux for PI DeepONet 2). The two other datasets contained 100 and 10 input-output pairs, respectively.
 
-\section*{Appendix}
+For the original dataset, we found that the Large DeepONet performed the best. As we decreased the size of the training datasets, we saw the physics-informed
+models performing better; this was most clear for the medium sized dataset. For the medium and small dataset, the Large DeepONet settled to an almost constant
+prediction across all source distributions. There was some tendency for the physics-informed models to do the same when trained on the small dataset, although
+they still performed better than the Large DeepONet.
+
+Our results indicate that physics-informed training does in fact replace labelled training to some extent, as we would have hoped. For a large enough training
+dataset, however, we still see that the ordinary DeepONet performs better. It should be noted that the work in this paper is so far limited to the first
+problem presented by Sahadath et al., namely that of isotropic scattering. The authors also studied anisotropic scattering and pure scattering (zero absorption),
+in addition to training a model on a range of cross-section values to assess its ability to generalize across varying physical conditions. We plan on extending
+this work by considering these remaining problems. Further ahead, the methodology will be extended to consider the eigenvalue problem of a 2D or 3D reactor.
+Another possible direction would be to extend to time-dependent problems, opening up the possibility to consider transient scenarios.
+
+\appendix
 
 \begin{figure*}[t]
     \centering

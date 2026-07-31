@@ -12,8 +12,6 @@
 \@writefile{toc}{\contentsline {title}{Physics Informed Deep Operator Networks for Neutron Transport}{1}{}}
 \@writefile{toc}{\contentsline {abstract}{Abstract}{1}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {II}Theory}{1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {A}The Neutron Transport Equation}{1}{}}
 \citation{deeponet_medium_2023}
 \citation{raissi2019physics}
 \citation{prantikos2022physics}
@@ -21,23 +19,25 @@
 \citation{xie2024boundary}
 \citation{sahadath2026characterization}
 \citation{sahadath2026characterization}
-\@writefile{toc}{\contentsline {subsection}{\numberline {B}Machine Learning Methods}{2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {1}Physics-Informed Neural Networks}{2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Theory}{2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A}The Neutron Transport Equation}{2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Illustration of a PINN. Adapted from \cite  {deeponet_medium_2023}.}}{2}{}}
 \newlabel{fig: PINN}{{1}{2}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {B}Machine Learning Methods}{2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1}Physics-Informed Neural Networks}{2}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2}Deep Operator Networks}{2}{}}
 \citation{deeponet_medium_2023}
 \citation{deeponet_medium_2023}
 \citation{deeponet_medium_2023}
 \citation{deeponet_medium_2023}
-\citation{wang2021learning}
-\citation{sahadath2026characterization}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Illustration of a Deep Operator Network. Adapted from \cite  {deeponet_medium_2023}.}}{3}{}}
 \newlabel{fig: DeepONet}{{2}{3}{}{}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Illustration of a Physics-Informed DeepONet. Adapted from \cite  {deeponet_medium_2023}.}}{3}{}}
 \newlabel{fig: PI DeepONet}{{3}{3}{}{}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3}Physics-Informed DeepONets}{3}{}}
 \newlabel{eq: Loss Function}{{4}{3}{}{}{}}
+\citation{wang2021learning}
+\citation{sahadath2026characterization}
 \citation{sahadath2026characterization}
 \citation{sahadath2026characterization}
 \citation{sahadath2026characterization}
@@ -50,37 +50,40 @@
 \newlabel{eq: Scalar flux}{{6}{4}{}{}{}}
 \newlabel{eq: Scalar current}{{7}{4}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {B}Data Generation}{4}{}}
-\newlabel{eq: Discretized NTE}{{11}{4}{}{}{}}
 \citation{sahadath2026characterization}
 \citation{sahadath2026characterization}
+\newlabel{eq: Discretized NTE}{{11}{5}{}{}{}}
 \newlabel{eq: GL scalar flux}{{12}{5}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {C}Model Architecture and Training}{5}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {1}Benchmark Model}{5}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2}Physics-Informed DeepONet}{5}{}}
 \citation{sahadath2026characterization}
 \citation{sahadath2026characterization}
-\citation{sahadath2026characterization}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2}Physics-Informed DeepONet}{6}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3}Large DeepONet}{6}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4}Training}{6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {D}Model Evaluation}{6}{}}
+\citation{sahadath2026characterization}
 \citation{sahadath2026characterization}
 \@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Test datasets for model evaluation. GRF sources are defined by length scale $l$, mean $m$ and variance $\sigma ^2$. The combined sources use $Q_1$: $l{=}0.08$, $m{=}2.5$, $\sigma ^2{=}0.5$; $Q_2$: $l{=}0.10$, $m{=}5.0$, $\sigma ^2{=}1.0$; $Q_3$: $l{=}0.20$, $m{=}10$, $\sigma ^2{=}2.0$. Sinusoidal sources are $Q(x) = 12.5 + \sin (2\pi f x)$.}}{7}{}}
 \newlabel{tab: Model evaluation}{{I}{7}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4}Training}{7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D}Model Evaluation}{7}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {V}Results}{7}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {VI}Discussion}{7}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces $R^2$ score of models trained on Dataset 1, the original dataset of 500 source distributions $Q(x)$.}}{8}{}}
 \newlabel{fig: R2 large}{{5}{8}{}{}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces ARE score of models trained on Dataset 1, the original dataset of 500 source distributions $Q(x)$.}}{8}{}}
 \newlabel{fig: ARE large}{{6}{8}{}{}{}}
-\bibdata{reportNotes,bibliography}
-\bibcite{IAEA_2024_SMR}{{1}{2024}{{{International Atomic Energy Agency}}}{{}}}
 \@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces $R^2$ score of models trained on Dataset 2, the medium sized dataset of 100 source distributions $Q(x)$.}}{9}{}}
 \newlabel{fig: R2 medium}{{7}{9}{}{}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces ARE score of models trained on Dataset 2, the medium sized dataset of 100 source distributions $Q(x)$.}}{9}{}}
 \newlabel{fig: ARE medium}{{8}{9}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusion}{9}{}}
-\@writefile{toc}{\appendix }
-\@writefile{toc}{\contentsline {section}{\numberline {}Appendix}{9}{}}
+\citation{sahadath2026characterization}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces $R^2$ score of models trained on Dataset 3, the small dataset of 10 source distributions $Q(x)$.}}{10}{}}
+\newlabel{fig: R2 small}{{9}{10}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces ARE score of models trained on Dataset 3, the small dataset of 10 source distributions $Q(x)$.}}{10}{}}
+\newlabel{fig: ARE small}{{10}{10}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusion}{10}{}}
+\bibdata{reportNotes,bibliography}
+\bibcite{IAEA_2024_SMR}{{1}{2024}{{{International Atomic Energy Agency}}}{{}}}
 \bibcite{black2023prospects}{{2}{2023}{{Black\ \emph  {et~al.}}}{{Black, Shropshire, Ara{\'u}jo,\ and\ van Heek}}}
 \bibcite{nuproship}{{3}{2024}{{Emblemsv{\r a}g\ \emph  {et~al.}}}{{Emblemsv{\r a}g, Ordonez, Tamm, Ortigosa, Colilles, P{\'e}rez, Thoresen, Ovrum, Jordahl, Laanke \emph  {et~al.}}}}
 \bibcite{MAGNET}{{4}{2023}{{Wilsdon\ \emph  {et~al.}}}{{Wilsdon, Hansel, Kunz,\ and\ Browning}}}
@@ -88,11 +91,6 @@
 \bibcite{kochunas2021digital}{{6}{2021}{{Kochunas\ and\ Huan}}{{}}}
 \bibcite{SHEN2022108861}{{7}{2022}{{Shen\ \emph  {et~al.}}}{{Shen, Guo, Li, Huang, Zheng, Pan,\ and\ Wang}}}
 \bibcite{ZHOU2024110759}{{8}{2024}{{Zhou\ \emph  {et~al.}}}{{Zhou, Yang, Wu, Fang, Liang, Lai, Guo, Zhu,\ and\ Yang}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces $R^2$ score of models trained on Dataset 3, the small dataset of 10 source distributions $Q(x)$.}}{10}{}}
-\newlabel{fig: R2 small}{{9}{10}{}{}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces ARE score of models trained on Dataset 3, the small dataset of 10 source distributions $Q(x)$.}}{10}{}}
-\newlabel{fig: ARE small}{{10}{10}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {}References}{10}{}}
 \bibcite{sahadath2026characterization}{{9}{2026}{{Sahadath\ \emph  {et~al.}}}{{Sahadath, Cheng, Pan,\ and\ Ji}}}
 \bibcite{wang2021learning}{{10}{2021}{{Wang\ \emph  {et~al.}}}{{Wang, Wang,\ and\ Perdikaris}}}
 \bibcite{deeponet_medium_2023}{{11}{2023}{{Mousavi}}{{}}}
@@ -103,12 +101,14 @@
 \bibstyle{apsrev4-1}
 \citation{REVTEX41Control}
 \citation{apsrev41Control}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Samples of predictions made by PI DeepONet 1 trained on Dataset 1 along with source distribution $Q(x)$ and true scalar flux $\varphi _0(x)$.}}{11}{}}
-\newlabel{fig: PI DeepONet 1 samples}{{11}{11}{}{}{}}
+\@writefile{toc}{\appendix }
+\@writefile{toc}{\contentsline {section}{\numberline {}References}{11}{}}
 \newlabel{LastBibItem}{{15}{11}{}{}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Comparison of sample predictions made by PI DeepONet 2 and Large DeepONet trained on Dataset 2.}}{12}{}}
-\newlabel{fig: Medium comparison}{{12}{12}{}{}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Comparison of NS sample predictions made by all models on trained on Dataset 3.}}{13}{}}
-\newlabel{fig: Small comparison}{{13}{13}{}{}{}}
-\newlabel{LastPage}{{}{13}{}{}{}}
-\gdef \@abspage@last{13}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Samples of predictions made by PI DeepONet 1 trained on Dataset 1 along with source distribution $Q(x)$ and true scalar flux $\varphi _0(x)$.}}{12}{}}
+\newlabel{fig: PI DeepONet 1 samples}{{11}{12}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Comparison of sample predictions made by PI DeepONet 2 and Large DeepONet trained on Dataset 2.}}{13}{}}
+\newlabel{fig: Medium comparison}{{12}{13}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Comparison of NS sample predictions made by all models on trained on Dataset 3.}}{14}{}}
+\newlabel{fig: Small comparison}{{13}{14}{}{}{}}
+\newlabel{LastPage}{{}{14}{}{}{}}
+\gdef \@abspage@last{14}
