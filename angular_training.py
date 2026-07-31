@@ -90,24 +90,6 @@ print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
 # ------------------------------------------------------------------------
 # Save-time consistency guard.
-#
-# train() restores the best-validation-ARE iterate into model.params before
-# returning. Before persisting, re-evaluate those restored params two ways
-# and require both to agree with the recorded best_val_ARE:
-#
-#   1. val_ARE(model.params, val_batch)  — the training-time metric. Should
-#      reproduce best_val_ARE exactly (same params, same function). A
-#      mismatch here means best-params restoration itself failed.
-#
-#   2. predict_phi0 on the RAW validation set, scored as phi_0 ARE — the
-#      evaluation path that evaluate_all.py / plot_sample_predictions use.
-#      This is the path that silently disagreed on an older checkpoint
-#      (recorded 2.5% but evaluated 264%). If the model that gets saved does
-#      not reproduce its own headline number under the evaluation path, the
-#      checkpoint's metadata is lying and we must NOT write it.
-#
-# Any divergence aborts the save loudly rather than producing a checkpoint
-# whose best_val_ARE disagrees with how it will actually be evaluated.
 # ------------------------------------------------------------------------
 GUARD_TOL = 1.0  # percentage points
 

@@ -21,18 +21,6 @@ w_all  = w_GL       # shape (N_ANGLES,)
 def squared_exp_kernel(x: np.ndarray, length_scale: float, variance: float) -> np.ndarray:
     """
     Build the covariance matrix using the squared exponential kernel.
-
-    C(xi, xj) = sigma^2 * exp( -(xi - xj)^2 / (2 * l^2) )
-
-    Parameters
-    ----------
-    x            : 1-D array of spatial points, shape (M,)
-    length_scale : l  — controls spatial smoothness
-    variance     : sigma^2 — controls amplitude fluctuations
-
-    Returns
-    -------
-    C : covariance matrix, shape (M, M)
     """
     diff = x[:, None] - x[None, :]          # (M, M) pairwise differences
     C = variance * np.exp(-diff**2 / (2.0 * length_scale**2))
@@ -46,23 +34,6 @@ def sample_grf(x: np.ndarray,
                rng: np.random.Generator) -> np.ndarray:
     """
     Draw n_samples realisations from a GRF defined on spatial points x.
-
-    Uses the Cholesky decomposition  C = L L^T, then
-    Q = M + L @ Z,  Z ~ N(0, I).
-
-    Parameters
-    ----------
-    x            : spatial points where the source is evaluated, shape (N,)
-    mean         : constant mean value of the GRF
-    length_scale : l parameter of the squared exponential kernel
-    variance     : sigma^2 parameter
-    n_samples    : number of independent realisations to draw
-    rng          : NumPy random Generator (for reproducibility)
-
-    Returns
-    -------
-    Q_samples : array of shape (n_samples, M), each row is one source Q(x)
-                NOTE: negative values are clipped to 0 (physical requirement)
     """
     N = len(x)
     C = squared_exp_kernel(x, length_scale, variance)
@@ -95,35 +66,6 @@ def solve_sn_1d(Q_j: np.ndarray,
                 tol: float = 1e-10) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Solve the steady-state 1D NTE for a given source distribution Q(x).
-
-    Equation (1) discretised via:
-      - Cell-averaged finite difference (Eq. 4-5)
-      - Discrete ordinates S_N with Gauss-Legendre quadrature (Eq. 6)
-      - Diamond difference relation  psi_{n,j} = (psi_{n,j+1/2} + psi_{n,j-1/2})/2  (Eq. 9)
-
-    Boundary conditions (vacuum):
-      psi(0, mu) = 0   for mu > 0  (left boundary, incoming from left)
-      psi(X, mu) = 0   for mu < 0  (right boundary, incoming from right)
-
-    Source iteration convergence criterion applied to scalar flux phi_0.
-
-    Parameters
-    ----------
-    Q_j      : cell-average source values, shape (J,)
-    Sigma_t  : total macroscopic cross section (cm^-1)
-    Sigma_s0 : zeroth Legendre moment of scattering XS (cm^-1)
-    Sigma_s1 : first Legendre moment of scattering XS (cm^-1), 0 = isotropic
-    mu       : quadrature cosines, shape (N,)
-    w        : quadrature weights,  shape (N,)
-    h        : uniform cell width (cm)
-    max_iter : maximum source-iteration sweeps
-    tol      : relative convergence tolerance on phi_0
-
-    Returns
-    -------
-    phi_0      : (J,)            cell-average scalar flux   [Eq. 11]
-    phi_1      : (J,)            cell-average current       [Eq. 12]
-    psi_centre : (N_angles, J)   cell-average angular flux  [Eq. 13]
     """
     J = len(Q_j)
     N = len(mu)
@@ -204,13 +146,6 @@ def generate_dataset(Sigma_t: float,
                      seed: int = 42) -> dict:
     """
     Generate a complete (source, scalar flux, angular flux) training dataset.
-
-      'Q'        : source distributions, shape (N_total, J)
-      'phi_0'    : scalar flux,          shape (N_total, J)
-      'psi'      : angular flux,         shape (N_total, N_angles, J)
-      'mu_GL'    : quadrature cosines,   shape (N_angles,)
-      'w_GL'     : quadrature weights,   shape (N_angles,)
-      'x'        : cell centres,         shape (J,)
     """
     rng = np.random.default_rng(seed)
 
@@ -277,9 +212,9 @@ if __name__ == "__main__":
     sizes = {"large": 500, "medium": 100, "small": 10}
 
     # ---- Common GRF training parameters (Section II.D) ----
-    GRF_MEAN     = 5.0
-    GRF_L        = 0.1
-    GRF_VARIANCE = 1.0
+    grf_mean     = 5.0
+    grf_l        = 0.1
+    grf_variance = 1.0
 
     for size, n_samples in sizes.items():
         print(f"\n=== size: {size}  (n={n_samples}) ===")
@@ -294,9 +229,9 @@ if __name__ == "__main__":
             Sigma_s0        = 0.5,
             Sigma_s1        = 0.0,
             n_samples       = n_samples,
-            grf_mean        = GRF_MEAN,
-            grf_length_scale= GRF_L,
-            grf_variance    = GRF_VARIANCE,
+            grf_mean        = grf_mean,
+            grf_length_scale= grf_l,
+            grf_variance    = grf_variance,
             seed            = 42
         )
         np.savez("datasets/" + size + "/M_Iso_train.npz", **ds_iso)

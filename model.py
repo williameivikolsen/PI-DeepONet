@@ -16,8 +16,6 @@ ACTIVATIONS = {
     "softplus": softplus,
     "sigmoid": sigmoid,
     "elu": elu,
-    "swish": swish,
-    "silu": swish,   # alias
 }
 _ACT_TO_NAME = {f: n for n, f in ACTIVATIONS.items()}
 
@@ -106,28 +104,6 @@ def build_val_batch(ds, output_scale: float):
 def build_data_arrays(ds, normalize=True):
     """
     Flat arrays for the supervised phi_0 loss.
-
-    inputs = (Q_flat, x_flat)
-        Q_flat : (N*J, J)    branch inputs, one row per (sample, x-point)
-        x_flat : (N*J,)      scalar spatial coord
-    outputs = phi_flat       : (N*J,)  scalar flux targets (normalized by
-                                       training-set mean if normalize=True)
-
-    When normalize=True, ALL fluxes and the source Q are rescaled by
-    phi_scale = mean(phi_0). This is exact: the steady-state transport
-    equation is linear, so substituting psi = phi_scale * psi_tilde
-    (and same for phi_0, phi_1) leaves the equation identical except Q
-    is replaced by Q/phi_scale. The network therefore solves the same
-    physical problem in dimensionless units, with all fields O(1).
-
-    Returns
-    -------
-    inputs    : tuple (Q_flat, x_flat) — Q in RAW units; the model
-                divides by phi_scale internally in residual_net.
-    outputs   : phi_flat (normalized).
-    phi_scale : float — mean of raw phi_0. Pass as output_scale to the
-                model so loss_data, residual_net, and predict_s all
-                stay consistent.
     """
     Q     = np.asarray(ds['Q'])            # (N, J)
     phi_0 = np.asarray(ds['phi_0'])        # (N, J)
@@ -140,7 +116,6 @@ def build_data_arrays(ds, normalize=True):
     if normalize:
         phi_scale = float(np.mean(phi_flat))
         phi_flat  = phi_flat / phi_scale
-        # Q stays in raw units — residual_net divides by phi_scale internally.
     else:
         phi_scale = 1.0
 
@@ -184,12 +159,6 @@ def build_bcs_arrays(ds, X, n_per_sample=50,
     x_bc       = x_bc[perm]
     mu_bc      = mu_bc[perm]
 
-    # Memory note: we do NOT materialize Q[sample_idx] (which would be
-    # (total, J) and explodes as N*n_per_sample*J — 100 MB+ at the large
-    # dataset). Instead we return the integer sample index and the unique
-    # source table Q (N, J); DataGenerator gathers the per-batch branch
-    # rows on the fly. The returned inputs[0] is the INDEX, and the table
-    # is the third return value, to be passed to DataGenerator(branch_table=...).
     y = np.stack([x_bc, mu_bc], axis=-1)   # (total, 2)
     s = np.zeros((total,))
     return (sample_idx, y), s, Q
@@ -201,13 +170,6 @@ def build_res_arrays(ds, X, n_per_sample=100,
     Interior collocation points for the PDE residual loss: x continuous in
     (0, X), mu drawn from the Gauss-Legendre nodes. Target is zero because
     residual_net already absorbs Q/2 via jnp.interp.
-
-    mu is restricted to the GL nodes (not continuous on (-1, 1)) for the
-    same reason as build_bcs_arrays: the vector-output angular model only
-    defines psi on the nodes. This costs no physics fidelity — the transport
-    residual's only derivative is in x, and its scattering source is a node
-    quadrature sum, so the residual is fully determined by the node angles.
-    x stays continuous because the residual DOES differentiate in x.
     """
     Q    = np.asarray(ds['Q'])
     N, J = Q.shape
@@ -221,8 +183,7 @@ def build_res_arrays(ds, X, n_per_sample=100,
     mu_r = random.choice(k2, mu_nodes, (total,))
 
     sample_idx = np.repeat(np.arange(N), n_per_sample)
-    # See build_bcs_arrays: return the index + unique Q table rather than
-    # materializing Q[sample_idx], so memory stays O(N*J) not O(total*J).
+
     y = np.stack([x_r, mu_r], axis=-1)
     s = np.zeros((total,))
     return (sample_idx, y), s, Q
@@ -272,16 +233,6 @@ class PI_DeepONet:
         self.x_sensors = np.asarray(x_sensors)   # shape (J,)
         self.X         = float(X)                # slab length
 
-        # Flux normalization constant: phi_scale = mean(phi_0) on training set.
-        # The network learns the normalized fields psi_tilde = psi/phi_scale,
-        # phi_0_tilde = phi_0/phi_scale, phi_1_tilde = phi_1/phi_scale.
-        # The transport equation in these variables is identical to the
-        # original except Q is replaced by Q/phi_scale (linearity).
-        # - loss_data: targets are pre-normalized in build_data_arrays.
-        # - loss_bcs:  zero targets, zero predictions; unaffected.
-        # - residual_net: divides interpolated Q by output_scale.
-        # - predict_s:  multiplies network output by output_scale to
-        #               return raw psi.
         self.output_scale = float(output_scale)
 
         # Reference source amplitude: mean(Q) on the training set.
@@ -292,16 +243,12 @@ class PI_DeepONet:
         self.lambda_res  = float(lambda_res)
         self.lambda_bcs  = float(lambda_bcs)
 
-        # 1. Define schedule
         self.lr_schedule = optax.exponential_decay(
             init_value=lr_init,
             transition_steps=lr_transition_steps,
             decay_rate=lr_decay_rate,
         )
-        # 2. Define optimizer
         self.optimizer = optax.adam(learning_rate=self.lr_schedule)
-        
-        # 3. Initialize optimizer state
         self.opt_state = self.optimizer.init(self.params)
 
         # Used to restore the trained model parameters
@@ -315,7 +262,7 @@ class PI_DeepONet:
         self.loss_bcs_log   = []
         self.loss_res_log   = []
 
-    # Define DeepONet architecture
+    # DeepONet architecture
     def operator_net(self, params, Q, x, mu):
         branch_params, trunk_params = params
         y = np.stack([x, mu])
@@ -324,17 +271,9 @@ class PI_DeepONet:
         outputs = np.sum(B * T)
         return outputs
 
-    # Define PDE residual at a single evaluation point (x, mu)
     def residual_net(self, params, Q, x, mu):
         """
         1D transport residual at a single evaluation point.
-
-            R(x, mu) = mu * dpsi/dx + Sigma_t * psi
-                       - 0.5 * (Sigma_s0 * phi_0 + 3 * mu * Sigma_s1 * phi_1)
-                       - Q(x) / 2
-
-        Q is the branch vector of length J evaluated on self.x_sensors;
-        Q(x) at x is obtained via piecewise-linear interpolation.
         """
         # Angular flux at (x, mu_k) for every GL quadrature node.
         psi_vec = vmap(
@@ -350,8 +289,6 @@ class PI_DeepONet:
         psi_x     = grad(self.operator_net, argnums=2)(params, Q, x, mu)
 
         # Q(x) via linear interpolation on the sensor grid.
-        # Divide by output_scale: in the normalized PDE that the network
-        # learns, the source term is Q/phi_scale (linearity of transport).
         Q_x = np.interp(x, self.x_sensors, Q) / self.output_scale
 
         res = (
@@ -380,10 +317,6 @@ class PI_DeepONet:
 
     # Supervised data loss on the scalar flux phi_0.
     def loss_data(self, params, batch):
-        """
-        phi_0_pred at (Q_i, x_j) is computed by Gauss-Legendre quadrature
-        over the scalar operator_net.
-        """
         inputs, outputs = batch
         Q, x = inputs
 
@@ -396,7 +329,7 @@ class PI_DeepONet:
         phi_0_pred = vmap(phi0_at)(Q, x)
         return np.mean((outputs.flatten() - phi_0_pred) ** 2)
 
-    # Define total loss
+    # Total loss
     def loss(self, params, data_batch, bcs_batch, res_batch):
         l_data = self.loss_data(params, data_batch)
         l_bcs  = self.loss_bcs(params, bcs_batch)
@@ -407,7 +340,7 @@ class PI_DeepONet:
             + self.lambda_res * l_res
         )
 
-    # Define a compiled update step
+    # Update step
     @partial(jit, static_argnums=(0,))
     def step(self, i, params, opt_state, data_batch, bcs_batch, res_batch):
         grads = grad(self.loss)(params, data_batch, bcs_batch, res_batch)
@@ -488,8 +421,7 @@ class PI_DeepONet:
     @partial(jit, static_argnums=(0,))
     def val_ARE(self, params, val_batch):
         """
-        Validation average relative error (%). Used by optimization.py as
-        the Optuna objective.
+        Validation average relative error (%). Used by optimization.py as the Optuna objective.
         """
         (Q, x), phi_norm = val_batch
 
@@ -505,22 +437,18 @@ class PI_DeepONet:
     # Evaluates predictions at test points
     @partial(jit, static_argnums=(0,))
     def predict_s(self, params, Q_star, Y_star):
-        # Network outputs psi_tilde = psi/output_scale; multiply back to
-        # return raw psi in original units.
+        # Network outputs psi_tilde = psi/output_scale; multiply back to eturn raw psi in original units
         psi_fn = vmap(self.operator_net, (None, 0, 0, 0))
         if self.Q_ref is None:
             psi_norm = psi_fn(params, Q_star, Y_star[:, 0], Y_star[:, 1])
             return self.output_scale * psi_norm
-        # Homogeneity correction: evaluate at training
-        # amplitude, scale back by the per-sample amplitude ratio.
+        # Homogeneity correction: evaluate at training amplitude, scale back by a
         a = np.mean(Q_star, axis=1) / self.Q_ref
         psi_norm = psi_fn(params, Q_star / a[:, None], Y_star[:, 0], Y_star[:, 1])
         return self.output_scale * a * psi_norm
 
     @partial(jit, static_argnums=(0,))
     def predict_res(self, params, Q_star, Y_star):
-        # residual_net returns the residual of the normalized PDE.
-        # The raw-PDE residual is output_scale times that (linearity).
         r_pred = vmap(self.residual_net, (None, 0, 0, 0))(params, Q_star, Y_star[:, 0], Y_star[:, 1])
         return self.output_scale * r_pred
 
@@ -535,26 +463,14 @@ class PI_DeepONet:
         phi0_all = vmap(phi0_for_one_Q, in_axes=(0, None))
         if self.Q_ref is None:
             return self.output_scale * phi0_all(Q_batch, x_points)
-        # Homogeneity correction: evaluate at training
-        # amplitude, scale back by the per-sample amplitude ratio.
+        # Homogeneity correction: evaluate at training amplitude, scale back by a
         a = np.mean(Q_batch, axis=1, keepdims=True) / self.Q_ref   # (N, 1)
         return self.output_scale * a * phi0_all(Q_batch / a, x_points)
 
 
 def build_psi_data_arrays(ds, normalize=True):
     """
-    Flatten an angular-flux dataset into per-(sample, x) supervision with a
-    full angular vector target.
-
-    inputs = (Q_flat, x_flat)
-        Q_flat : (N*J, J)   branch input, one row per (sample, x-point)
-        x_flat : (N*J,)     scalar spatial coordinate
-    outputs = psi_flat : (N*J, A)   angular-flux targets, psi / phi_scale
-    where A = N_angles, J = #cells, N = #sources.
-
-    Returns
-    -------
-    inputs, outputs, phi_scale
+    Flatten an angular-flux dataset into per-sample supervision with a full angular flux target
     """
     Q     = np.asarray(ds['Q'])        # (N, J)
     psi   = np.asarray(ds['psi'])      # (N, A, J)
@@ -568,8 +484,7 @@ def build_psi_data_arrays(ds, normalize=True):
     else:
         phi_scale = 1.0
 
-    # psi is (N, A, J); we want one A-vector per (sample, x), so reorder to
-    # (N, J, A) and flatten the (N, J) axes -> (N*J, A).
+    # psi is (N, A, J); we want one A-vector per (sample, x), so reorder to (N, J, A) and flatten the (N, J) axes -> (N*J, A).
     psi_xa   = np.transpose(psi, (0, 2, 1))            # (N, J, A)
     psi_flat = (psi_xa.reshape(N * J, A) / phi_scale)  # (N*J, A)
 
@@ -582,13 +497,6 @@ def build_psi_data_arrays(ds, normalize=True):
 def build_psi_val_batch(ds, output_scale: float):
     """
     Validation batch for the angular regime's best-params tracking.
-
-    val_ARE in PI_DeepONet measures phi_0 ARE (angle-integrated), which is
-    the quantity we ultimately care about and keeps the early-stopping
-    criterion identical across all regimes. So the val batch is built in
-    the phi_0 form expected by PI_DeepONet.val_ARE: ((Q_flat, x_flat),
-    phi_norm). This is identical to build_val_batch; kept as a separate
-    name so the angular training script reads self-documentingly.
     """
     return build_val_batch(ds, output_scale=output_scale)
 
@@ -610,13 +518,7 @@ class PI_DeepONet_Angular(PI_DeepONet):
 
     def operator_net(self, params, Q, x, mu):
         """
-        Scalar psi_tilde(x, mu) for a single node angle mu, by selecting the
-        matching channel from angular_net.
-
-        mu is expected to be one of the GL nodes (the data, BC and residual
-        builders all sample on the nodes). Selection uses a one-hot dot so
-        the result stays differentiable in x (grad argnums=2 in residual_net
-        flows through angular_net; the channel mask does not depend on x).
+        Scalar psi_tilde(x, mu) for a single node angle mu, by selecting the matching channel from angular_net.
         """
         psi_vec = self.angular_net(params, Q, x)               # (A,)
         onehot  = (self.mu_GL == mu).astype(psi_vec.dtype)     # (A,)
@@ -634,10 +536,6 @@ class PI_DeepONet_Angular(PI_DeepONet):
     def loss_data(self, params, batch):
         """
         Vector data loss: MSE over the full angular vector at each (Q, x).
-
-            batch = ((Q, x), psi_target)
-            Q : (B, J)    x : (B,)    psi_target : (B, A)
-            prediction = angular_net(params, Q, x)   -> (B, A)
         """
         inputs, outputs = batch
         Q, x = inputs

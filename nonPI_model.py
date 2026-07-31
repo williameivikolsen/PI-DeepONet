@@ -64,20 +64,6 @@ class DataGenerator(data.Dataset):
 def build_data_arrays(ds, normalize=True):
     """
     Flat arrays for the supervised phi_0 loss.
-
-    inputs = (Q_flat, x_flat)
-        Q_flat : (N*J, J)    branch inputs, one row per (sample, x-point)
-        x_flat : (N*J,)      scalar spatial coord
-    outputs = phi_flat       : (N*J,)  scalar flux targets (normalized by
-                                       training-set mean if normalize=True)
-
-    Returns
-    -------
-    inputs    : tuple (Q_flat, x_flat)
-    outputs   : phi_flat (possibly normalized)
-    phi_scale : float — the mean of raw phi_0 used for normalization
-                (==1.0 if normalize=False). Pass this to DeepONet so
-                predict_s returns un-normalized predictions.
     """
     Q     = np.asarray(ds['Q'])            # (N, J)
     phi_0 = np.asarray(ds['phi_0'])        # (N, J)
@@ -143,16 +129,13 @@ class DeepONet:
         # Reference source amplitude: mean(Q) on the training set.
         self.Q_ref = None if Q_ref is None else float(Q_ref)
 
-        # 1. Define schedule
         self.lr_schedule = optax.exponential_decay(
             init_value=lr_init,
             transition_steps=lr_transition_steps,
             decay_rate=lr_decay_rate,
         )
-        # 2. Define optimizer
         self.optimizer = optax.adam(learning_rate=self.lr_schedule)
         
-        # 3. Initialize optimizer state
         self.opt_state = self.optimizer.init(self.params)
 
         # Used to restore the trained model parameters
@@ -163,7 +146,7 @@ class DeepONet:
         # Loggers
         self.loss_log       = []
 
-    # Define DeepONet architecture
+    # DeepONet architecture
     def operator_net(self, params, Q, x):
         branch_params, trunk_params = params
         y = np.atleast_1d(x)          # scalar → shape (1,)
@@ -178,7 +161,7 @@ class DeepONet:
         phi_0_pred = vmap(self.operator_net, (None, 0, 0))(params, Q, x)
         return np.mean((outputs.flatten() - phi_0_pred) ** 2)
 
-    # Define a compiled update step
+    # Update step
     @partial(jit, static_argnums=(0,))
     def step(self, i, params, opt_state, data_batch):
         grads = grad(self.loss)(params, data_batch)
@@ -240,7 +223,6 @@ class DeepONet:
         phi0_all = vmap(f_for_one_Q, in_axes=(0, None))
         if self.Q_ref is None:
             return self.output_scale * phi0_all(Q_batch, x_points)
-        # Homogeneity correction: evaluate at training
-        # amplitude, scale back by the per-sample amplitude ratio.
+        # Homogeneity correction: evaluate at training amplitude, scale back by a
         a = np.mean(Q_batch, axis=1, keepdims=True) / self.Q_ref   # (N, 1)
         return self.output_scale * a * phi0_all(Q_batch / a, x_points)
