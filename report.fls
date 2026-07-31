@@ -72,6 +72,8 @@ INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/xurl/xurl.sty
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/xurl/xurl.sty
 INPUT ./report.aux
 INPUT ./report.aux
 INPUT report.aux

@@ -26,12 +26,13 @@
 \usepackage{physics}
 \usepackage{booktabs}
 \usepackage{xcolor}
+\usepackage{xurl}
 
 \begin{document}
 
 \preprint{APS/123-QED}
 
-\title{Physics Informed Deep Operator Networks for Neutron Transport}
+\title{Physics-Informed Deep Operator Networks for Neutron Transport}
 
 \author{William Eivik Olsen}
  \altaffiliation[Also at ]{Department of Physics, University of Oslo.}
@@ -44,7 +45,7 @@ We study the effect of physics-informed training for the performance of a DeepON
 is to which extent physics-informed training can replace labelled training. The performance is compared for a benchmark DeepONet, a larger DeepONet and two
 physics-informed DeepONets. To investigate the effect of physics-informed training, the four models are trained on three datasets of different sizes. We find
 that among the models trained on the largest dataset, the large DeepONet performed the best. As the size of the training datasets were decreased, the
-physics-informed models performed better. We conclude that physics-informed training does, to some extent, replace labelled training.
+physics-informed models performed better. We conclude that physics-informed training does, to some extent, compensate for lack of labelled training data.
 \end{abstract}
 
 \maketitle
@@ -69,7 +70,7 @@ To mitigate this challenge, the development of digital twin technology for micro
 digital replica of an operating asset that can receive data from live sensors and provide physics modeling and simulation of the asset. In the
 nuclear context, a complete physics simulation should include the neutronics of the core, thermal-hydraulics and radiation transport
 \cite{DT2024review}. An additional advantage of creating a digital twin is the ability to perform multi-physics simulations of the reactor in
-the approval phase. For this reason, digital twins for maritime nuclear propulsion has gained the attention of Det Norske Veritas
+the approval phase. For this reason, digital twins for maritime nuclear propulsion have gained the attention of Det Norske Veritas
 (DNV), who recently initiated the research project MONS (Model-based Nuclear Safety) to investigate model based safety assessments of maritime
 nuclear vessels using multi-physics simulations. This paper is a contribution to the MONS project.
 
@@ -81,7 +82,7 @@ should be able to simulate the reactor in real-time \cite{kochunas2021digital}. 
 computational costs, and are unable to solve the NTE in real-time \cite{SHEN2022108861, ZHOU2024110759, sahadath2026characterization}.
 
 The advance of machine learning methods has sparked interest in applying them to enable fast solutions of the NTE. Among them is Sahadath et al.
-\cite{sahadath2026characterization}, who investigated a DeepONet trained on neutron transport of a 1D slab. In this paper, we will investigate
+\cite{sahadath2026characterization}, who investigated a DeepONet (first introduced by \cite{deeponet}) trained on neutron transport of a 1D slab. In this paper, we will investigate
 the performance of a \textit{Physics Informed DeepONet}, first introduced by \cite{wang2021learning}. We will evaluate its performance on the same
 1D problem and compare it to that of Sahadath et al.
 
@@ -116,7 +117,7 @@ The second term on the right side is the fission source term. The integral of th
 $\psi$ and the neutrons released per fission $\nu$ gives the total number of neutrons which are emitted isotropically. The integral is multiplied
 by the fission spectrum $\chi(E)$, such that the final result is the number of fission neutrons at energy $E$.
 
-Finally, $S(\mathbf{r},\hat{\Omega},E,t)$ is the external neutron source term.
+Finally, $S_\text{ext}(\mathbf{r},\hat{\Omega},E,t)$ is the external neutron source term.
 
 The NTE describes the interactions of neutrons in the reactor and, importantly, the fissions they cause along with the new neutrons
 released from fission. A nuclear reactor is a controlled fission chain reaction, with the goal of producing as many new neutrons from fissions
@@ -157,7 +158,7 @@ is challenging for the maritime settings, where initial and boundary conditions 
 
 \subsubsection{Deep Operator Networks}
 
-The disadvantage we discussed with PINNs are shared with most traditional machine learning methods, as they  learn pointwise mapping between
+The disadvantages we discussed with PINNs are shared with most traditional machine learning methods, as they  learn pointwise mapping between
 input-output data pairs. Deep operator networks, on the other hand, learn mappings between entire input and output function spaces. DeepONets
 treat inputs and outputs as functions, and aim to learn the solution operator that maps initial or boundary condition functions to corresponding
 solution functions \cite{sahadath2026characterization}. This framework of learning the function mapping allows them to generalize to previously
@@ -166,8 +167,8 @@ equation, delivering accurate predictions for a wide range of scenarios while ma
 
 A DeepONet consists of two neural networks:
 \begin{itemize}
-    \item A TrunkNet that processes evaluation points, such as time or spatial coordinates.
-    \item A BranchNet that encodes discretized condition functions, such as initial and boundary conditions.
+    \item A trunk net that processes evaluation points, such as time or spatial coordinates.
+    \item A branch net that encodes discretized condition functions, such as initial and boundary conditions.
 \end{itemize}
 The final output is obtained through the dot product of the output of these two networks. An illustration of the DeepONet architecture is shown
 in figure \ref{fig: DeepONet}.
@@ -180,26 +181,26 @@ in figure \ref{fig: DeepONet}.
 \end{figure}
 
 Consider an input function $u(x)$ that can be sampled at a set of discrete positions $\{x_1, x_2, ..., x_m\}$ in the domain $D_x$ as
-$[u(x_1), u(x_2, ..., u(x_m)]$. Given an operator $G$ that acts on $u(x)$, $G(u)$ represents the resulting output function in domain $D_y$.
+$[u(x_1), u(x_2), ..., u(x_m)]$. Given an operator $G$ that acts on $u(x)$, $G(u)$ represents the resulting output function in domain $D_y$.
 Note that the domains $D_x$ and $D_y$ are not necessarily the same and can be entirely different. Within the domain of $G(u)$, the real value at
-any sampling point $y_i$ is expressed as $G(u)(y_i)$. From the generalized universal approximation theorem for operators, for any $\epsilon > 0$,
-there exists positive integers $n,p$ and continuous vector functions
-$\mathbf{g}: \mathbb{R}^n \to \mathbb{R}^p$ and $\mathbf{f}: \mathbb{R}^d \to \mathbb{R}^p$ such that
+any sampling point $y_i$ is expressed as $G(u)(y_i)$. From the generalized universal approximation theorem for operators \cite{chen1995universal},
+for any $\epsilon > 0$, there exists positive integers $n,p$ and continuous vector functions
+$\mathbf{g}: \mathbb{R}^m \to \mathbb{R}^p$ and $\mathbf{f}: \mathbb{R}^d \to \mathbb{R}^p$ such that
 \begin{equation}
     |G(u)(y_i) - \langle g(u(x_1), ..., u(x_m)), f(y_i) \rangle| < \epsilon,
 \end{equation}
 where $\langle \cdot, \cdot \rangle$ denotes the dot product defined in $\mathbb{R}^p$, and the functions $g$ and $f$ can be represented by any
 neural networks.
 
-The approximation of $g(u(x_1), ..., u(x_m))$ is made by the BranchNet. This is done by mapping the input $[u(x_1), u(x_2, ..., u(x_m)]$ to a
-vector $\mathbf{b_N} = [b_1, b_2, ..., b_p]$. The TrunkNet takes an evaluation point $y_i$ from the domain of the target operator $G(u)$ and
+The approximation of $g(u(x_1), ..., u(x_m))$ is made by the branch net. This is done by mapping the input $[u(x_1), u(x_2), ..., u(x_m)]$ to a
+vector $\mathbf{b_N} = [b_1, b_2, ..., b_p]$. The trunk net takes an evaluation point $y_i$ from the domain of the target operator $G(u)$ and
 outputs a vector $\mathbf{t_N} = [t_1(y_i), t_2(y_i), ..., t_p(y_i)]$. Finally, the output is computed by
 \begin{equation}
     G(u)(y_i) \approx \sum_{k=1}^p b_k(u(x_1), ... u(x_m)) t_k(y_i).
 \end{equation}
 
 The challenge faced by DeepONets is their requirement of large annotated datasets consisting of input-output observations. Another worry for our
-usecase is the model's ability to extrapolate: If the reactor enters a state significantly outside the training distribution, the DeepONet
+use case is the model's ability to extrapolate: If the reactor enters a state significantly outside the training distribution, the DeepONet
 predictions can become unphysical.
 
 \subsubsection{Physics-Informed DeepONets}
@@ -233,7 +234,7 @@ The architecture was first suggested by \cite{wang2021learning}, who demonstrate
 on various types of PDEs, including a diffusion model.
 The framework is able to combine the advantages of PINNs and DeepONets: They keep the low-data requirement of the PINN methods while being able
 to generalize like a DeepONet. The physics constraint makes the model more robust to handle inputs outside the training distribution.
-For these reasons, we believe Physics-Informed DeepONets to be the most promising architecture for our usecase.
+For these reasons, we believe Physics-Informed DeepONets to be the most promising architecture for our use case.
 
 \section{Problem Statement}
 
@@ -258,8 +259,8 @@ data will be scarcer due to the necessity of using Monte Carlo or Deterministic 
     \label{fig: 1D Slab}
 \end{figure}
 
-We adapt the problem from Sahadath et al. \cite{sahadath2026characterization}. The geometry is a 1D slab with a length of 10 cm,
-spatially uniform cross sections and zero incoming current boundary conditions imposed at both ends. The geometry is illustrated
+We adapt the problem from Sahadath et al. \cite{sahadath2026characterization}. The geometry is a 1D fixed-source, non-multiplying slab with a
+length of 10 cm, spatially uniform cross sections and zero incoming current boundary conditions imposed at both ends. The geometry is illustrated
 in Figure \ref{fig: 1D Slab}. The total cross section is assumed to be 1.0 cm$^{-1}$, while the absorption and scattering
 cross section depend on the scenario considered.
 
@@ -283,17 +284,17 @@ forward-traveling directions ($\mu > 0$), and none enter from the right at $x = 
 
 The angular flux $\psi(x, \mu)$ can be integrated over the angular variable $\mu$ to obtain the \textit{scalar flux} $\varphi_0(x)$,
 \begin{equation} \label{eq: Scalar flux}
-    \varphi_0(x) = \int_{-1}^1 \psi(x, \mu) \dd{x}.
+    \varphi_0(x) = \int_{-1}^1 \psi(x, \mu) \dd{\mu}.
 \end{equation}
-By taking the integral of the angular flux weighted by the angular variable $\mu$, the \textit{scalar current} $\varphi_1(x)$ is obtained,
+By taking the integral of the angular flux weighted by the angular variable $\mu$, the \textit{neutron current} $\varphi_1(x)$ is obtained,
 \begin{equation} \label{eq: Scalar current}
-    \varphi_1(x) = \int_{-1}^1 \mu \psi(x, \mu) \dd{x}.
+    \varphi_1(x) = \int_{-1}^1 \mu \psi(x, \mu) \dd{\mu}.
 \end{equation}
 
 \subsection{Data Generation}
 
-In the paper by Sahadath et al, a set of source distributions $Q(x)$ were prepared, and the 1D NTE was solved numerically for each of them to
-generate a training dataset for their DeepONet model. This was accomplished by fist applying spatial and angular discretization. The spatial domain
+In the paper by Sahadath et .al, a set of source distributions $Q(x)$ were prepared, and the 1D NTE was solved numerically for each of them to
+generate a training dataset for their DeepONet model. This was accomplished by first applying spatial and angular discretization. The spatial domain
 was partitioned into $J$ uniformly spaced cells using the cell-averaged finite difference method. Denoting the edges of the $j$'th cell by
 $x_{j\pm\frac{1}{2}}$, the cell width $h_j$ and cell centre $x_j$ are given by
 \begin{align}
@@ -373,31 +374,43 @@ ReLU activation functions. The model was trained on
 \subsubsection{Physics-Informed DeepONet}
 
 For the Physics-Informed DeepONet, the architecture must differ from the benchmark model to incorporate the PDE loss. The benchmark
-model predicts the scalar flux directly, but the 1D NTE \eqref{eq: 1D NTE} is formulated in terms of the angular flux $\psi(x, \mu)$. The PDE loss term
-$\mathcal{L}_{\text{PDE}}$ measures how far \eqref{eq: 1D NTE} is from being satisfied by the model's predictions. It is calculated by drawing $M$ random
-samples of $\tilde{\psi}_{n,j}$ and calculating the residual
+model predicts the scalar flux directly, but the 1D NTE \eqref{eq: 1D NTE} is formulated in terms of the angular flux $\psi(x, \mu)$.
+The PDE loss term $\mathcal{L}_{\mathrm{PDE}}$ measures how far the model's predictions are from satisfying \eqref{eq: 1D NTE}.
+Let $\tilde{\psi}_\theta(x,\mu;Q)$ denote the angular flux predicted by the network with parameters $\theta$ for the source $Q$. The
+corresponding moments are obtained from the model's own predictions by Gauss--Legendre quadrature over the $N$ ordinates,
 \begin{align}
-R_j &= \frac{\mu_n}{h_j} \left( \tilde{\psi}_{n, j+\frac{1}{2}} - \tilde{\psi}_{n, j-\frac{1}{2}} \right) + \Sigma_{t,j} \, \tilde{\psi}_{n,j} \nonumber \\
-&- \frac{1}{2} \left( \Sigma_{s0,j} \, \tilde{\varphi}_{0,j} + 3 \mu_n \Sigma_{s1,j} \, \tilde{\varphi}_{1,j} + Q_j \right),
+  \tilde{\varphi}_0(x;Q) &= \sum_{n=1}^{N} w_n\, \tilde{\psi}_\theta(x,\mu_n;Q), \\
+  \tilde{\varphi}_1(x;Q) &= \sum_{n=1}^{N} w_n\, \mu_n\, \tilde{\psi}_\theta(x,\mu_n;Q).
 \end{align}
-where $\tilde{\psi}_{n,j}$, $\tilde{\varphi}_{0,j}$ and $\tilde{\varphi}_{1,j}$ are the model's predictions for the angular flux, scalar flux and scalar current, respectively.
-The PDE loss term is then given by
+The residual of \eqref{eq: 1D NTE} at an interior point $(x,\mu)$ is then
+\begin{align}
+  \mathcal{R}_\theta(x,\mu;Q) &= \mu\,\frac{\partial \tilde{\psi}_\theta}{\partial x}(x,\mu;Q) + \Sigma_t\, \tilde{\psi}_\theta(x,\mu;Q) \nonumber \\
+    &- \frac{1}{2}\Big[ \Sigma_{s0}\, \tilde{\varphi}_0(x;Q) + 3\mu\, \Sigma_{s1}\, \tilde{\varphi}_1(x;Q) \Big] \nonumber \\
+    &- \frac{1}{2} Q(x),
+\end{align}
+where the spatial derivative is evaluated exactly by automatic differentiation of the network with respect to its trunk input $x$. The PDE
+loss is the mean squared residual over a batch of $M$ interior collocation points,
 \begin{equation}
-\mathcal{L}_{\text{PDE}} = \frac{1}{M} \sum_{j=1}^M R_j^2.
+  \mathcal{L}_{\mathrm{PDE}}
+    = \frac{1}{M} \sum_{i=1}^{M}
+      \mathcal{R}_\theta\!\left(x_i, \mu_i; Q^{(i)}\right)^{2},
 \end{equation}
+with $x_i$ drawn uniformly from $(0,X)$ and $\mu_i$ drawn uniformly from the $N$ quadrature nodes $\{\mu_1,\dots,\mu_N\}$.
 Likewise, the boundary condition loss term $\mathcal{L}_{\text{BC}}$ measures how far the model's predictions are from satisfying the boundary conditions.
-It is calculated by drawing $M$ random samples of $\tilde{\psi}_{n,j}$ at the boundaries $x = 0$, $x=10$, and evaluating how far the model is from predicting
+It is calculated by drawing $M_b$ random samples of $\tilde{\psi}(x,\mu)$ at the boundaries $x = 0$, $x=10$, and evaluating how far the model is from predicting
 the correct boundary condition $\psi(x=0, \mu) = 0$ for $\mu > 0$ and $\psi(x=10, \mu) = 0$ for $\mu < 0$. The loss term is then given by
 \begin{equation}
-\mathcal{L}_{\text{BC}} = \frac{1}{M} \sum_{j=1}^M \tilde{\psi}_{n,j}^2.
+  \mathcal{L}_{\mathrm{BC}}
+    = \frac{1}{M_b} \sum_{i=1}^{M_b}
+      \tilde{\psi}_\theta\!\left(x_i^{b}, \mu_i^{b}; Q^{(i)}\right)^{2},
 \end{equation}
 
-To implement this loss funciton, the Physics-Informed DeepONet must therefore predict the angular flux $\psi(x,\mu)$ instead of the scalar flux $\varphi_0(x)$.
+To implement this loss function, the Physics-Informed DeepONet must therefore predict the angular flux $\psi(x,\mu)$ instead of the scalar flux $\varphi_0(x)$.
 This forces a decision for training. The model can either:
 \begin{enumerate}
     \item Train on the same dataset as the benchmark model. The model must then predict an angular flux $\psi(x,\mu)$ and feed the angular flux into
     the GL quadrature \eqref{eq: GL scalar flux} to calculate the scalar flux $\varphi_0(x)$.
-    \item Train on a separate dataset from the benchmark problem. This dataset will containt the angular flux $\psi(x,\mu)$ for each source
+    \item Train on a separate dataset from the benchmark problem. This dataset will contain the angular flux $\psi(x,\mu)$ for each source
     function $Q(x)$. The two datasets will share the same input, but have different outputs.
 \end{enumerate}
 
@@ -427,7 +440,7 @@ The parameters for the NTE were set to the first problem considered in \cite{sah
 scattering. The cross sections were then given by
 $\Sigma_t = 1.0 \text{ cm}^{-1}$, $\Sigma_a = 0.5 \text{ cm}^{-1}$, $\Sigma_{s0} = 0.5 \text{ cm}^{-1}$ and $\Sigma_{s1} = 0 \text{ cm}^{-1}$.
 
-To test wether physics-informed loss can replace labelled training, the models were trained on datasets of three different sizes:
+To test whether physics-informed loss can replace labelled training, the models were trained on datasets of three different sizes:
 \begin{enumerate}
     \item The original dataset of 500 source distributions $Q(x)$.
     \item A medium sized dataset of a subset of 100 source distributions $Q(x)$ from the original dataset.
@@ -502,7 +515,7 @@ $\bar{T}_r$ is the mean of the true scalar flux $\varphi_0(x)$. The $R^2$ score 
 high $R^2$ score does not necessarily imply a causal connection or guarantee that overfitting is absent. It should therefore be reported with
 other error metrics. We therefore also computed the average relative error (ARE) by
 \begin{equation}
-    \text{ARE} = \sum_{i=1}^{N} \frac{T_{ri} - P_{ri}}{T_{ri}}.
+    \text{ARE} = \frac{1}{N}\sum_{i=1}^{N} \left|\frac{T_{ri} - P_{ri}}{T_{ri}}\right|.
 \end{equation}
 
 \section{Results}
@@ -555,7 +568,7 @@ the benchmark DeepONet, the Large DeepONet, and the two Physics-Informed DeepONe
 \section{Discussion}
 
 The true benchmark model is the DeepONet trained on the original dataset of 500 source distributions. Its performance is shown in
-Figures \ref{fig: R2 large} and \ref{fig: ARE large}. We see that it achieved an $R^2$ score of $0.999 \pm 0.005$ and ARE score of $(1.1 \pm 0.2)\%$ 
+Figures \ref{fig: R2 large} and \ref{fig: ARE large}. We see that it achieved an $R^2$ score of $0.989 \pm 0.005$ and ARE score of $(1.1 \pm 0.2)\%$ 
 on the non-shifted dataset. Although this must be considered a good performance, it does not quite live up to the performance reported by Sahadath et al.
 \cite{sahadath2026characterization}, who achieved an $R^2$ score of $0.9979 \pm 0.0009$ and ARE of $(0.50 \pm 0.09)\%$. The discrepancy is likely due to
 differences in the training procedure; the learning rate schedule was not reported in the paper and may have differed from the one we used. For the rest
@@ -570,7 +583,7 @@ scalar flux $\varphi_0(x)$, it is enough for the model to learn this quantity we
 
 Another interesting observation is that the best performing model is the Large DeepONet. This model was included in our testing to factor out the possibility
 that the PI DeepONets would perform better than the benchmark model simply because they had more parameters. This appears to be exactly what happened,
-with the PDE loss contributing negatively to the models' performance when trained on the original dataset.
+with the physics-informed training contributing negatively to the models' performance when trained on the original dataset.
 
 For all models, we see that the small shifts in GRF parameters do not have a significant effect on the performance. Among the large shifts, the performance
 appears to be worst for LS1. This is likely because the source distributions in this case have the lowest mean value among the datasets, 2.5, which is
@@ -582,17 +595,17 @@ combination of two source distributions. The features discussed here are visible
 \ref{fig: PI DeepONet 1 samples}.
 
 For the models trained on Dataset 2, shown in Figures \ref{fig: R2 medium} and \ref{fig: ARE medium}, we see a change in which models
-perform well. Unsurpisingly, the general performance is worse than for the models trained on the original dataset. The benchmark model performs significantly
+perform well. Unsurprisingly, the general performance is worse than for the models trained on the original dataset. The benchmark model performs significantly
 worse than the other models. We also see that the Large DeepONet is outperformed by the PI DeepONets in the NS, SS and LS1 cases. For the other large shift
 cases, corresponding to larger length scales, the Large DeepONet seems to perform similarly or slightly better. Comparing the predictions made on the samples shown
 in \ref{fig: Medium comparison}, we see that the physics-informed model is able to follow the high-frequent oscillations of the NS sample significantly
-better. The Large DeepONet seems to have settled on a set of parameters that gives a similar prediction different distributions – one that gives a less
+better. The Large DeepONet seems to have settled on a set of parameters that gives a similar prediction for different distributions – one that gives a less
 varying output in the middle of the slab and decreases towards zero at the boundaries. This gives an ARE that is only slightly worse for the NS, SS and LS1
 cases. However, since the prediction does not reproduce the true shape of the scalar flux, its $R^2$ score is worse than that of the PI DeepONets.
 For the LS3 sample, which has a less varying scalar flux, the Large DeepONet is able to reproduce the true scalar flux better since the large length scale
 gives a flux closer to its basic prediction.
 
-Finally, for the models trained on Dataset 3, we see in Figures \ref{fig: R2 small} amd \ref{fig: ARE small} that the performance has dropped further. The
+Finally, for the models trained on Dataset 3, we see in Figures \ref{fig: R2 small} and \ref{fig: ARE small} that the performance has dropped further. The
 tendency we saw in the models trained on Dataset 2 become even more clear, as the models predict an even more constant scalar flux across different source
 distributions. This can be seen in Figure \ref{fig: Small comparison}. We see that the physics-informed models also show more of this tendency, although
 their higher $R^2$ scores indicate that they are still able to recover more of the true physics than the Large DeepONet.
@@ -614,7 +627,9 @@ prediction across all source distributions. There was some tendency for the phys
 they still performed better than the Large DeepONet.
 
 Our results indicate that physics-informed training does in fact replace labelled training to some extent, as we would have hoped. For a large enough training
-dataset, however, we still see that the ordinary DeepONet performs better. It should be noted that the work in this paper is so far limited to the first
+dataset, however, we still see that the ordinary DeepONet performs better.
+
+It should be noted that the work in this paper is so far limited to the first
 problem presented by Sahadath et al., namely that of isotropic scattering. The authors also studied anisotropic scattering and pure scattering (zero absorption),
 in addition to training a model on a range of cross-section values to assess its ability to generalize across varying physical conditions. We plan on extending
 this work by considering these remaining problems. Further ahead, the methodology will be extended to consider the eigenvalue problem of a 2D or 3D reactor.
@@ -639,7 +654,7 @@ Another possible direction would be to extend to time-dependent problems, openin
 \begin{figure*}[t]
     \centering
     \includegraphics[width=\linewidth]{results/small_comparison.pdf}
-    \caption{Comparison of NS sample predictions made by all models on trained on Dataset 3.}
+    \caption{Comparison of NS sample predictions made by all models trained on Dataset 3.}
     \label{fig: Small comparison}
 \end{figure*}
 
