@@ -5,8 +5,9 @@ import seaborn as sns
 
 from helpers import load_model
 
-size = "large"
-file = "pideeponet_angular_scalar_data_relu"
+size = "small"
+file = "pideeponet_angular_relu"
+# file = "large_deeponet"
 
 CHECKPOINT = f"trained_models/{size}/{file}.pkl"
 SAMPLE_IDX = 0
@@ -70,5 +71,5 @@ fig.legend(handles, labels, loc="upper center", ncol=2, frameon=True,
            bbox_to_anchor=(0.5, 1.02))
 
 fig.tight_layout()
-plt.savefig(f"results/{file}_samples.pdf", bbox_inches="tight")
-# plt.show()
+# plt.savefig(f"results/{file}_samples.pdf", bbox_inches="tight")
+plt.show()

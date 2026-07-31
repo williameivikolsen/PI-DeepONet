@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.4.16)  30 JUL 2026 21:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.4.16)  31 JUL 2026 11:39
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -375,18 +375,28 @@ File: results/ARE_small.pdf Graphic file (type pdf)
 <use results/ARE_small.pdf>
 Package pdftex.def Info: results/ARE_small.pdf  used on input line 547.
 (pdftex.def)             Requested size: 510.0pt x 229.49991pt.
- [7]
-<results/pideeponet_angular_scalar_data_relu_samples.pdf, id=61, 789.87032pt x 734.92946pt>
+ [7] [8 <./results/R2_large.pdf> <./results/ARE_large.pdf>]
+<results/pideeponet_angular_scalar_data_relu_samples.pdf, id=184, 789.87032pt x 734.92946pt>
 File: results/pideeponet_angular_scalar_data_relu_samples.pdf Graphic file (type pdf)
 <use results/pideeponet_angular_scalar_data_relu_samples.pdf>
-Package pdftex.def Info: results/pideeponet_angular_scalar_data_relu_samples.pdf  used on input line 590.
+Package pdftex.def Info: results/pideeponet_angular_scalar_data_relu_samples.pdf  used on input line 605.
 (pdftex.def)             Requested size: 510.0pt x 474.53612pt.
- (./report.bbl [8 <./results/R2_large.pdf> <./results/ARE_large.pdf>]
+<results/medium_comparison.pdf, id=185, 714.43163pt x 513.78323pt>
+File: results/medium_comparison.pdf Graphic file (type pdf)
+<use results/medium_comparison.pdf>
+Package pdftex.def Info: results/medium_comparison.pdf  used on input line 612.
+(pdftex.def)             Requested size: 510.0pt x 366.7721pt.
+<results/small_comparison.pdf, id=186, 714.46237pt x 734.92946pt>
+File: results/small_comparison.pdf Graphic file (type pdf)
+<use results/small_comparison.pdf>
+Package pdftex.def Info: results/small_comparison.pdf  used on input line 619.
+(pdftex.def)             Requested size: 510.0pt x 524.61832pt.
+ (./report.bbl [9 <./results/R2_medium.pdf> <./results/ARE_medium.pdf>]
 Underfull \hbox (badness 1043) in paragraph at lines 54--55
  \OT1/cmr/m/n/9 Rep. (In-ter-na-tional Atomic En-ergy Agency, Vi-enna,
  []
 
-[9 <./results/R2_medium.pdf> <./results/ARE_medium.pdf>]
+[10 <./results/R2_small.pdf> <./results/ARE_small.pdf>]
 Underfull \hbox (badness 10000) in paragraph at lines 84--85
  []\OT1/cmr/m/n/9 S. Mousavi, ``Op-er-a-tor learn-ing via physics-
  []
@@ -406,25 +416,25 @@ Overfull \hbox (207.8588pt too wide) in paragraph at lines 84--85
  \OT1/cmtt/m/n/9 operator-[]learning-[]via-[]physics-[]informed-[]deeponet-[]lets-[]implement-[]it-[]from-[]scratch-[]6659f3179887$
  []
 
-) [10 <./results/R2_small.pdf> <./results/ARE_small.pdf>] [11 <./results/pideeponet_angular_scalar_data_relu_samples.pdf>] (./report.aux)
+) [11 <./results/pideeponet_angular_scalar_data_relu_samples.pdf>] [12 <./results/medium_comparison.pdf>] [13 <./results/small_comparison.pdf>] (./report.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 6119 strings out of 467525
- 87077 string characters out of 5418982
- 536491 words of memory out of 5000000
- 34950 multiletter control sequences out of 15000+600000
+ 6137 strings out of 467525
+ 87688 string characters out of 5418982
+ 536478 words of memory out of 5000000
+ 34968 multiletter control sequences out of 15000+600000
  641390 words of font info for 90 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  73i,11n,79p,935b,396s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on report.pdf (11 pages, 986915 bytes).
+Output written on report.pdf (13 pages, 1052675 bytes).
 PDF statistics:
- 583 PDF objects out of 1000 (max. 8388607)
- 166 compressed objects within 2 object streams
+ 687 PDF objects out of 1000 (max. 8388607)
+ 189 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 56 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 66 words of extra memory for PDF output out of 10000 (max. 10000000)
 

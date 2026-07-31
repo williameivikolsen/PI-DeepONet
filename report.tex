@@ -563,7 +563,7 @@ to perform better than PI DeepONet 2. Recall that their difference was that PI D
 $\psi(x, \mu)$, while PI DeepONet 1 had its labelled training data in the form of scalar flux $\varphi_0(x)$. In our discussion of the model architecture,
 we speculated that the lower dimensionality of the scalar flux might make it harder for the model to learn. However, these results suggest that the opposite
 is true, at least in the case of training on the original dataset. One might speculate that since the model's performance is tested in terms of only the
-scalar flux $\varphi_0(x)$, it is more important for the model to learn this quantity well than the angular flux $\psi(x, \mu)$.
+scalar flux $\varphi_0(x)$, it is enough for the model to learn this quantity well rather than the angular flux $\psi(x, \mu)$.
 
 Another interesting observation is that the best performing model is the Large DeepONet. This model was included in our testing to factor out the possibility
 that the PI DeepONets would perform better than the benchmark model simply because they had more parameters. This appears to be exactly what happened,
@@ -571,13 +571,28 @@ with the PDE loss contributing negatively to the models' performance when traine
 
 For all models, we see that the small shifts in GRF parameters do not have a significant effect on the performance. Among the large shifts, the performance
 appears to be worst for LS1. This is likely because the source distributions in this case have the lowest mean value among the datasets, 2.5, which is
-half the value of the mean in the training dataset. This corresponds to a lower scalar flux, giving higher relative errors. Likewise, for the rest of the large
-shifts, where the mean of the source distributions are higher, the performance appears to be better, likely because of the higher mean scalar flux.
-For the single test cases, the performance is worst for the nonlinear combination of two source distributions.
+half the value of the mean in the training dataset, in addition to having a lower length scale. This gives a lower, more rapidly varying scalar flux,
+giving higher relative errors. Likewise, for the rest of the large
+shifts, where the mean of the source distributions are higher, the performance appears to be better. This is likely because of the higher mean scalar flux
+and larger length scale, which gives smaller variations in the scalar flux. For the single test cases, the performance is worst for the nonlinear
+combination of two source distributions. The features discussed here are visible in the samples shown along with the prediction by PI DeepONet 1 in Figure
+\ref{fig: PI DeepONet 1 samples}.
 
-For the models trained on the medium sized dataset, shown in Figures \ref{fig: R2 medium} and \ref{fig: ARE medium}, we see a change in which models
+For the models trained on Dataset 2, shown in Figures \ref{fig: R2 medium} and \ref{fig: ARE medium}, we see a change in which models
 perform well. Unsurpisingly, the general performance is worse than for the models trained on the original dataset. The benchmark model performs significantly
-worse, 
+worse than the other models. We also see that the Large DeepONet is outperformed by the PI DeepONets in the NS, SS and LS1 cases. For the other large shift
+cases, corresponding to larger length scales, the Large DeepONet seems to perform similarly or slightly better. Comparing the predictions made on the samples shown
+in \ref{fig: Medium comparison}, we see that the physics-informed model is able to follow the high-frequent oscillations of the NS sample significantly
+better. The Large DeepONet seems to have settled on a set of parameters that gives a similar prediction different distributions – one that gives a less
+varying output in the middle of the slab and decreases towards zero at the boundaries. This gives an ARE that is only slightly worse for the NS, SS and LS1
+cases. However, since the prediction does not reproduce the true shape of the scalar flux, its $R^2$ score is worse than that of the PI DeepONets.
+For the LS3 sample, which has a less varying scalar flux, the Large DeepONet is able to reproduce the true scalar flux better since the large length scale
+gives a flux closer to its basic prediction.
+
+Finally, for the models trained on Dataset 3, we see in Figures \ref{fig: R2 small} amd \ref{fig: ARE small} that the performance has dropped further. The
+tendency we saw in the models trained on Dataset 2 become even more clear, as the models predict an even more constant scalar flux across different source
+distributions. This can be seen in Figure \ref{fig: Small comparison}. We see that the physics-informed models also show more of this tendency, although
+their higher $R^2$ scores indicate that they are still able to recover more of the true physics than the Large DeepONet.
 
 \section{Conclusion}
 
@@ -588,8 +603,22 @@ worse,
 \begin{figure*}[t]
     \centering
     \includegraphics[width=\linewidth]{results/pideeponet_angular_scalar_data_relu_samples.pdf}
-    \caption{Samples of predictions made by PI DeepONet 1 trained on original dataset along with source distribution $Q(x)$ and true scalar flux $\varphi_0(x)$.}
+    \caption{Samples of predictions made by PI DeepONet 1 trained on Dataset 1 along with source distribution $Q(x)$ and true scalar flux $\varphi_0(x)$.}
     \label{fig: PI DeepONet 1 samples}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\linewidth]{results/medium_comparison.pdf}
+    \caption{Comparison of sample predictions made by PI DeepONet 2 and Large DeepONet trained on Dataset 2.}
+    \label{fig: Medium comparison}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\linewidth]{results/small_comparison.pdf}
+    \caption{Comparison of NS sample predictions made by all models on trained on Dataset 3.}
+    \label{fig: Small comparison}
 \end{figure*}
 
 \bibliography{bibliography}

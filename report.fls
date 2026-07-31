@@ -199,6 +199,16 @@ INPUT ./results/pideeponet_angular_scalar_data_relu_samples.pdf
 INPUT ./results/pideeponet_angular_scalar_data_relu_samples.pdf
 INPUT ./results/pideeponet_angular_scalar_data_relu_samples.pdf
 INPUT ./results/pideeponet_angular_scalar_data_relu_samples.pdf
+INPUT ./results/medium_comparison.pdf
+INPUT ./results/medium_comparison.pdf
+INPUT ./results/medium_comparison.pdf
+INPUT ./results/medium_comparison.pdf
+INPUT ./results/medium_comparison.pdf
+INPUT ./results/small_comparison.pdf
+INPUT ./results/small_comparison.pdf
+INPUT ./results/small_comparison.pdf
+INPUT ./results/small_comparison.pdf
+INPUT ./results/small_comparison.pdf
 INPUT ./report.bbl
 INPUT ./report.bbl
 INPUT report.bbl
