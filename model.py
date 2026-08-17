@@ -243,12 +243,13 @@ class PI_DeepONet:
         self.lambda_res  = float(lambda_res)
         self.lambda_bcs  = float(lambda_bcs)
 
-        self.lr_schedule = optax.exponential_decay(
-            init_value=lr_init,
-            transition_steps=lr_transition_steps,
-            decay_rate=lr_decay_rate,
-        )
-        self.optimizer = optax.adam(learning_rate=self.lr_schedule)
+        # self.lr_schedule = optax.exponential_decay(
+        #     init_value=lr_init,
+        #     transition_steps=lr_transition_steps,
+        #     decay_rate=lr_decay_rate,
+        # )
+        # self.optimizer = optax.adam(learning_rate=self.lr_schedule)
+        self.optimizer = optax.adam(learning_rate=lr_init)
         self.opt_state = self.optimizer.init(self.params)
 
         # Used to restore the trained model parameters

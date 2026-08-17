@@ -129,12 +129,13 @@ class DeepONet:
         # Reference source amplitude: mean(Q) on the training set.
         self.Q_ref = None if Q_ref is None else float(Q_ref)
 
-        self.lr_schedule = optax.exponential_decay(
-            init_value=lr_init,
-            transition_steps=lr_transition_steps,
-            decay_rate=lr_decay_rate,
-        )
-        self.optimizer = optax.adam(learning_rate=self.lr_schedule)
+        # self.lr_schedule = optax.exponential_decay(
+        #     init_value=lr_init,
+        #     transition_steps=lr_transition_steps,
+        #     decay_rate=lr_decay_rate,
+        # )
+        # self.optimizer = optax.adam(learning_rate=self.lr_schedule)
+        self.optimizer = optax.adam(learning_rate=lr_init)
         
         self.opt_state = self.optimizer.init(self.params)
 

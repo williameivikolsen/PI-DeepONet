@@ -16,7 +16,7 @@ from nonPI_model import (
 
 print(jax.devices())
 
-size = "medium"
+size = "small"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
@@ -61,8 +61,8 @@ model.train(data_dataset,
 dt = time.time() - t0
 print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
-os.makedirs("trained_models/" + size, exist_ok=True)
-with open("trained_models/" + size + "/large_deeponet.pkl", "wb") as f:
+os.makedirs("trained_models/training_testing/" + size, exist_ok=True)
+with open("trained_models/training_testing/" + size + "/large_deeponet.pkl", "wb") as f:
     pickle.dump({
         "params": model.params,
         "config": {
@@ -81,4 +81,4 @@ with open("trained_models/" + size + "/large_deeponet.pkl", "wb") as f:
         "n_iter": n_iter,
         "log_every": log_every,
     }, f)
-print("Saved trained_models/" + size + "/large_deeponet.pkl")
+print("Saved trained_models/training_testing/" + size + "/large_deeponet.pkl")

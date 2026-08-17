@@ -19,7 +19,7 @@ from model_angular_scalar import PI_DeepONet_AngularScalar
 
 print(jax.devices())
 
-size = "medium"
+size = "small"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
@@ -141,8 +141,8 @@ if _fail:
     )
 print("  guard passed: restored params reproduce best_val_ARE on both paths.\n")
 
-os.makedirs("trained_models/" + size, exist_ok=True)
-out_path = "trained_models/" + size + "/pideeponet_angular_scalar_data_" + model.activation_name + ".pkl"
+os.makedirs("trained_models/training_testing/" + size, exist_ok=True)
+out_path = "trained_models/training_testing/" + size + "/pideeponet_angular_scalar_data_" + model.activation_name + ".pkl"
 with open(out_path, "wb") as f:
     pickle.dump({
         "params": model.params,
