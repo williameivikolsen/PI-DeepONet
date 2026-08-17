@@ -40,8 +40,10 @@ print(f"  (network learns phi_0 / phi_scale; predict_s un-normalizes automatical
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                              rng_key=random.PRNGKey(101))
 
-branch_layers = [J, 250, 250, 250, 250, 100]
-trunk_layers  = [1, 500, 500, 500, 500, 100]
+# branch_layers = [J, 250, 250, 250, 250, 100]
+# trunk_layers  = [1, 500, 500, 500, 500, 100]
+branch_layers = [100, 200, 200, 100]
+trunk_layers = [1, 200, 200, 100]
 
 model = DeepONet(
     branch_layers, trunk_layers,
@@ -62,7 +64,7 @@ dt = time.time() - t0
 print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
 os.makedirs("trained_models/training_testing/" + size, exist_ok=True)
-with open("trained_models/training_testing/" + size + "/large_deeponet.pkl", "wb") as f:
+with open("trained_models/training_testing/" + size + "/benchmark.pkl", "wb") as f:
     pickle.dump({
         "params": model.params,
         "config": {
@@ -81,4 +83,4 @@ with open("trained_models/training_testing/" + size + "/large_deeponet.pkl", "wb
         "n_iter": n_iter,
         "log_every": log_every,
     }, f)
-print("Saved trained_models/training_testing/" + size + "/large_deeponet.pkl")
+print("Saved trained_models/training_testing/" + size + "/benchmark.pkl")
