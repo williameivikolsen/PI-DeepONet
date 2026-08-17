@@ -19,7 +19,7 @@ from model import (
 
 print(jax.devices())
 
-size = "medium"
+size = "large"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
