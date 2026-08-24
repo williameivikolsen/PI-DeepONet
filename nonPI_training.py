@@ -40,11 +40,11 @@ print(f"  (network learns phi_0 / phi_scale; predict_s un-normalizes automatical
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                              rng_key=random.PRNGKey(101))
 
-branch_layers = [J, 250, 250, 250, 250, 100]
-trunk_layers  = [1, 500, 500, 500, 500, 100]
-# branch_layers = [100, 200, 200, 100]
-# trunk_layers = [1, 200, 200, 100]
-model_name = "large_deeponet"
+# branch_layers = [J, 250, 250, 250, 250, 100]
+# trunk_layers  = [1, 500, 500, 500, 500, 100]
+branch_layers = [100, 200, 200, 100]
+trunk_layers = [1, 200, 200, 100]
+model_name = "benchmark"
 
 model = DeepONet(
     branch_layers, trunk_layers,
