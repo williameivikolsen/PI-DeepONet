@@ -198,6 +198,7 @@ class PI_DeepONet:
                  lr_init=1e-3,
                  lr_decay_rate=0.9,
                  lr_transition_steps=2000,
+                 lr_schedule=None,
                  output_scale=1.0,
                  Q_ref=None,
                  seed=None):
@@ -243,13 +244,17 @@ class PI_DeepONet:
         self.lambda_res  = float(lambda_res)
         self.lambda_bcs  = float(lambda_bcs)
 
-        # self.lr_schedule = optax.exponential_decay(
-        #     init_value=lr_init,
-        #     transition_steps=lr_transition_steps,
-        #     decay_rate=lr_decay_rate,
-        # )
-        # self.optimizer = optax.adam(learning_rate=self.lr_schedule)
-        self.optimizer = optax.adam(learning_rate=lr_init)
+        # Learning rate.
+        if lr_schedule is None:
+            lr_schedule = lr_init
+        elif lr_schedule == "exp_decay":
+            lr_schedule = optax.exponential_decay(
+                init_value=lr_init,
+                transition_steps=lr_transition_steps,
+                decay_rate=lr_decay_rate,
+            )
+        self.lr_schedule = lr_schedule
+        self.optimizer = optax.adam(learning_rate=lr_schedule)
         self.opt_state = self.optimizer.init(self.params)
 
         # Used to restore the trained model parameters
@@ -393,6 +398,7 @@ class PI_DeepONet:
                         f"L_bcs={float(l_bcs):.3e}  "
                         f"L_res={float(l_res):.3e}")
 
+                v = None
                 if val_batch is not None and it % val_every == 0:
                     v = float(self.val_ARE(self.params, val_batch))
                     self.val_ARE_log.append(v)
@@ -411,7 +417,7 @@ class PI_DeepONet:
 
                 if callback is not None:
                     callback(it, float(l), float(l_data),
-                             float(l_bcs), float(l_res))
+                             float(l_bcs), float(l_res), v)
 
         # Restore the parameters that achieved the lowest validation ARE
         if val_batch is not None:
