@@ -41,7 +41,7 @@ LR_CANDIDATES = {
 }
 
 arch = {"branch": [250, 250, 250, 250], "trunk": [500, 500, 500, 500]}
-model_name = sys.argv[1] if len(sys.argv) > 1 else "large_deeponet"
+model_name = "large_deeponet"
 P_LATENT   = 100
 
 # ---------------------------------------------------------------------------
