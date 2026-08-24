@@ -1,3 +1,5 @@
+import os
+import pickle
 import sys
 
 import optax
@@ -57,6 +59,7 @@ val_ds = {k: jnp.asarray(val_np[k]) for k in val_np.files}
 
 X_slab = 10.0
 J      = int(ds['x'].shape[0])
+SIGMA_T, SIGMA_S0, SIGMA_S1 = 1.0, 0.5, 0.0
 
 E      = 2000
 B      = 1000
@@ -67,6 +70,15 @@ LOG_EVERY = N_ITER // 100          # 100 validation points per trial
 # Data arrays are identical for every trial, so build them once.
 data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
 val_batch = build_val_batch(val_ds, output_scale=phi_scale)
+
+# Weights of the best trial so far. Seeded from an existing checkpoint so a
+# resumed sweep does not overwrite a better run.
+CKPT_PATH  = f"trained_models/lr_search/{model_name}.pkl"
+_incumbent = {"val_ARE": float("inf")}
+if os.path.exists(CKPT_PATH):
+    with open(CKPT_PATH, "rb") as f:
+        _incumbent["val_ARE"] = float(pickle.load(f).get("val_ARE", float("inf")))
+    print(f"Existing checkpoint {CKPT_PATH}: val_ARE={_incumbent['val_ARE']:.3f}%")
 
 
 def objective(trial):
@@ -82,7 +94,7 @@ def objective(trial):
 
     model = DeepONet(
         branch_layers, trunk_layers,
-        Sigma_t=1.0, Sigma_s0=0.5, Sigma_s1=0.0,
+        Sigma_t=SIGMA_T, Sigma_s0=SIGMA_S0, Sigma_s1=SIGMA_S1,
         x_sensors=ds['x'], X=X_slab,
         lr_schedule=learning_rate,
         output_scale=phi_scale,
@@ -105,7 +117,40 @@ def objective(trial):
         callback=report_to_optuna,
     )
 
-    return float(model.best_val_ARE)
+    val_ARE = float(model.best_val_ARE)
+
+    # Keep the weights of the best trial only
+    if val_ARE < _incumbent["val_ARE"]:
+        _incumbent["val_ARE"] = val_ARE
+        os.makedirs(os.path.dirname(CKPT_PATH), exist_ok=True)
+        with open(CKPT_PATH, "wb") as f:
+            pickle.dump({
+                "params": model.params,
+                "config": {
+                    "activation":    model.activation_name,
+                    "branch_layers": branch_layers,
+                    "trunk_layers":  trunk_layers,
+                    "Sigma_t":       SIGMA_T,
+                    "Sigma_s0":      SIGMA_S0,
+                    "Sigma_s1":      SIGMA_S1,
+                    "x_sensors":     onp.asarray(ds['x']),
+                    "X":             X_slab,
+                    "output_scale":  phi_scale,
+                    "Q_ref":         model.Q_ref,
+                },
+                "loss_log":      model.loss_log,
+                "val_ARE_log":   model.val_ARE_log,
+                "val_iter_log":  model.val_iter_log,
+                "n_iter":        N_ITER,
+                "log_every":     LOG_EVERY,
+                "model_name":    model_name,
+                "lr_config":     lr_name,
+                "val_ARE":       val_ARE,
+                "best_val_iter": model.best_val_iter,
+            }, f)
+        print(f"  new best: {lr_name} at {val_ARE:.3f}% -> saved {CKPT_PATH}")
+
+    return val_ARE
 
 
 if __name__ == "__main__":
@@ -135,3 +180,4 @@ if __name__ == "__main__":
 
     print("\nBest params:", study.best_params)
     print(f"Best validation ARE: {study.best_value:.3f}%")
+    print(f"Best trial weights: {CKPT_PATH}")
