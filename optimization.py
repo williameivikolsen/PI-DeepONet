@@ -1,3 +1,5 @@
+import sys
+
 import optax
 import optuna
 import jax.numpy as jnp
@@ -38,6 +40,10 @@ LR_CANDIDATES = {
         init_value=1e-3, end_value=1e-5, transition_steps=n),
 }
 
+arch = {"branch": [250, 250, 250, 250], "trunk": [500, 500, 500, 500]}
+model_name = sys.argv[1] if len(sys.argv) > 1 else "large_deeponet"
+P_LATENT   = 100
+
 # ---------------------------------------------------------------------------
 # Load datasets once outside the objective
 # ---------------------------------------------------------------------------
@@ -67,9 +73,9 @@ def objective(trial):
     lr_name = trial.suggest_categorical("lr_config", list(LR_CANDIDATES))
     learning_rate = LR_CANDIDATES[lr_name](N_ITER)
 
-    # Benchmark architecture, fixed across the sweep.
-    branch_layers = [J, 200, 200, 100]
-    trunk_layers  = [1, 200, 200, 100]
+    # Architecture is fixed across the sweep; only the learning rate varies.
+    branch_layers = [J] + arch["branch"] + [P_LATENT]
+    trunk_layers  = [1] + arch["trunk"]  + [P_LATENT]
 
     data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                                  rng_key=random.PRNGKey(101))
@@ -104,8 +110,8 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(
-        storage="sqlite:///benchmark_lr_search.db",
-        study_name="benchmark_lr_search",
+        storage=f"sqlite:///{model_name}_lr_search.db",
+        study_name=f"{model_name}_lr_search",
         direction="minimize",
         sampler=optuna.samplers.GridSampler({"lr_config": list(LR_CANDIDATES)}),
         pruner=optuna.pruners.MedianPruner(
