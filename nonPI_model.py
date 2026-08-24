@@ -81,6 +81,21 @@ def build_data_arrays(ds, normalize=True):
 
     return (Q_flat, x_flat), phi_flat, phi_scale
 
+
+def build_val_batch(ds, output_scale: float):
+    """
+    Build a single validation (inputs, outputs) tuple.
+    """
+    Q     = np.asarray(ds['Q'])            # (N, J)
+    phi_0 = np.asarray(ds['phi_0'])        # (N, J)
+    x     = np.asarray(ds['x'])            # (J,)
+    N, J  = Q.shape
+    Q_flat   = np.repeat(Q, J, axis=0)
+    x_flat   = np.tile(x, N)
+    phi_flat = (phi_0 / output_scale).reshape(-1)
+    return (Q_flat, x_flat), phi_flat
+
+
 class DeepONet:
     def __init__(self, branch_layers, trunk_layers,
                  Sigma_t, Sigma_s0, Sigma_s1,
@@ -90,6 +105,7 @@ class DeepONet:
                  lr_init=1e-3,
                  lr_decay_rate=0.9,
                  lr_transition_steps=5000,
+                 lr_schedule=None,
                  output_scale=1.0,
                  Q_ref=None,
                  seed=None):
@@ -129,14 +145,19 @@ class DeepONet:
         # Reference source amplitude: mean(Q) on the training set.
         self.Q_ref = None if Q_ref is None else float(Q_ref)
 
-        # self.lr_schedule = optax.exponential_decay(
-        #     init_value=lr_init,
-        #     transition_steps=lr_transition_steps,
-        #     decay_rate=lr_decay_rate,
-        # )
-        # self.optimizer = optax.adam(learning_rate=self.lr_schedule)
-        self.optimizer = optax.adam(learning_rate=lr_init)
-        
+        # Learning rate.
+        if lr_schedule is None:
+            lr_schedule = lr_init
+        elif lr_schedule == "exp_decay":
+            lr_schedule = optax.exponential_decay(
+                init_value=lr_init,
+                transition_steps=lr_transition_steps,
+                decay_rate=lr_decay_rate,
+            )
+        self.lr_schedule = lr_schedule
+        self.optimizer = optax.adam(learning_rate=lr_schedule)
+
+
         self.opt_state = self.optimizer.init(self.params)
 
         # Used to restore the trained model parameters
@@ -172,8 +193,19 @@ class DeepONet:
 
     # Optimize parameters in a loop
     def train(self, data_dataset,
-              nIter=10000, log_every=100, callback=None):
+              nIter=10000, log_every=100, callback=None,
+              val_batch=None, val_every=None):
         data_iter = iter(data_dataset)
+
+        if val_every is None:
+            val_every = log_every
+
+        # Validation bookkeeping
+        self.val_ARE_log    = []
+        self.val_iter_log   = []
+        self.best_params    = self.params
+        self.best_val_ARE   = float("inf")
+        self.best_val_iter  = 0
 
         for it in range(nIter):
             data_batch = next(data_iter)
@@ -193,10 +225,43 @@ class DeepONet:
                 pred_b = vmap(self.operator_net, (None, 0, 0))(self.params, Q_b, x_b)
                 are = float(np.mean(np.abs((outputs_b.flatten() - pred_b) / outputs_b.flatten())) * 100)
 
-                print(f"Iter {it:6d}: L={float(l):.3e}  ARE={are:.3f}%")
+                line = f"Iter {it:6d}: L={float(l):.3e}  ARE={are:.3f}%"
+
+                v = None
+                if val_batch is not None and it % val_every == 0:
+                    v = float(self.val_ARE(self.params, val_batch))
+                    self.val_ARE_log.append(v)
+                    self.val_iter_log.append(it)
+
+                    if v < self.best_val_ARE:
+                        self.best_val_ARE  = v
+                        self.best_val_iter = it
+                        self.best_params   = self.params
+                        flag = " *"
+                    else:
+                        flag = ""
+                    line += f"  val_ARE={v:.3f}%{flag}"
+
+                print(line)
 
                 if callback is not None:
-                    callback(it, float(l))
+                    callback(it, float(l), v)
+
+        # Restore the parameters that achieved the lowest validation ARE
+        if val_batch is not None:
+            print(f"\nBest validation ARE = {self.best_val_ARE:.3f}% "
+                  f"at iter {self.best_val_iter}; restoring those params.")
+            self.params = self.best_params
+
+    @partial(jit, static_argnums=(0,))
+    def val_ARE(self, params, val_batch):
+        """
+        Validation average relative error (%). Used by optimization.py as the
+        Optuna objective. Targets are already normalized by output_scale.
+        """
+        (Q, x), phi_norm = val_batch
+        phi_pred = vmap(self.operator_net, (None, 0, 0))(params, Q, x)
+        return np.mean(np.abs((phi_norm.flatten() - phi_pred) / phi_norm.flatten())) * 100.0
 
     @partial(jit, static_argnums=(0,))
     def predict_s(self, params, Q_star, x_star):
