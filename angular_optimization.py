@@ -50,7 +50,7 @@ TRUNK_WIDTH  = 500
 LAMBDA_DATA, LAMBDA_RES, LAMBDA_BCS = 0.7, 0.25, 0.05
 N_PER_SAMPLE = 1000
 
-size = "large"
+size = "medium"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
@@ -81,7 +81,7 @@ trunk_layers  = [1] + N_LAYERS * [TRUNK_WIDTH]  + [A * P_LATENT]
 
 # Weights of the best trial so far. Seeded from an existing checkpoint so a
 # resumed sweep does not overwrite a better run.
-CKPT_PATH  = f"trained_models/lr_search/{model_name}.pkl"
+CKPT_PATH  = f"trained_models/lr_search/{size}/{model_name}.pkl"
 _incumbent = {"val_ARE": float("inf")}
 if os.path.exists(CKPT_PATH):
     with open(CKPT_PATH, "rb") as f:
@@ -193,7 +193,7 @@ def objective(trial):
 if __name__ == "__main__":
     study = optuna.create_study(
         storage=f"sqlite:///{model_name}_lr_search.db",
-        study_name=f"{model_name}_lr_search",
+        study_name=f"{model_name}_{size}_lr_search",
         direction="minimize",
         sampler=optuna.samplers.GridSampler({"lr_config": list(LR_CANDIDATES)}),
         pruner=optuna.pruners.MedianPruner(
