@@ -49,7 +49,7 @@ P_LATENT   = 100
 # ---------------------------------------------------------------------------
 # Load datasets once outside the objective
 # ---------------------------------------------------------------------------
-size = "medium"
+size = "small"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
