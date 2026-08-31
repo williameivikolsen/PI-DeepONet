@@ -71,7 +71,7 @@ model = PI_DeepONet_Angular(
     x_sensors=ds['x'], X=X_slab,
     lambda_data=0.7, lambda_res=0.25, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
-    activation="relu"   # string name -> saved in config -> reconstructed on load
+    activation="tanh"   # string name -> saved in config -> reconstructed on load
 )
 print(f"\nInstantiated PI_DeepONet_Angular  (branch {branch_layers}, trunk {trunk_layers})")
 
