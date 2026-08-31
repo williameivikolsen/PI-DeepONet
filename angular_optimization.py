@@ -188,7 +188,7 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(
-        storage=f"sqlite:///{model_name}_lr_search.db",
+        storage=f"sqlite:///unnormalized_optimization.db",
         study_name=f"{model_name}_tanh_lr_search",
         direction="minimize",
         sampler=optuna.samplers.GridSampler({"lr_config": list(LR_CANDIDATES)}),
