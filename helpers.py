@@ -8,6 +8,21 @@ def load_model(path: str):
     with open(path, "rb") as f:
         ckpt = pickle.load(f)
     cfg = dict(ckpt["config"])
+
+    # Checkpoints written before the normalization removal carry an
+    # output_scale (and possibly a Q_ref) in their config, and their weights
+    # emit psi/output_scale. The current models have no such parameters and
+    # work in raw physical units, so such a checkpoint cannot be loaded
+    # without silently mis-scaling every prediction.
+    stale = [k for k in ("output_scale", "Q_ref") if k in cfg]
+    if stale:
+        raise ValueError(
+            f"{path}: config contains {', '.join(stale)}. This checkpoint "
+            f"predates the removal of normalization from the codebase; its "
+            f"weights were trained on scaled targets and are incompatible "
+            f"with the current un-normalized models. Retrain it."
+        )
+
     cfg["x_sensors"] = jnp.asarray(cfg["x_sensors"])
 
     is_PI = "N_angles" in cfg

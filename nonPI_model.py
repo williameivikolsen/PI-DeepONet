@@ -61,7 +61,7 @@ class DataGenerator(data.Dataset):
         return in_batch, out_batch
 
 
-def build_data_arrays(ds, normalize=True):
+def build_data_arrays(ds):
     """
     Flat arrays for the supervised phi_0 loss.
     """
@@ -73,16 +73,10 @@ def build_data_arrays(ds, normalize=True):
     x_flat   = np.tile(x, N)               # (N*J,)
     phi_flat = phi_0.reshape(-1)           # (N*J,)
 
-    if normalize:
-        phi_scale = float(np.mean(phi_flat))
-        phi_flat  = phi_flat / phi_scale
-    else:
-        phi_scale = 1.0
-
-    return (Q_flat, x_flat), phi_flat, phi_scale
+    return (Q_flat, x_flat), phi_flat
 
 
-def build_val_batch(ds, output_scale: float):
+def build_val_batch(ds):
     """
     Build a single validation (inputs, outputs) tuple.
     """
@@ -92,7 +86,7 @@ def build_val_batch(ds, output_scale: float):
     N, J  = Q.shape
     Q_flat   = np.repeat(Q, J, axis=0)
     x_flat   = np.tile(x, N)
-    phi_flat = (phi_0 / output_scale).reshape(-1)
+    phi_flat = phi_0.reshape(-1)
     return (Q_flat, x_flat), phi_flat
 
 
@@ -106,8 +100,6 @@ class DeepONet:
                  lr_decay_rate=0.9,
                  lr_transition_steps=5000,
                  lr_schedule=None,
-                 output_scale=1.0,
-                 Q_ref=None,
                  seed=None):
         # Network initialization and evaluation functions
         if isinstance(activation, str):
@@ -136,14 +128,6 @@ class DeepONet:
         # collocation points via jnp.interp inside residual_net.
         self.x_sensors = np.asarray(x_sensors)   # shape (J,)
         self.X         = float(X)                # slab length
-
-        # Output normalization constant.
-        # Network learns phi_0 / output_scale; predict_s multiplies back.
-        # Loss is computed on normalized values (targets already divided).
-        self.output_scale = float(output_scale)
-
-        # Reference source amplitude: mean(Q) on the training set.
-        self.Q_ref = None if Q_ref is None else float(Q_ref)
 
         # Learning rate.
         if lr_schedule is None:
@@ -257,28 +241,16 @@ class DeepONet:
     def val_ARE(self, params, val_batch):
         """
         Validation average relative error (%). Used by optimization.py as the
-        Optuna objective. Targets are already normalized by output_scale.
+        Optuna objective.
         """
-        (Q, x), phi_norm = val_batch
+        (Q, x), phi_true = val_batch
         phi_pred = vmap(self.operator_net, (None, 0, 0))(params, Q, x)
-        return np.mean(np.abs((phi_norm.flatten() - phi_pred) / phi_norm.flatten())) * 100.0
+        return np.mean(np.abs((phi_true.flatten() - phi_pred) / phi_true.flatten())) * 100.0
 
     @partial(jit, static_argnums=(0,))
     def predict_s(self, params, Q_star, x_star):
-        # Network is trained on phi_0 / output_scale, so multiply back
-        # to return predictions in the original (un-normalized) units.
         phi_fn = vmap(self.operator_net, (None, 0, 0))
-        if self.Q_ref is None:
-            return self.output_scale * phi_fn(params, Q_star, x_star)
-        # Homogeneity correction: evaluate at training
-        # amplitude, scale back by the per-sample amplitude ratio.
-        a = np.mean(Q_star, axis=1) / self.Q_ref
-        return self.output_scale * a * phi_fn(params, Q_star / a[:, None], x_star)
-
-    @partial(jit, static_argnums=(0,))
-    def predict_res(self, params, Q_star, Y_star):
-        r_pred = vmap(self.residual_net, (None, 0, 0, 0))(params, Q_star, Y_star[:, 0], Y_star[:, 1])
-        return r_pred
+        return phi_fn(params, Q_star, x_star)
 
     @partial(jit, static_argnums=(0,))
     def predict_phi0(self, params, Q_batch, x_points):
@@ -287,8 +259,4 @@ class DeepONet:
             in_axes=(None, 0),
         )
         phi0_all = vmap(f_for_one_Q, in_axes=(0, None))
-        if self.Q_ref is None:
-            return self.output_scale * phi0_all(Q_batch, x_points)
-        # Homogeneity correction: evaluate at training amplitude, scale back by a
-        a = np.mean(Q_batch, axis=1, keepdims=True) / self.Q_ref   # (N, 1)
-        return self.output_scale * a * phi0_all(Q_batch / a, x_points)
+        return phi0_all(Q_batch, x_points)

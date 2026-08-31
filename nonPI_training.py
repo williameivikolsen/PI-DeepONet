@@ -34,16 +34,14 @@ X_slab = 10.0
 Sigma_t, Sigma_s0, Sigma_s1 = 1.0, 0.5, 0.0
 J = int(ds['x'].shape[0])
 
-data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
-print(f"\nOutput normalization: phi_scale = {phi_scale:.6f}")
-print(f"  (network learns phi_0 / phi_scale; predict_s un-normalizes automatically)")
+data_in, data_out = build_data_arrays(ds)
 
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                              rng_key=random.PRNGKey(101))
 
 val_np = onp.load("datasets/M_Iso_val.npz")
 val_ds = {k: jnp.asarray(val_np[k]) for k in val_np.files}
-val_batch = build_val_batch(val_ds, output_scale=phi_scale)
+val_batch = build_val_batch(val_ds)
 print(f"Loaded validation set: {val_ds['Q'].shape[0]} sources")
 
 # branch_layers = [J, 250, 250, 250, 250, 100]
@@ -61,8 +59,6 @@ model = DeepONet(
     x_sensors=ds['x'], X=X_slab,
     lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
     lr_schedule=lr_schedule,
-    output_scale=phi_scale,
-    Q_ref=float(jnp.mean(ds['Q'])),
 )
 print(f"Learning rate: {lr_config}")
 print(f"\nInstantiated DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
@@ -134,8 +130,6 @@ with open(f"trained_models/training_testing/{size}/{model_name}.pkl", "wb") as f
             "Sigma_s1":      Sigma_s1,
             "x_sensors":     onp.asarray(ds['x']),
             "X":             X_slab,
-            "output_scale":  phi_scale,
-            "Q_ref":         model.Q_ref,
         },
         "loss_log":      model.loss_log,
         "val_ARE_log":   model.val_ARE_log,

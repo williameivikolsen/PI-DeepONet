@@ -38,12 +38,9 @@ Sigma_t, Sigma_s0, Sigma_s1 = 1.0, 0.5, 0.0
 J = int(ds['x'].shape[0])
 A = int(ds['mu_GL'].shape[0])
 
-# --- Supervised psi data arrays (psi at GL nodes, normalized by phi_scale) ---
-data_in, data_out, phi_scale = build_psi_data_arrays(ds, normalize=True)
-print(f"\nFlux normalization: phi_scale = {phi_scale:.6f}")
-print(f"  Network learns psi/phi_scale; data loss supervises psi at GL nodes;")
-print(f"  residual uses Q/phi_scale; predict_s un-normalizes.")
-print(f"  psi-supervision points: {data_out.shape[0]}  (= N*J, each carrying an A-vector target)")
+# --- Supervised psi data arrays (psi at GL nodes) ---
+data_in, data_out = build_psi_data_arrays(ds)
+print(f"\npsi-supervision points: {data_out.shape[0]}  (= N*J, each carrying an A-vector target)")
 
 # --- Physics collocation sets: identical construction to training.py ---
 bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=1000)
@@ -52,7 +49,7 @@ res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=1000)
 # --- Validation set (phi_0 form; ARE on phi_0 as in training.py) ---
 val_np = onp.load("datasets/M_Iso_val.npz")
 val_ds = {k: jnp.asarray(val_np[k]) for k in val_np.files}
-val_batch = build_psi_val_batch(val_ds, output_scale=phi_scale)
+val_batch = build_psi_val_batch(val_ds)
 print(f"Loaded validation set: {val_ds['Q'].shape[0]} sources")
 
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
@@ -74,8 +71,6 @@ model = PI_DeepONet_Angular(
     x_sensors=ds['x'], X=X_slab,
     lambda_data=0.7, lambda_res=0.25, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
-    output_scale=phi_scale,
-    Q_ref=float(jnp.mean(ds['Q'])),
     activation="relu"   # string name -> saved in config -> reconstructed on load
 )
 print(f"\nInstantiated PI_DeepONet_Angular  (branch {branch_layers}, trunk {trunk_layers})")
@@ -95,7 +90,7 @@ GUARD_TOL = 1.0  # percentage points
 
 _are_valpath = float(model.val_ARE(model.params, val_batch))
 
-# predict_phi0 path on raw (un-normalized) validation data.
+# predict_phi0 path on the validation data.
 _phi_pred = onp.asarray(model.predict_phi0(model.params,
                                            jnp.asarray(val_ds['Q']),
                                            jnp.asarray(val_ds['x'])))
@@ -153,8 +148,6 @@ with open(out_path, "wb") as f:
             "Sigma_s1":      Sigma_s1,
             "x_sensors":     onp.asarray(ds['x']),
             "X":             X_slab,
-            "output_scale":  phi_scale,
-            "Q_ref":         model.Q_ref,
         },
         "loss_log":      model.loss_log,
         "loss_data_log": model.loss_data_log,

@@ -38,16 +38,12 @@ Sigma_t, Sigma_s0, Sigma_s1 = 1.0, 0.5, 0.0
 J = int(ds['x'].shape[0])
 A = int(ds['mu_GL'].shape[0])
 
-# --- Supervised phi_0 data arrays (scalar flux, normalized by phi_scale) ---
+# --- Supervised phi_0 data arrays (scalar flux) ---
 # Same vector-output trunk as PI_DeepONet_Angular (all A angles from one
 # forward pass), but the data loss supervises scalar phi_0 via GL
 # quadrature (PI_DeepONet_AngularScalar.loss_data), not the raw psi vector.
-data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
-print(f"\nFlux normalization: phi_scale = {phi_scale:.6f}")
-print(f"  Network learns psi/phi_scale (vector-output trunk); data loss")
-print(f"  supervises phi_0 = GL-quadrature(psi) against true phi_0;")
-print(f"  residual uses Q/phi_scale; predict_s un-normalizes.")
-print(f"  phi_0-supervision points: {data_out.shape[0]}  (= N*J, each a scalar target)")
+data_in, data_out = build_data_arrays(ds)
+print(f"\nphi_0-supervision points: {data_out.shape[0]}  (= N*J, each a scalar target)")
 
 # --- Physics collocation sets: identical construction to angular_training.py ---
 bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=1000)
@@ -56,7 +52,7 @@ res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=1000)
 # --- Validation set (phi_0 form; ARE on phi_0, same as the other models) ---
 val_np = onp.load("datasets/M_Iso_val.npz")
 val_ds = {k: jnp.asarray(val_np[k]) for k in val_np.files}
-val_batch = build_val_batch(val_ds, output_scale=phi_scale)
+val_batch = build_val_batch(val_ds)
 print(f"Loaded validation set: {val_ds['Q'].shape[0]} sources")
 
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
@@ -79,8 +75,6 @@ model = PI_DeepONet_AngularScalar(
     x_sensors=ds['x'], X=X_slab,
     lambda_data=0.7, lambda_res=0.25, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
-    output_scale=phi_scale,
-    Q_ref=float(jnp.mean(ds['Q'])),
     activation="relu"   # string name -> saved in config -> reconstructed on load
 )
 print(f"\nInstantiated PI_DeepONet_AngularScalar  (branch {branch_layers}, trunk {trunk_layers})")
@@ -157,8 +151,6 @@ with open(out_path, "wb") as f:
             "Sigma_s1":      Sigma_s1,
             "x_sensors":     onp.asarray(ds['x']),
             "X":             X_slab,
-            "output_scale":  phi_scale,
-            "Q_ref":         model.Q_ref,
         },
         "loss_log":      model.loss_log,
         "loss_data_log": model.loss_data_log,

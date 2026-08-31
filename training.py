@@ -37,16 +37,14 @@ X_slab = 10.0
 Sigma_t, Sigma_s0, Sigma_s1 = 1.0, 0.5, 0.0
 J = int(ds['x'].shape[0])
 
-data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
-print(f"\nFlux normalization: phi_scale = {phi_scale:.6f}")
-print(f"  Network learns psi/phi_scale; residual uses Q/phi_scale; predict_s un-normalizes.")
+data_in, data_out = build_data_arrays(ds)
 bcs_in,  bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=500)
 res_in,  res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=500)
 
 # Validation set (held out from training; used for best-params tracking)
 val_np = onp.load("datasets/M_Iso_val.npz")
 val_ds = {k: jnp.asarray(val_np[k]) for k in val_np.files}
-val_batch = build_val_batch(val_ds, output_scale=phi_scale)
+val_batch = build_val_batch(val_ds)
 print(f"Loaded validation set: {val_ds['Q'].shape[0]} sources")
 
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
@@ -67,8 +65,6 @@ model = PI_DeepONet(
     lambda_data=0.1, lambda_res=0.85, lambda_bcs=0.05,
     # lambda_data=0, lambda_res=0.9, lambda_bcs=0.1, # No data training
     lr_transition_steps=n_iter//10,
-    output_scale=phi_scale,
-    Q_ref=float(jnp.mean(ds['Q'])),
     activation="relu"
 )
 print(f"\nInstantiated PI_DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
@@ -95,8 +91,6 @@ with open("trained_models/training_testing/" + size + "/pideeponet_relu.pkl", "w
             "Sigma_s1":      Sigma_s1,
             "x_sensors":     onp.asarray(ds['x']),
             "X":             X_slab,
-            "output_scale":  phi_scale,
-            "Q_ref":         model.Q_ref,
         },
         "loss_log":      model.loss_log,
         "loss_data_log": model.loss_data_log,

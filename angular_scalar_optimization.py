@@ -69,10 +69,10 @@ N_ITER = int(D * E / B)
 LOG_EVERY = N_ITER // 100          # 100 validation points per trial
 
 # Data, collocation and validation arrays are identical for every trial.
-data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
+data_in, data_out = build_data_arrays(ds)
 bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=N_PER_SAMPLE)
 res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=N_PER_SAMPLE)
-val_batch = build_val_batch(val_ds, output_scale=phi_scale)
+val_batch = build_val_batch(val_ds)
 
 branch_layers = [J] + N_LAYERS * [BRANCH_WIDTH] + [P_LATENT]
 trunk_layers  = [1] + N_LAYERS * [TRUNK_WIDTH]  + [A * P_LATENT]
@@ -126,8 +126,6 @@ def objective(trial):
         x_sensors=ds['x'], X=X_slab,
         lambda_data=LAMBDA_DATA, lambda_res=LAMBDA_RES, lambda_bcs=LAMBDA_BCS,
         lr_schedule=learning_rate,
-        output_scale=phi_scale,
-        Q_ref=float(jnp.mean(ds['Q'])),
         activation="tanh",
         seed=1234,
     )
@@ -166,8 +164,6 @@ def objective(trial):
                     "Sigma_s1":      SIGMA_S1,
                     "x_sensors":     onp.asarray(ds['x']),
                     "X":             X_slab,
-                    "output_scale":  phi_scale,
-                    "Q_ref":         model.Q_ref,
                 },
                 "loss_log":      model.loss_log,
                 "loss_data_log": model.loss_data_log,

@@ -87,7 +87,7 @@ class DataGenerator(data.Dataset):
         return in_batch, out_batch
 
 
-def build_val_batch(ds, output_scale: float):
+def build_val_batch(ds):
     """
     Build a single validation (inputs, outputs) tuple.
     """
@@ -97,11 +97,11 @@ def build_val_batch(ds, output_scale: float):
     N, J  = Q.shape
     Q_flat   = np.repeat(Q, J, axis=0)
     x_flat   = np.tile(x, N)
-    phi_flat = (phi_0 / output_scale).reshape(-1)
+    phi_flat = phi_0.reshape(-1)
     return (Q_flat, x_flat), phi_flat
 
 
-def build_data_arrays(ds, normalize=True):
+def build_data_arrays(ds):
     """
     Flat arrays for the supervised phi_0 loss.
     """
@@ -113,13 +113,7 @@ def build_data_arrays(ds, normalize=True):
     x_flat   = np.tile(x, N)               # (N*J,)
     phi_flat = phi_0.reshape(-1)           # (N*J,)
 
-    if normalize:
-        phi_scale = float(np.mean(phi_flat))
-        phi_flat  = phi_flat / phi_scale
-    else:
-        phi_scale = 1.0
-
-    return (Q_flat, x_flat), phi_flat, phi_scale
+    return (Q_flat, x_flat), phi_flat
 
 
 def build_bcs_arrays(ds, X, n_per_sample=50,
@@ -199,8 +193,6 @@ class PI_DeepONet:
                  lr_decay_rate=0.9,
                  lr_transition_steps=2000,
                  lr_schedule=None,
-                 output_scale=1.0,
-                 Q_ref=None,
                  seed=None):
         activation, self.activation_name = resolve_activation(activation)
         self.activation = activation
@@ -233,11 +225,6 @@ class PI_DeepONet:
         # collocation points via jnp.interp inside residual_net.
         self.x_sensors = np.asarray(x_sensors)   # shape (J,)
         self.X         = float(X)                # slab length
-
-        self.output_scale = float(output_scale)
-
-        # Reference source amplitude: mean(Q) on the training set.
-        self.Q_ref = None if Q_ref is None else float(Q_ref)
 
         # Loss-term weights
         self.lambda_data = float(lambda_data)
@@ -295,7 +282,7 @@ class PI_DeepONet:
         psi_x     = grad(self.operator_net, argnums=2)(params, Q, x, mu)
 
         # Q(x) via linear interpolation on the sensor grid.
-        Q_x = np.interp(x, self.x_sensors, Q) / self.output_scale
+        Q_x = np.interp(x, self.x_sensors, Q)
 
         res = (
             mu * psi_x
@@ -430,7 +417,7 @@ class PI_DeepONet:
         """
         Validation average relative error (%). Used by optimization.py as the Optuna objective.
         """
-        (Q, x), phi_norm = val_batch
+        (Q, x), phi_true = val_batch
 
         def phi0_at(Q_i, x_j):
             psi_vec = vmap(
@@ -439,25 +426,17 @@ class PI_DeepONet:
             return np.dot(self.w_GL, psi_vec)
 
         phi_pred = vmap(phi0_at)(Q, x)
-        return np.mean(np.abs((phi_norm.flatten() - phi_pred) / phi_norm.flatten())) * 100.0
+        return np.mean(np.abs((phi_true.flatten() - phi_pred) / phi_true.flatten())) * 100.0
 
     # Evaluates predictions at test points
     @partial(jit, static_argnums=(0,))
     def predict_s(self, params, Q_star, Y_star):
-        # Network outputs psi_tilde = psi/output_scale; multiply back to eturn raw psi in original units
         psi_fn = vmap(self.operator_net, (None, 0, 0, 0))
-        if self.Q_ref is None:
-            psi_norm = psi_fn(params, Q_star, Y_star[:, 0], Y_star[:, 1])
-            return self.output_scale * psi_norm
-        # Homogeneity correction: evaluate at training amplitude, scale back by a
-        a = np.mean(Q_star, axis=1) / self.Q_ref
-        psi_norm = psi_fn(params, Q_star / a[:, None], Y_star[:, 0], Y_star[:, 1])
-        return self.output_scale * a * psi_norm
+        return psi_fn(params, Q_star, Y_star[:, 0], Y_star[:, 1])
 
     @partial(jit, static_argnums=(0,))
     def predict_res(self, params, Q_star, Y_star):
-        r_pred = vmap(self.residual_net, (None, 0, 0, 0))(params, Q_star, Y_star[:, 0], Y_star[:, 1])
-        return self.output_scale * r_pred
+        return vmap(self.residual_net, (None, 0, 0, 0))(params, Q_star, Y_star[:, 0], Y_star[:, 1])
 
     @partial(jit, static_argnums=(0,))
     def predict_phi0(self, params, Q_batch, x_points):
@@ -468,44 +447,34 @@ class PI_DeepONet:
             return np.dot(self.w_GL, psi_vec)
         phi0_for_one_Q = vmap(phi0_at, in_axes=(None, 0))
         phi0_all = vmap(phi0_for_one_Q, in_axes=(0, None))
-        if self.Q_ref is None:
-            return self.output_scale * phi0_all(Q_batch, x_points)
-        # Homogeneity correction: evaluate at training amplitude, scale back by a
-        a = np.mean(Q_batch, axis=1, keepdims=True) / self.Q_ref   # (N, 1)
-        return self.output_scale * a * phi0_all(Q_batch / a, x_points)
+        return phi0_all(Q_batch, x_points)
 
 
-def build_psi_data_arrays(ds, normalize=True):
+def build_psi_data_arrays(ds):
     """
     Flatten an angular-flux dataset into per-sample supervision with a full angular flux target
     """
     Q     = np.asarray(ds['Q'])        # (N, J)
     psi   = np.asarray(ds['psi'])      # (N, A, J)
-    phi_0 = np.asarray(ds['phi_0'])    # (N, J)
     x     = np.asarray(ds['x'])        # (J,)
 
     N, A, J = psi.shape
 
-    if normalize:
-        phi_scale = float(np.mean(phi_0))
-    else:
-        phi_scale = 1.0
-
     # psi is (N, A, J); we want one A-vector per (sample, x), so reorder to (N, J, A) and flatten the (N, J) axes -> (N*J, A).
-    psi_xa   = np.transpose(psi, (0, 2, 1))            # (N, J, A)
-    psi_flat = (psi_xa.reshape(N * J, A) / phi_scale)  # (N*J, A)
+    psi_xa   = np.transpose(psi, (0, 2, 1))   # (N, J, A)
+    psi_flat = psi_xa.reshape(N * J, A)       # (N*J, A)
 
     Q_flat = np.repeat(Q, J, axis=0)   # (N*J, J)
     x_flat = np.tile(x, N)             # (N*J,)
 
-    return (Q_flat, x_flat), psi_flat, phi_scale
+    return (Q_flat, x_flat), psi_flat
 
 
-def build_psi_val_batch(ds, output_scale: float):
+def build_psi_val_batch(ds):
     """
     Validation batch for the angular regime's best-params tracking.
     """
-    return build_val_batch(ds, output_scale=output_scale)
+    return build_val_batch(ds)
 
 
 class PI_DeepONet_Angular(PI_DeepONet):

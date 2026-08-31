@@ -68,8 +68,8 @@ N_ITER = int(D * E / B)
 LOG_EVERY = N_ITER // 100          # 100 validation points per trial
 
 # Data arrays are identical for every trial, so build them once.
-data_in, data_out, phi_scale = build_data_arrays(ds, normalize=True)
-val_batch = build_val_batch(val_ds, output_scale=phi_scale)
+data_in, data_out = build_data_arrays(ds)
+val_batch = build_val_batch(val_ds)
 
 # Weights of the best trial so far. Seeded from an existing checkpoint so a
 # resumed sweep does not overwrite a better run.
@@ -97,8 +97,6 @@ def objective(trial):
         Sigma_t=SIGMA_T, Sigma_s0=SIGMA_S0, Sigma_s1=SIGMA_S1,
         x_sensors=ds['x'], X=X_slab,
         lr_schedule=learning_rate,
-        output_scale=phi_scale,
-        Q_ref=float(jnp.mean(ds['Q'])),
         activation="relu",
         seed=1234,
     )
@@ -135,8 +133,6 @@ def objective(trial):
                     "Sigma_s1":      SIGMA_S1,
                     "x_sensors":     onp.asarray(ds['x']),
                     "X":             X_slab,
-                    "output_scale":  phi_scale,
-                    "Q_ref":         model.Q_ref,
                 },
                 "loss_log":      model.loss_log,
                 "val_ARE_log":   model.val_ARE_log,
