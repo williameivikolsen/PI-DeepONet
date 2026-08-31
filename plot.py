@@ -5,11 +5,13 @@ import seaborn as sns
 
 from helpers import load_model
 
-size = "small"
-file = "pideeponet_angular_relu"
+# size = "large"
+# file = "pideeponet_angular_relu"
 # file = "large_deeponet"
 
-CHECKPOINT = f"trained_models/{size}/{file}.pkl"
+# CHECKPOINT = f"trained_models/{size}/{file}.pkl"
+CHECKPOINT = f"trained_models/lr_search/tanh/pideeponet_angular.pkl"
+
 SAMPLE_IDX = 0
 
 SCENARIOS = [
@@ -71,5 +73,5 @@ fig.legend(handles, labels, loc="upper center", ncol=2, frameon=True,
            bbox_to_anchor=(0.5, 1.02))
 
 fig.tight_layout()
-# plt.savefig(f"results/{file}_samples.pdf", bbox_inches="tight")
+# plt.savefig(f"results/tanh_samples.pdf", bbox_inches="tight")
 plt.show()

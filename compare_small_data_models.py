@@ -8,9 +8,9 @@ from helpers import load_model
 size = "small"
 
 MODELS = [
-    ("PI DeepONet 1",  f"trained_models/{size}/pideeponet_angular_scalar_data_relu.pkl"),
-    ("PI DeepONet 2",  f"trained_models/{size}/pideeponet_angular_relu.pkl"),
-    ("Large DeepONet", f"trained_models/{size}/large_deeponet.pkl"),
+    ("PI DeepONet 1",  f"trained_models/training_testing/{size}/pideeponet_angular_scalar_data_relu.pkl"),
+    ("PI DeepONet 2",  f"trained_models/training_testing/{size}/pideeponet_angular_relu.pkl"),
+    ("Large DeepONet", f"trained_models/training_testing/{size}/large_deeponet.pkl"),
 ]
 SCENARIOS = [
     ("NS",  "datasets/test/M_Iso_test_NS.npz"),

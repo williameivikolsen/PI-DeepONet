@@ -8,8 +8,8 @@ from helpers import load_model
 size = "medium"
 
 MODELS = [
-    ("PI DeepONet 2",  f"trained_models/{size}/pideeponet_angular_relu.pkl"),
-    ("Large DeepONet", f"trained_models/{size}/large_deeponet.pkl"),
+    ("PI DeepONet 2",  f"trained_models/training_testing/{size}/pideeponet_angular_relu.pkl"),
+    ("Large DeepONet", f"trained_models/training_testing/{size}/large_deeponet.pkl"),
 ]
 SCENARIOS = [
     ("NS",  "datasets/test/M_Iso_test_NS.npz"),
@@ -69,5 +69,5 @@ fig.legend(handles, labels, loc="upper center", ncol=2, frameon=True,
            bbox_to_anchor=(0.5, 1.02))
 
 fig.tight_layout()
-plt.savefig(f"results/medium_comparison.pdf", bbox_inches="tight")
-# plt.show()
+# plt.savefig(f"results/medium_comparison.pdf", bbox_inches="tight")
+plt.show()
