@@ -5,12 +5,11 @@ import seaborn as sns
 
 from helpers import load_model
 
-# size = "large"
-# file = "pideeponet_angular_relu"
-# file = "large_deeponet"
+size = "large"
+file = "benchmark"
 
-# CHECKPOINT = f"trained_models/{size}/{file}.pkl"
-CHECKPOINT = f"trained_models/lr_search/tanh/pideeponet_angular.pkl"
+CHECKPOINT = f"trained_models/training_testing/{size}/{file}.pkl"
+# CHECKPOINT = f"trained_models/lr_search/tanh/pideeponet_angular.pkl"
 
 SAMPLE_IDX = 0
 

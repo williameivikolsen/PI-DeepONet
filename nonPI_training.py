@@ -35,6 +35,8 @@ Sigma_t, Sigma_s0, Sigma_s1 = 1.0, 0.5, 0.0
 J = int(ds['x'].shape[0])
 
 data_in, data_out = build_data_arrays(ds)
+Q_scale = float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))
+print(f"Branch input rescaling: Q_scale = {Q_scale:.6f}  (RMS of training Q)")
 
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                              rng_key=random.PRNGKey(101))
@@ -56,7 +58,7 @@ lr_schedule  = 3e-4
 model = DeepONet(
     branch_layers, trunk_layers,
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
-    x_sensors=ds['x'], X=X_slab,
+    x_sensors=ds['x'], X=X_slab, Q_scale=Q_scale,
     lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
     lr_schedule=lr_schedule,
 )
@@ -130,6 +132,7 @@ with open(f"trained_models/training_testing/{size}/{model_name}.pkl", "wb") as f
             "Sigma_s1":      Sigma_s1,
             "x_sensors":     onp.asarray(ds['x']),
             "X":             X_slab,
+            "Q_scale":       Q_scale,
         },
         "loss_log":      model.loss_log,
         "val_ARE_log":   model.val_ARE_log,

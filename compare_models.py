@@ -17,10 +17,10 @@ size = "large"
 # }
 
 checkpoints = {
-    "Benchmark":  f"trained_models/lr_search/{size}/benchmark.pkl",
-    "Large DeepONet":  f"trained_models/lr_search/{size}/large_deeponet.pkl",
-    "PI DeepONet 1": f"trained_models/lr_search/{size}/pideeponet_angular_scalar_data.pkl",
-    "PI DeepONet 2":  f"trained_models/lr_search/{size}/pideeponet_angular.pkl",
+    "Benchmark":  f"trained_models/training_testing/{size}/benchmark.pkl",
+    # "Large DeepONet":  f"trained_models/lr_search/{size}/large_deeponet.pkl",
+    # "PI DeepONet 1": f"trained_models/lr_search/{size}/pideeponet_angular_scalar_data.pkl",
+    # "PI DeepONet 2":  f"trained_models/lr_search/{size}/pideeponet_angular.pkl",
 }
 
 test_dir = "datasets/test"
