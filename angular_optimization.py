@@ -50,7 +50,7 @@ TRUNK_WIDTH  = 500
 LAMBDA_DATA, LAMBDA_RES, LAMBDA_BCS = 0.7, 0.25, 0.05
 N_PER_SAMPLE = 1000
 branch_activation = "relu"   # unbounded -> extrapolates in source amplitude
-trunk_activation  = "tanh"
+trunk_activation  = "gelu"
 
 size = "large"
 
