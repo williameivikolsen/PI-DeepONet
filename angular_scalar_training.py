@@ -44,10 +44,11 @@ A = int(ds['mu_GL'].shape[0])
 # quadrature (PI_DeepONet_AngularScalar.loss_data), not the raw psi vector.
 data_in, data_out = build_data_arrays(ds)
 # Branch input transform: (Q - Q_shift) / Q_scale. Constants come from the
-# TRAINING SET as a whole — never from the sample being evaluated. Swap the
-# commented line to test standardization instead of scale-only.
-Q_shift, Q_scale = 0.0, float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))              # scale-only
-# Q_shift, Q_scale = float(jnp.mean(ds['Q'])), float(jnp.std(ds['Q']))       # standardized
+# TRAINING SET as a whole — never from the sample being evaluated. Identity
+# while the branch is relu: relu absorbs a scale factor exactly, and a shift
+# would destroy the amplitude extrapolation the relu branch is there to give.
+Q_shift, Q_scale = 0.0, 1.0
+# Q_shift, Q_scale = 0.0, float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))   # for a bounded branch activation
 print(f"Branch input: (Q - {Q_shift:.6f}) / {Q_scale:.6f}")
 print(f"\nphi_0-supervision points: {data_out.shape[0]}  (= N*J, each a scalar target)")
 
