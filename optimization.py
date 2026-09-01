@@ -69,8 +69,12 @@ LOG_EVERY = N_ITER // 100          # 100 validation points per trial
 
 # Data arrays are identical for every trial, so build them once.
 data_in, data_out = build_data_arrays(ds)
-Q_scale = float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))
-print(f"Branch input rescaling: Q_scale = {Q_scale:.6f}  (RMS of training Q)")
+# Branch input transform: (Q - Q_shift) / Q_scale. Constants come from the
+# TRAINING SET as a whole — never from the sample being evaluated. Swap the
+# commented line to test standardization instead of scale-only.
+Q_shift, Q_scale = 0.0, float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))              # scale-only
+# Q_shift, Q_scale = float(jnp.mean(ds['Q'])), float(jnp.std(ds['Q']))       # standardized
+print(f"Branch input: (Q - {Q_shift:.6f}) / {Q_scale:.6f}")
 val_batch = build_val_batch(val_ds)
 
 # Weights of the best trial so far. Seeded from an existing checkpoint so a
@@ -97,7 +101,7 @@ def objective(trial):
     model = DeepONet(
         branch_layers, trunk_layers,
         Sigma_t=SIGMA_T, Sigma_s0=SIGMA_S0, Sigma_s1=SIGMA_S1,
-        x_sensors=ds['x'], X=X_slab, Q_scale=Q_scale,
+        x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
         lr_schedule=learning_rate,
         activation="relu",
         seed=1234,
@@ -135,6 +139,7 @@ def objective(trial):
                     "Sigma_s1":      SIGMA_S1,
                     "x_sensors":     onp.asarray(ds['x']),
                     "X":             X_slab,
+                    "Q_shift":       Q_shift,
                     "Q_scale":       Q_scale,
                 },
                 "loss_log":      model.loss_log,

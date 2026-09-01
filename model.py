@@ -186,7 +186,7 @@ def build_res_arrays(ds, X, n_per_sample=100,
 class PI_DeepONet:
     def __init__(self, branch_layers, trunk_layers, N_angles,
                  Sigma_t, Sigma_s0, Sigma_s1,
-                 x_sensors, X, Q_scale,
+                 x_sensors, X, Q_shift, Q_scale,
                  lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
                  activation=relu,
                  lr_init=1e-3,
@@ -226,8 +226,10 @@ class PI_DeepONet:
         self.x_sensors = np.asarray(x_sensors)   # shape (J,)
         self.X         = float(X)                # slab length
 
-        # Branch-input rescaling constant: RMS(Q) on the training set. Applied
-        # only where Q enters the branch; residual_net's source term keeps raw Q.
+        # Branch-input transform: (Q - Q_shift) / Q_scale, constants taken from
+        # the training set. Applied only where Q enters the branch; the source
+        # term in residual_net keeps raw Q.
+        self.Q_shift = float(Q_shift)
         self.Q_scale = float(Q_scale)
 
         # Loss-term weights
@@ -263,7 +265,7 @@ class PI_DeepONet:
     def operator_net(self, params, Q, x, mu):
         branch_params, trunk_params = params
         y = np.stack([x, mu])
-        B = self.branch_apply(branch_params, Q / self.Q_scale)
+        B = self.branch_apply(branch_params, (Q - self.Q_shift) / self.Q_scale)
         T = self.trunk_apply(trunk_params, y)
         outputs = np.sum(B * T)
         return outputs
@@ -490,7 +492,7 @@ class PI_DeepONet_Angular(PI_DeepONet):
         """
         branch_params, trunk_params = params
         y = np.atleast_1d(x)                       # trunk input is x only, shape (1,)
-        B = self.branch_apply(branch_params, Q / self.Q_scale)     # (p,)
+        B = self.branch_apply(branch_params, (Q - self.Q_shift) / self.Q_scale)   # (p,)
         T = self.trunk_apply(trunk_params, y)      # (A*p,)
         p = B.shape[0]
         T = T.reshape(self.N_angles, p)            # (A, p)

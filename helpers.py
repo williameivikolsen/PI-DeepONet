@@ -23,10 +23,11 @@ def load_model(path: str):
             f"with the current un-normalized models. Retrain it."
         )
 
-    # Checkpoints predating the branch-input rescaling were trained on raw Q,
-    # which is exactly Q_scale = 1.0. Supplying it keeps their predictions
+    # Checkpoints predating the branch-input transform were trained on raw Q,
+    # which is exactly (Q - 0.0) / 1.0. Supplying those keeps their predictions
     # faithful; the constructor takes no default, so a new checkpoint that
     # failed to record one fails loudly rather than silently picking a value.
+    cfg.setdefault("Q_shift", 0.0)
     cfg.setdefault("Q_scale", 1.0)
 
     cfg["x_sensors"] = jnp.asarray(cfg["x_sensors"])

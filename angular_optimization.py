@@ -72,8 +72,12 @@ LOG_EVERY = N_ITER // 100          # 100 validation points per trial
 # Data loss supervises the full psi vector at the GL nodes; validation ARE is
 # still measured on phi_0, as in angular_training.py.
 data_in, data_out = build_psi_data_arrays(ds)
-Q_scale = float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))
-print(f"Branch input rescaling: Q_scale = {Q_scale:.6f}  (RMS of training Q)")
+# Branch input transform: (Q - Q_shift) / Q_scale. Constants come from the
+# TRAINING SET as a whole — never from the sample being evaluated. Swap the
+# commented line to test standardization instead of scale-only.
+# Q_shift, Q_scale = 0.0, float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))              # scale-only
+Q_shift, Q_scale = float(jnp.mean(ds['Q'])), float(jnp.std(ds['Q']))       # standardized
+print(f"Branch input: (Q - {Q_shift:.6f}) / {Q_scale:.6f}")
 bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=N_PER_SAMPLE)
 res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=N_PER_SAMPLE)
 val_batch = build_psi_val_batch(val_ds)
@@ -127,7 +131,7 @@ def objective(trial):
         branch_layers, trunk_layers,
         N_angles=A,
         Sigma_t=SIGMA_T, Sigma_s0=SIGMA_S0, Sigma_s1=SIGMA_S1,
-        x_sensors=ds['x'], X=X_slab, Q_scale=Q_scale,
+        x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
         lambda_data=LAMBDA_DATA, lambda_res=LAMBDA_RES, lambda_bcs=LAMBDA_BCS,
         lr_schedule=learning_rate,
         activation="tanh",
@@ -168,6 +172,7 @@ def objective(trial):
                     "Sigma_s1":      SIGMA_S1,
                     "x_sensors":     onp.asarray(ds['x']),
                     "X":             X_slab,
+                    "Q_shift":       Q_shift,
                     "Q_scale":       Q_scale,
                 },
                 "loss_log":      model.loss_log,
@@ -192,7 +197,7 @@ def objective(trial):
 if __name__ == "__main__":
     study = optuna.create_study(
         storage=f"sqlite:///Q_normalized_optimization.db",
-        study_name=f"{model_name}_tanh_lr_search",
+        study_name=f"standardized_Q",
         direction="minimize",
         sampler=optuna.samplers.GridSampler({"lr_config": list(LR_CANDIDATES)}),
         pruner=optuna.pruners.MedianPruner(

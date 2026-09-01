@@ -93,7 +93,7 @@ def build_val_batch(ds):
 class DeepONet:
     def __init__(self, branch_layers, trunk_layers,
                  Sigma_t, Sigma_s0, Sigma_s1,
-                 x_sensors, X, Q_scale,
+                 x_sensors, X, Q_shift, Q_scale,
                  lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
                  activation=relu,
                  lr_init=1e-3,
@@ -129,8 +129,10 @@ class DeepONet:
         self.x_sensors = np.asarray(x_sensors)   # shape (J,)
         self.X         = float(X)                # slab length
 
-        # Branch-input rescaling constant: RMS(Q) on the training set. Applied
-        # only where Q enters the branch; callers pass Q in raw physical units.
+        # Branch-input transform: (Q - Q_shift) / Q_scale, constants taken from
+        # the training set. Applied only where Q enters the branch; callers pass
+        # Q in raw physical units.
+        self.Q_shift = float(Q_shift)
         self.Q_scale = float(Q_scale)
 
         # Learning rate.
@@ -160,7 +162,7 @@ class DeepONet:
     def operator_net(self, params, Q, x):
         branch_params, trunk_params = params
         y = np.atleast_1d(x)          # scalar → shape (1,)
-        B = self.branch_apply(branch_params, Q / self.Q_scale)
+        B = self.branch_apply(branch_params, (Q - self.Q_shift) / self.Q_scale)
         T = self.trunk_apply(trunk_params, y)
         return np.sum(B * T)
 

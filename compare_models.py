@@ -8,19 +8,9 @@ from helpers import load_model, r2_score, are
 
 size = "large"
 
-# checkpoints = {
-#     "Benchmark":  "trained_models/training_testing/" + size + "/benchmark.pkl",
-#     # "PI DeepONet 1": "trained_models/" + size + "/pideeponet_relu.pkl",
-#     "PI DeepONet 1": "trained_models/training_testing/" + size + "/pideeponet_angular_scalar_data_relu.pkl",
-#     "PI DeepONet 2":  "trained_models/training_testing/" + size + "/pideeponet_angular_relu.pkl",
-#     "Large DeepONet": "trained_models/training_testing/" + size + "/large_deeponet.pkl",
-# }
-
 checkpoints = {
     "Benchmark":  f"trained_models/training_testing/{size}/benchmark.pkl",
-    # "Large DeepONet":  f"trained_models/lr_search/{size}/large_deeponet.pkl",
-    # "PI DeepONet 1": f"trained_models/lr_search/{size}/pideeponet_angular_scalar_data.pkl",
-    # "PI DeepONet 2":  f"trained_models/lr_search/{size}/pideeponet_angular.pkl",
+    "Angular PI DeepONet": f"trained_models/lr_search/tanh/pideeponet_angular.pkl",
 }
 
 test_dir = "datasets/test"

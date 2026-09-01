@@ -38,8 +38,12 @@ Sigma_t, Sigma_s0, Sigma_s1 = 1.0, 0.5, 0.0
 J = int(ds['x'].shape[0])
 
 data_in, data_out = build_data_arrays(ds)
-Q_scale = float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))
-print(f"Branch input rescaling: Q_scale = {Q_scale:.6f}  (RMS of training Q)")
+# Branch input transform: (Q - Q_shift) / Q_scale. Constants come from the
+# TRAINING SET as a whole — never from the sample being evaluated. Swap the
+# commented line to test standardization instead of scale-only.
+Q_shift, Q_scale = 0.0, float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))              # scale-only
+# Q_shift, Q_scale = float(jnp.mean(ds['Q'])), float(jnp.std(ds['Q']))       # standardized
+print(f"Branch input: (Q - {Q_shift:.6f}) / {Q_scale:.6f}")
 bcs_in,  bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=500)
 res_in,  res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=500)
 
@@ -63,7 +67,7 @@ model = PI_DeepONet(
     branch_layers, trunk_layers,
     N_angles=16,
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
-    x_sensors=ds['x'], X=X_slab, Q_scale=Q_scale,
+    x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
     lambda_data=0.1, lambda_res=0.85, lambda_bcs=0.05,
     # lambda_data=0, lambda_res=0.9, lambda_bcs=0.1, # No data training
     lr_transition_steps=n_iter//10,
@@ -93,6 +97,7 @@ with open("trained_models/training_testing/" + size + "/pideeponet_relu.pkl", "w
             "Sigma_s1":      Sigma_s1,
             "x_sensors":     onp.asarray(ds['x']),
             "X":             X_slab,
+            "Q_shift":       Q_shift,
             "Q_scale":       Q_scale,
         },
         "loss_log":      model.loss_log,
