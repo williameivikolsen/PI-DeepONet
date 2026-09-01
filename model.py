@@ -188,18 +188,21 @@ class PI_DeepONet:
                  Sigma_t, Sigma_s0, Sigma_s1,
                  x_sensors, X, Q_shift, Q_scale,
                  lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
-                 activation=relu,
+                 branch_activation=relu,
+                 trunk_activation=relu,
                  lr_init=1e-3,
                  lr_decay_rate=0.9,
                  lr_transition_steps=2000,
                  lr_schedule=None,
                  seed=None):
-        activation, self.activation_name = resolve_activation(activation)
-        self.activation = activation
+        branch_activation, self.branch_activation_name = resolve_activation(branch_activation)
+        trunk_activation,  self.trunk_activation_name  = resolve_activation(trunk_activation)
+        self.branch_activation = branch_activation
+        self.trunk_activation  = trunk_activation
 
         # Network initialization and evaluation functions
-        self.branch_init, self.branch_apply = MLP(branch_layers, activation=activation)
-        self.trunk_init, self.trunk_apply = MLP(trunk_layers, activation=activation)
+        self.branch_init, self.branch_apply = MLP(branch_layers, activation=branch_activation)
+        self.trunk_init, self.trunk_apply = MLP(trunk_layers, activation=trunk_activation)
         self.N_angles = N_angles
 
         # Initialize Parameters (use seed for reproducible init per trial)

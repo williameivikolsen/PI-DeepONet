@@ -49,7 +49,8 @@ BRANCH_WIDTH = 250
 TRUNK_WIDTH  = 500
 LAMBDA_DATA, LAMBDA_RES, LAMBDA_BCS = 0.7, 0.25, 0.05
 N_PER_SAMPLE = 1000
-activation   = "gelu"
+branch_activation = "relu"   # unbounded -> extrapolates in source amplitude
+trunk_activation  = "tanh"
 
 size = "large"
 
@@ -88,7 +89,7 @@ trunk_layers  = [1] + N_LAYERS * [TRUNK_WIDTH]  + [A * P_LATENT]
 
 # Weights of the best trial so far. Seeded from an existing checkpoint so a
 # resumed sweep does not overwrite a better run.
-CKPT_PATH  = f"trained_models/lr_search/tanh/{model_name}.pkl"
+CKPT_PATH  = f"trained_models/lr_search/{branch_activation}_{trunk_activation}/{model_name}.pkl"
 _incumbent = {"val_ARE": float("inf")}
 if os.path.exists(CKPT_PATH):
     with open(CKPT_PATH, "rb") as f:
@@ -135,7 +136,8 @@ def objective(trial):
         x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
         lambda_data=LAMBDA_DATA, lambda_res=LAMBDA_RES, lambda_bcs=LAMBDA_BCS,
         lr_schedule=learning_rate,
-        activation=activation,
+        branch_activation=branch_activation,
+        trunk_activation=trunk_activation,
         seed=1234,
     )
 
@@ -164,7 +166,8 @@ def objective(trial):
                 "params": model.params,
                 "config": {
                     "model_type":    "angular_vec",
-                    "activation":    model.activation_name,
+                    "branch_activation": model.branch_activation_name,
+                    "trunk_activation":  model.trunk_activation_name,
                     "branch_layers": branch_layers,
                     "trunk_layers":  trunk_layers,
                     "N_angles":      A,
@@ -197,8 +200,8 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(
-        storage=f"sqlite:///Q_normalized_optimization.db",
-        study_name=activation,
+        storage=f"sqlite:///activation_studies.db",
+        study_name=f"{branch_activation}_{trunk_activation}",
         direction="minimize",
         sampler=optuna.samplers.GridSampler({"lr_config": list(LR_CANDIDATES)}),
         pruner=optuna.pruners.MedianPruner(

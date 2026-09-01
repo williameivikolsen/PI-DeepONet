@@ -27,6 +27,13 @@ def load_model(path: str):
     # which is exactly (Q - 0.0) / 1.0. Supplying those keeps their predictions
     # faithful; the constructor takes no default, so a new checkpoint that
     # failed to record one fails loudly rather than silently picking a value.
+    # Checkpoints written before branch/trunk activations were split used one
+    # activation for both nets, so mapping it to both is faithful.
+    if "activation" in cfg:
+        act = cfg.pop("activation")
+        cfg.setdefault("branch_activation", act)
+        cfg.setdefault("trunk_activation", act)
+
     cfg.setdefault("Q_shift", 0.0)
     cfg.setdefault("Q_scale", 1.0)
 

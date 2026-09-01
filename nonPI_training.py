@@ -128,7 +128,8 @@ with open(f"trained_models/training_testing/{size}/{model_name}.pkl", "wb") as f
     pickle.dump({
         "params": model.params,
         "config": {
-            "activation":    model.activation_name,
+            "branch_activation": model.branch_activation_name,
+            "trunk_activation":  model.trunk_activation_name,
             "branch_layers": branch_layers,
             "trunk_layers":  trunk_layers,
             "Sigma_t":       Sigma_t,

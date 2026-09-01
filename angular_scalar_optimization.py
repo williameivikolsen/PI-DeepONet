@@ -48,6 +48,8 @@ BRANCH_WIDTH = 250
 TRUNK_WIDTH  = 500
 LAMBDA_DATA, LAMBDA_RES, LAMBDA_BCS = 0.7, 0.25, 0.05
 N_PER_SAMPLE = 1000
+branch_activation = "relu"   # unbounded -> extrapolates in source amplitude
+trunk_activation  = "tanh"
 
 size = "large"
 
@@ -132,7 +134,8 @@ def objective(trial):
         x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
         lambda_data=LAMBDA_DATA, lambda_res=LAMBDA_RES, lambda_bcs=LAMBDA_BCS,
         lr_schedule=learning_rate,
-        activation="tanh",
+        branch_activation=branch_activation,
+        trunk_activation=trunk_activation,
         seed=1234,
     )
 
@@ -161,7 +164,8 @@ def objective(trial):
                 "params": model.params,
                 "config": {
                     "model_type":    "angular_vec_scalar_data",
-                    "activation":    model.activation_name,
+                    "branch_activation": model.branch_activation_name,
+                    "trunk_activation":  model.trunk_activation_name,
                     "branch_layers": branch_layers,
                     "trunk_layers":  trunk_layers,
                     "N_angles":      A,

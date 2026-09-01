@@ -9,6 +9,17 @@ from jax.nn import relu, tanh, gelu, softplus, sigmoid, elu, swish
 ACTIVATIONS = {"relu": relu, "tanh": tanh, "gelu": gelu, "softplus": softplus,
                "sigmoid": sigmoid, "elu": elu, "swish": swish, "silu": swish}
 _ACT_TO_NAME = {f: n for n, f in ACTIVATIONS.items()}
+
+
+def resolve_activation(activation):
+    if isinstance(activation, str):
+        if activation not in ACTIVATIONS:
+            raise ValueError(
+                f"Unknown activation name '{activation}'. "
+                f"Known: {sorted(ACTIVATIONS)}"
+            )
+        return ACTIVATIONS[activation], activation
+    return activation, _ACT_TO_NAME.get(activation, "custom")
 from numpy.polynomial.legendre import leggauss
 import optax 
 from torch.utils import data
@@ -95,20 +106,20 @@ class DeepONet:
                  Sigma_t, Sigma_s0, Sigma_s1,
                  x_sensors, X, Q_shift, Q_scale,
                  lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,
-                 activation=relu,
+                 branch_activation=relu,
+                 trunk_activation=relu,
                  lr_init=1e-3,
                  lr_decay_rate=0.9,
                  lr_transition_steps=5000,
                  lr_schedule=None,
                  seed=None):
         # Network initialization and evaluation functions
-        if isinstance(activation, str):
-            self.activation_name = activation
-            activation = ACTIVATIONS[activation]
-        else:
-            self.activation_name = _ACT_TO_NAME.get(activation, "relu")
-        self.branch_init, self.branch_apply = MLP(branch_layers, activation=activation)
-        self.trunk_init, self.trunk_apply = MLP(trunk_layers, activation=activation)
+        branch_activation, self.branch_activation_name = resolve_activation(branch_activation)
+        trunk_activation,  self.trunk_activation_name  = resolve_activation(trunk_activation)
+        self.branch_activation = branch_activation
+        self.trunk_activation  = trunk_activation
+        self.branch_init, self.branch_apply = MLP(branch_layers, activation=branch_activation)
+        self.trunk_init, self.trunk_apply = MLP(trunk_layers, activation=trunk_activation)
 
         # Initialize Parameters (use seed for reproducible init per trial)
         if seed is None:

@@ -81,7 +81,8 @@ model = PI_DeepONet_AngularScalar(
     x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
     lambda_data=0.7, lambda_res=0.25, lambda_bcs=0.05,
     lr_transition_steps=n_iter // 10,
-    activation="tanh"   # string name -> saved in config -> reconstructed on load
+    branch_activation="relu",   # unbounded -> extrapolates in source amplitude
+    trunk_activation="tanh",    # names are saved in config and reconstructed on load
 )
 print(f"\nInstantiated PI_DeepONet_AngularScalar  (branch {branch_layers}, trunk {trunk_layers})")
 
@@ -142,13 +143,14 @@ if _fail:
 print("  guard passed: restored params reproduce best_val_ARE on both paths.\n")
 
 os.makedirs("trained_models/training_testing/" + size, exist_ok=True)
-out_path = "trained_models/training_testing/" + size + "/pideeponet_angular_scalar_data_" + model.activation_name + ".pkl"
+out_path = "trained_models/training_testing/" + size + "/pideeponet_angular_scalar_data_" + model.branch_activation_name + "_" + model.trunk_activation_name + ".pkl"
 with open(out_path, "wb") as f:
     pickle.dump({
         "params": model.params,
         "config": {
             "model_type":    "angular_vec_scalar_data",
-            "activation":    model.activation_name,
+            "branch_activation": model.branch_activation_name,
+            "trunk_activation":  model.trunk_activation_name,
             "branch_layers": branch_layers,
             "trunk_layers":  trunk_layers,
             "N_angles":      A,

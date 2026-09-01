@@ -103,7 +103,8 @@ def objective(trial):
         Sigma_t=SIGMA_T, Sigma_s0=SIGMA_S0, Sigma_s1=SIGMA_S1,
         x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
         lr_schedule=learning_rate,
-        activation="relu",
+        branch_activation="relu",
+        trunk_activation="relu",
         seed=1234,
     )
 
@@ -131,7 +132,8 @@ def objective(trial):
             pickle.dump({
                 "params": model.params,
                 "config": {
-                    "activation":    model.activation_name,
+                    "branch_activation": model.branch_activation_name,
+                    "trunk_activation":  model.trunk_activation_name,
                     "branch_layers": branch_layers,
                     "trunk_layers":  trunk_layers,
                     "Sigma_t":       SIGMA_T,

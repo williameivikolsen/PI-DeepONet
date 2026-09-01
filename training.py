@@ -71,7 +71,8 @@ model = PI_DeepONet(
     lambda_data=0.1, lambda_res=0.85, lambda_bcs=0.05,
     # lambda_data=0, lambda_res=0.9, lambda_bcs=0.1, # No data training
     lr_transition_steps=n_iter//10,
-    activation="relu"
+    branch_activation="relu",
+    trunk_activation="tanh",
 )
 print(f"\nInstantiated PI_DeepONet  (branch {branch_layers}, trunk {trunk_layers})")
 
@@ -88,7 +89,8 @@ with open("trained_models/training_testing/" + size + "/pideeponet_relu.pkl", "w
     pickle.dump({
         "params": model.params,
         "config": {
-            "activation": model.activation_name,
+            "branch_activation": model.branch_activation_name,
+            "trunk_activation":  model.trunk_activation_name,
             "branch_layers": branch_layers,
             "trunk_layers":  trunk_layers,
             "N_angles":      16,
