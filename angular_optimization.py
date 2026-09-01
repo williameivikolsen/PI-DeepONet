@@ -49,6 +49,7 @@ BRANCH_WIDTH = 250
 TRUNK_WIDTH  = 500
 LAMBDA_DATA, LAMBDA_RES, LAMBDA_BCS = 0.7, 0.25, 0.05
 N_PER_SAMPLE = 1000
+activation   = "gelu"
 
 size = "large"
 
@@ -134,7 +135,7 @@ def objective(trial):
         x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
         lambda_data=LAMBDA_DATA, lambda_res=LAMBDA_RES, lambda_bcs=LAMBDA_BCS,
         lr_schedule=learning_rate,
-        activation="tanh",
+        activation=activation,
         seed=1234,
     )
 
@@ -197,7 +198,7 @@ def objective(trial):
 if __name__ == "__main__":
     study = optuna.create_study(
         storage=f"sqlite:///Q_normalized_optimization.db",
-        study_name=f"standardized_Q",
+        study_name=activation,
         direction="minimize",
         sampler=optuna.samplers.GridSampler({"lr_config": list(LR_CANDIDATES)}),
         pruner=optuna.pruners.MedianPruner(
