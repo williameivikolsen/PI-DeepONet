@@ -74,7 +74,7 @@ trunk_layers  = [1] + n_layers * [500] + [A * p_latent]
 lr_config    = "const_1e-4"
 lr_schedule  = 1e-4
 
-seed = 1234
+seed = 123
 
 model = PI_DeepONet_Angular(
     branch_layers, trunk_layers,
@@ -84,7 +84,7 @@ model = PI_DeepONet_Angular(
     lambda_data=0.7, lambda_res=0.25, lambda_bcs=0.05,
     lr_schedule=lr_schedule,
     branch_activation="relu",   # unbounded -> extrapolates in source amplitude
-    trunk_activation="gelu",    # names are saved in config and reconstructed on load
+    trunk_activation="tanh",    # names are saved in config and reconstructed on load
     seed=seed,
 )
 print(f"Learning rate: {lr_config}")

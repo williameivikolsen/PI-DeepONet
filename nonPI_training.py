@@ -125,7 +125,9 @@ if _fail:
 print("  guard passed: restored params reproduce best_val_ARE on both paths.\n")
 
 os.makedirs("trained_models/training_testing/" + size, exist_ok=True)
-with open(f"trained_models/training_testing/{size}/{model_name}.pkl", "wb") as f:
+out_path = (f"trained_models/training_testing/{size}/{model_name}_"
+            f"{model.branch_activation_name}_{model.trunk_activation_name}.pkl")
+with open(out_path, "wb") as f:
     pickle.dump({
         "params": model.params,
         "config": {
@@ -150,4 +152,4 @@ with open(f"trained_models/training_testing/{size}/{model_name}.pkl", "wb") as f
         "log_every": log_every,
         "lr_config": lr_config,
     }, f)
-print(f"Saved trained_models/training_testing/{size}/{model_name}.pkl")
+print("Saved " + out_path)

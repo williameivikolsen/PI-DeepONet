@@ -87,7 +87,7 @@ trunk_layers  = [1] + N_LAYERS * [TRUNK_WIDTH]  + [A * P_LATENT]
 
 # Weights of the best trial so far. Seeded from an existing checkpoint so a
 # resumed sweep does not overwrite a better run.
-CKPT_PATH  = f"trained_models/lr_search/{branch_activation}_{trunk_activation}/{model_name}.pkl"
+CKPT_PATH  = f"trained_models/lr_search/{size}/{model_name}_{branch_activation}_{trunk_activation}.pkl"
 _incumbent = {"val_ARE": float("inf")}
 if os.path.exists(CKPT_PATH):
     with open(CKPT_PATH, "rb") as f:

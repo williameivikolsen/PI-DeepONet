@@ -86,7 +86,9 @@ dt = time.time() - t0
 print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
 os.makedirs("trained_models/training_testing/" + size, exist_ok=True)
-with open("trained_models/training_testing/" + size + "/pideeponet_relu.pkl", "wb") as f:
+out_path = (f"trained_models/training_testing/{size}/pideeponet_"
+            f"{model.branch_activation_name}_{model.trunk_activation_name}.pkl")
+with open(out_path, "wb") as f:
     pickle.dump({
         "params": model.params,
         "config": {
@@ -114,4 +116,4 @@ with open("trained_models/training_testing/" + size + "/pideeponet_relu.pkl", "w
         "n_iter": n_iter,
         "log_every": log_every,
     }, f)
-print("Saved trained_models/training_testing/" + size + "/pideeponet.pkl")
+print("Saved " + out_path)

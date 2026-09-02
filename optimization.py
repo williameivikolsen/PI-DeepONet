@@ -44,6 +44,8 @@ LR_CANDIDATES = {
 
 arch = {"branch": [250, 250, 250, 250], "trunk": [500, 500, 500, 500]}
 model_name = "large_deeponet"
+branch_activation = "relu"
+trunk_activation  = "relu"
 P_LATENT   = 100
 
 # ---------------------------------------------------------------------------
@@ -80,7 +82,7 @@ val_batch = build_val_batch(val_ds)
 
 # Weights of the best trial so far. Seeded from an existing checkpoint so a
 # resumed sweep does not overwrite a better run.
-CKPT_PATH  = f"trained_models/lr_search/{size}/{model_name}.pkl"
+CKPT_PATH  = f"trained_models/lr_search/{size}/{model_name}_{branch_activation}_{trunk_activation}.pkl"
 _incumbent = {"val_ARE": float("inf")}
 if os.path.exists(CKPT_PATH):
     with open(CKPT_PATH, "rb") as f:
@@ -104,8 +106,8 @@ def objective(trial):
         Sigma_t=SIGMA_T, Sigma_s0=SIGMA_S0, Sigma_s1=SIGMA_S1,
         x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
         lr_schedule=learning_rate,
-        branch_activation="relu",
-        trunk_activation="relu",
+        branch_activation=branch_activation,
+        trunk_activation=trunk_activation,
         seed=1234,
     )
 

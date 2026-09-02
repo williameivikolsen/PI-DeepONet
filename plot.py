@@ -9,7 +9,7 @@ size = "large"
 file = "benchmark"
 
 # CHECKPOINT = f"trained_models/training_testing/{size}/{file}.pkl"
-CHECKPOINT = f"trained_models/lr_search/relu_gelu/pideeponet_angular.pkl"
+CHECKPOINT = "trained_models/training_testing/large/pideeponet_angular_relu_gelu_continued.pkl"
 
 SAMPLE_IDX = 0
 
