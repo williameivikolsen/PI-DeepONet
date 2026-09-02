@@ -53,6 +53,7 @@ LAMBDA_DATA, LAMBDA_RES, LAMBDA_BCS = 0.7, 0.25, 0.05
 N_PER_SAMPLE = 1000
 branch_activation = "relu"   # unbounded -> extrapolates in source amplitude
 trunk_activation  = "gelu"
+sweep_name        = "lowlr"
 
 size = "large"
 
@@ -198,7 +199,7 @@ def objective(trial):
 if __name__ == "__main__":
     study = optuna.create_study(
         storage=f"sqlite:///activation_studies.db",
-        study_name=f"{branch_activation}_{trunk_activation}",
+        study_name=f"{branch_activation}_{trunk_activation}_{sweep_name}",
         direction="minimize",
         sampler=optuna.samplers.GridSampler({"lr_config": list(LR_CANDIDATES)}),
         pruner=optuna.pruners.MedianPruner(
