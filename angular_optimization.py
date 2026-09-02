@@ -15,31 +15,33 @@ from model import (
 )
 
 LR_CANDIDATES = {
-    "const_1e-2": lambda n: 1e-2,
-    "const_3e-3": lambda n: 3e-3,
-    "const_1e-3": lambda n: 1e-3,      # what angular_training.py currently uses
-    "const_3e-4": lambda n: 3e-4,
-    "const_1e-4": lambda n: 1e-4,
-    "exp_1e-3_d0.9_report": lambda n: optax.exponential_decay(
-        init_value=1e-3, transition_steps=max(n // 10, 1), decay_rate=0.9),
-    "exp_1e-2_d0.9": lambda n: optax.exponential_decay(
-        init_value=1e-2, transition_steps=max(n // 10, 1), decay_rate=0.9),
-    "exp_1e-3_d0.9_fast": lambda n: optax.exponential_decay(
-        init_value=1e-3, transition_steps=max(n // 20, 1), decay_rate=0.9),
-    "exp_1e-3_d0.9_slow": lambda n: optax.exponential_decay(
-        init_value=1e-3, transition_steps=max(n // 5, 1), decay_rate=0.9),
-    "cosine_1e-3": lambda n: optax.cosine_decay_schedule(
-        init_value=1e-3, decay_steps=n, alpha=0.0),
-    "cosine_1e-2": lambda n: optax.cosine_decay_schedule(
-        init_value=1e-2, decay_steps=n, alpha=0.01),
-    "warmup_cosine_1e-2": lambda n: optax.warmup_cosine_decay_schedule(
-        init_value=1e-5, peak_value=1e-2,
-        warmup_steps=max(n // 20, 1), decay_steps=n, end_value=1e-5),
-    "step_1e-3": lambda n: optax.piecewise_constant_schedule(
-        init_value=1e-3,
-        boundaries_and_scales={int(0.5 * n): 0.1, int(0.75 * n): 0.1}),
-    "linear_1e-3": lambda n: optax.linear_schedule(
-        init_value=1e-3, end_value=1e-5, transition_steps=n),
+    # "const_1e-2": lambda n: 1e-2,
+    # "const_3e-3": lambda n: 3e-3,
+    # "const_1e-3": lambda n: 1e-3,      # what angular_training.py currently uses
+    # "const_3e-4": lambda n: 3e-4,
+    # "const_1e-4": lambda n: 1e-4,
+    "const_3e-5": lambda n: 3e-5,
+    "const_1e-5": lambda n: 1e-5,
+    # "exp_1e-3_d0.9_report": lambda n: optax.exponential_decay(
+    #     init_value=1e-3, transition_steps=max(n // 10, 1), decay_rate=0.9),
+    # "exp_1e-2_d0.9": lambda n: optax.exponential_decay(
+    #     init_value=1e-2, transition_steps=max(n // 10, 1), decay_rate=0.9),
+    # "exp_1e-3_d0.9_fast": lambda n: optax.exponential_decay(
+    #     init_value=1e-3, transition_steps=max(n // 20, 1), decay_rate=0.9),
+    # "exp_1e-3_d0.9_slow": lambda n: optax.exponential_decay(
+    #     init_value=1e-3, transition_steps=max(n // 5, 1), decay_rate=0.9),
+    # "cosine_1e-3": lambda n: optax.cosine_decay_schedule(
+    #     init_value=1e-3, decay_steps=n, alpha=0.0),
+    # "cosine_1e-2": lambda n: optax.cosine_decay_schedule(
+    #     init_value=1e-2, decay_steps=n, alpha=0.01),
+    # "warmup_cosine_1e-2": lambda n: optax.warmup_cosine_decay_schedule(
+    #     init_value=1e-5, peak_value=1e-2,
+    #     warmup_steps=max(n // 20, 1), decay_steps=n, end_value=1e-5),
+    # "step_1e-3": lambda n: optax.piecewise_constant_schedule(
+    #     init_value=1e-3,
+    #     boundaries_and_scales={int(0.5 * n): 0.1, int(0.75 * n): 0.1}),
+    # "linear_1e-3": lambda n: optax.linear_schedule(
+    #     init_value=1e-3, end_value=1e-5, transition_steps=n),
 }
 
 model_name   = "pideeponet_angular"
