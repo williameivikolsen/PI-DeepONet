@@ -27,7 +27,7 @@ print(f"Loaded datasets/{size}/M_Iso_train.npz")
 for k in ds:
     print(f"  {k:<10s} shape={tuple(ds[k].shape)}  dtype={ds[k].dtype}")
 
-E = 2000  # Epochs
+E = 2*2000  # Epochs
 B = 1000  # Batch size
 D = len(ds["Q"]) * len(ds["x"])   # N*J, matched to training.py (not N*J*A)
 n_iter = int(D * E / B)
@@ -71,16 +71,20 @@ n_layers      = 4
 branch_layers = [J] + n_layers * [250] + [p_latent]
 trunk_layers  = [1] + n_layers * [500] + [A * p_latent]
 
+lr_config    = "const_1e-4"
+lr_schedule  = 1e-4
+
 model = PI_DeepONet_Angular(
     branch_layers, trunk_layers,
     N_angles=A,
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
     x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
     lambda_data=0.7, lambda_res=0.25, lambda_bcs=0.05,
-    lr_transition_steps=n_iter // 10,
+    lr_schedule=lr_schedule,
     branch_activation="relu",   # unbounded -> extrapolates in source amplitude
-    trunk_activation="tanh",    # names are saved in config and reconstructed on load
+    trunk_activation="gelu",    # names are saved in config and reconstructed on load
 )
+print(f"Learning rate: {lr_config}")
 print(f"\nInstantiated PI_DeepONet_Angular  (branch {branch_layers}, trunk {trunk_layers})")
 
 print(f"\n--- Training for {n_iter} iterations ---")
@@ -160,6 +164,7 @@ with open(out_path, "wb") as f:
             "Q_shift":       Q_shift,
             "Q_scale":       Q_scale,
         },
+        "lr_config":     lr_config,
         "loss_log":      model.loss_log,
         "loss_data_log": model.loss_data_log,
         "loss_bcs_log":  model.loss_bcs_log,
