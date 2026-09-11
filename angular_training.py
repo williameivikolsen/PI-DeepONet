@@ -27,8 +27,8 @@ print(f"Loaded datasets/{size}/M_Iso_train.npz")
 for k in ds:
     print(f"  {k:<10s} shape={tuple(ds[k].shape)}  dtype={ds[k].dtype}")
 
-E = 2*2000  # Epochs
-B = 1000  # Batch size
+E = 2000  # Epochs
+B = 10000  # Batch size
 D = len(ds["Q"]) * len(ds["x"])   # N*J, matched to training.py (not N*J*A)
 n_iter = int(D * E / B)
 log_every = n_iter // 100

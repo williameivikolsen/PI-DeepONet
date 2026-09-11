@@ -17,21 +17,21 @@ from model import (
 LR_CANDIDATES = {
     # "const_1e-2": lambda n: 1e-2,
     # "const_3e-3": lambda n: 3e-3,
-    # "const_1e-3": lambda n: 1e-3,      # what angular_training.py currently uses
-    # "const_3e-4": lambda n: 3e-4,
-    # "const_1e-4": lambda n: 1e-4,
-    "const_3e-5": lambda n: 3e-5,
-    "const_1e-5": lambda n: 1e-5,
+    "const_1e-3": lambda n: 1e-3,
+    "const_3e-4": lambda n: 3e-4,
+    "const_1e-4": lambda n: 1e-4,
+    # "const_3e-5": lambda n: 3e-5,
+    # "const_1e-5": lambda n: 1e-5,
     # "exp_1e-3_d0.9_report": lambda n: optax.exponential_decay(
     #     init_value=1e-3, transition_steps=max(n // 10, 1), decay_rate=0.9),
     # "exp_1e-2_d0.9": lambda n: optax.exponential_decay(
     #     init_value=1e-2, transition_steps=max(n // 10, 1), decay_rate=0.9),
-    # "exp_1e-3_d0.9_fast": lambda n: optax.exponential_decay(
-    #     init_value=1e-3, transition_steps=max(n // 20, 1), decay_rate=0.9),
+    "exp_1e-3_d0.9_fast": lambda n: optax.exponential_decay(
+        init_value=1e-3, transition_steps=max(n // 20, 1), decay_rate=0.9),
     # "exp_1e-3_d0.9_slow": lambda n: optax.exponential_decay(
     #     init_value=1e-3, transition_steps=max(n // 5, 1), decay_rate=0.9),
-    # "cosine_1e-3": lambda n: optax.cosine_decay_schedule(
-    #     init_value=1e-3, decay_steps=n, alpha=0.0),
+    "cosine_1e-3": lambda n: optax.cosine_decay_schedule(
+        init_value=1e-3, decay_steps=n, alpha=0.0),
     # "cosine_1e-2": lambda n: optax.cosine_decay_schedule(
     #     init_value=1e-2, decay_steps=n, alpha=0.01),
     # "warmup_cosine_1e-2": lambda n: optax.warmup_cosine_decay_schedule(
@@ -53,7 +53,7 @@ LAMBDA_DATA, LAMBDA_RES, LAMBDA_BCS = 0.7, 0.25, 0.05
 N_PER_SAMPLE = 1000
 branch_activation = "relu"   # unbounded -> extrapolates in source amplitude
 trunk_activation  = "gelu"
-sweep_name        = "lowlr"
+sweep_name        = "B5000"
 
 size = "large"
 
@@ -68,11 +68,10 @@ J      = int(ds['x'].shape[0])
 A      = int(ds['mu_GL'].shape[0])
 SIGMA_T, SIGMA_S0, SIGMA_S1 = 1.0, 0.5, 0.0
 
-E      = 2000
-B      = 1000
-D      = len(ds["Q"]) * len(ds["x"])
-N_ITER = int(D * E / B)
+B      = 5000
+N_ITER = 100000
 LOG_EVERY = N_ITER // 100          # 100 validation points per trial
+print(f"Batch size {B}, {N_ITER} iterations per trial")
 
 data_in, data_out = build_psi_data_arrays(ds)
 Q_shift, Q_scale = 0.0, 1.0
@@ -87,7 +86,7 @@ trunk_layers  = [1] + N_LAYERS * [TRUNK_WIDTH]  + [A * P_LATENT]
 
 # Weights of the best trial so far. Seeded from an existing checkpoint so a
 # resumed sweep does not overwrite a better run.
-CKPT_PATH  = f"trained_models/lr_search/{size}/{model_name}_{branch_activation}_{trunk_activation}.pkl"
+CKPT_PATH  = f"trained_models/lr_search/{size}/{model_name}_{branch_activation}_{trunk_activation}_B{B}.pkl"
 _incumbent = {"val_ARE": float("inf")}
 if os.path.exists(CKPT_PATH):
     with open(CKPT_PATH, "rb") as f:

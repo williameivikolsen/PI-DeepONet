@@ -122,36 +122,28 @@ def build_bcs_arrays(ds, X, n_per_sample=50,
     Vacuum-BC evaluation points, with mu drawn from the Gauss-Legendre
     quadrature nodes.
 
-    Half the points are at x=0 with mu > 0 (incoming from left is zero),
-    the other half at x=X with mu < 0 (incoming from right is zero).
-    Target is zero for every point.
+    Every sample gets both boundaries: half of its points at x=0 with mu > 0
+    (incoming from left is zero), the other half at x=X with mu < 0 (incoming
+    from right is zero). Target is zero for every point.
     """
     Q    = np.asarray(ds['Q'])
     N, J = Q.shape
     total = N * n_per_sample
-    half  = total // 2
 
     mu_nodes, _ = leggauss(N_angles)
     mu_nodes = np.asarray(mu_nodes)
     pos_nodes = mu_nodes[mu_nodes > 0.0]      # left-boundary angles
     neg_nodes = mu_nodes[mu_nodes < 0.0]      # right-boundary angles
 
-    k1, k2 = random.split(rng_key)
-    mu_left  = random.choice(k1, pos_nodes, (half,))
-    mu_right = random.choice(k2, neg_nodes, (total - half,))
-
-    x_left   = np.zeros((half,))
-    x_right  = np.full((total - half,), X)
-
-    x_bc  = np.concatenate([x_left,  x_right])
-    mu_bc = np.concatenate([mu_left, mu_right])
     sample_idx = np.repeat(np.arange(N), n_per_sample)
+    is_left    = np.tile(np.arange(n_per_sample) % 2 == 0, N)
 
-    # Shuffle so that left/right halves are interleaved with sample indices.
-    perm = random.permutation(random.PRNGKey(7), total)
-    sample_idx = sample_idx[perm]
-    x_bc       = x_bc[perm]
-    mu_bc      = mu_bc[perm]
+    k1, k2 = random.split(rng_key)
+    mu_left  = random.choice(k1, pos_nodes, (total,))
+    mu_right = random.choice(k2, neg_nodes, (total,))
+
+    x_bc  = np.where(is_left, 0.0, X)
+    mu_bc = np.where(is_left, mu_left, mu_right)
 
     y = np.stack([x_bc, mu_bc], axis=-1)   # (total, 2)
     s = np.zeros((total,))
