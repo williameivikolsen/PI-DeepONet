@@ -2,7 +2,7 @@ import pickle
 import numpy as onp
 import matplotlib.pyplot as plt
 
-CHECKPOINT = "trained_models/lr_search/relu_gelu/pideeponet_angular.pkl"
+CHECKPOINT = "trained_models/training_testing/large/pideeponet_angular_relu_tanh_seed123.pkl"
 
 ckpt = pickle.load(open(CHECKPOINT, "rb"))
 cfg = ckpt["config"]

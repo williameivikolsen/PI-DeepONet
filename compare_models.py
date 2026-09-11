@@ -10,7 +10,7 @@ size = "large"
 
 checkpoints = {
     "Benchmark":  f"trained_models/training_testing/{size}/benchmark.pkl",
-    "Angular PI DeepONet": "trained_models/training_testing/large/pideeponet_angular_relu_gelu_continued.pkl",
+    "Angular PI DeepONet": "trained_models/training_testing/large/pideeponet_angular_relu_tanh_seed123_continued.pkl",
 }
 
 test_dir = "datasets/test"

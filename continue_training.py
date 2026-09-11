@@ -20,7 +20,7 @@ from model import (
 
 print(jax.devices())
 
-CHECKPOINT = "trained_models/training_testing/large/pideeponet_angular_relu_tanh_seed123.pkl"
+CHECKPOINT = "trained_models/training_testing/large/pideeponet_angular_relu_tanh_seed123_continued.pkl"
 OUT_PATH   = "trained_models/training_testing/large/pideeponet_angular_relu_tanh_seed123_continued.pkl"
 
 # The checkpoint config does NOT record the learning rate, so load_model rebuilds
