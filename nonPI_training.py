@@ -24,10 +24,10 @@ ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
 for k in ds:
     print(f"  {k:<10s} shape={tuple(ds[k].shape)}  dtype={ds[k].dtype}")
 
-E = 2000 # Epochs
 B = 1000 # Batch size
-D = len(ds["Q"])*len(ds["x"]) # Number of points in dataset
-n_iter = int(D*E/B)
+# Iteration budget set directly rather than as D*E/B, so changing B changes the
+# gradient quality, not the number of steps.
+n_iter = 100000
 log_every = n_iter//100
 
 X_slab = 10.0

@@ -48,28 +48,28 @@ def MLP(layers, activation=relu):
 
     return init, apply
 
+@partial(jit, static_argnums=(3,))
+def _sample_batch(key, inputs, output, batch_size):
+    # Memory helper
+    idx = random.choice(key, output.shape[0], (batch_size,), replace=False)
+    in_batch  = tuple(arr[idx] for arr in inputs)
+    out_batch = output[idx]
+    return in_batch, out_batch
+
+
 class DataGenerator(data.Dataset):
     def __init__(self, inputs, output, batch_size=1024,
                  rng_key=random.PRNGKey(1234)):
-        # Initialization
-        self.inputs     = inputs
-        self.output     = output
-        self.N          = output.shape[0]
+        self.inputs     = tuple(np.asarray(arr) for arr in inputs)
+        self.output     = np.asarray(output)
+        self.N          = self.output.shape[0]
         self.batch_size = batch_size
         self.key        = rng_key
 
     def __getitem__(self, index):
         # Generate one batch of data
         self.key, subkey = random.split(self.key)
-        return self._batch(subkey)
-
-    @partial(jit, static_argnums=(0,))
-    def _batch(self, key):
-        # Generates data containing batch_size samples
-        idx = random.choice(key, self.N, (self.batch_size,), replace=False)
-        in_batch  = tuple(arr[idx] for arr in self.inputs)
-        out_batch = self.output[idx]
-        return in_batch, out_batch
+        return _sample_batch(subkey, self.inputs, self.output, self.batch_size)
 
 
 def build_data_arrays(ds):

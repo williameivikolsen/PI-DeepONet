@@ -30,16 +30,16 @@ OUT_PATH   = "trained_models/training_testing/large/pideeponet_angular_relu_tanh
 lr_config    = "const_1e-4"
 lr_schedule  = 1e-4
 
-E = 2000    # additional epochs
 B = 1000    # batch size
+# Additional iterations, set directly rather than as D*E/B, so changing B changes
+# the gradient quality, not the number of steps.
+n_iter = 100000
 
 size = "large"
 
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
 
-D = len(ds["Q"]) * len(ds["x"])
-n_iter = int(D * E / B)
 log_every = n_iter // 100
 
 X_slab = 10.0
@@ -82,7 +82,7 @@ bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
 res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
                              rng_key=random.PRNGKey(313), branch_table=res_Q)
 
-print(f"\n--- Continuing for {n_iter} iterations ({E} epochs) ---")
+print(f"\n--- Continuing for {n_iter} iterations ---")
 t0 = time.time()
 model.train(data_dataset, bcs_dataset, res_dataset,
             nIter=n_iter, log_every=log_every,

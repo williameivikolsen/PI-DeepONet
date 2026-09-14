@@ -27,10 +27,8 @@ print(f"Loaded datasets/M_Iso_train.npz")
 for k in ds:
     print(f"  {k:<10s} shape={tuple(ds[k].shape)}  dtype={ds[k].dtype}")
 
-E = 2000 # Epochs
 B = 1000 # Batch size
-D = len(ds["Q"])*len(ds["x"]) # Number of points in dataset
-n_iter = int(D*E/B)
+n_iter = 2000
 log_every = n_iter//100
 
 X_slab = 10.0

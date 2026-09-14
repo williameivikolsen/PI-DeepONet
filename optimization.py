@@ -63,10 +63,8 @@ X_slab = 10.0
 J      = int(ds['x'].shape[0])
 SIGMA_T, SIGMA_S0, SIGMA_S1 = 1.0, 0.5, 0.0
 
-E      = 2000
 B      = 1000
-D      = len(ds["Q"]) * len(ds["x"])
-N_ITER = int(D * E / B)
+N_ITER = 2000
 LOG_EVERY = N_ITER // 100          # 100 validation points per trial
 
 # Data arrays are identical for every trial, so build them once.

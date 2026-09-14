@@ -64,10 +64,10 @@ J      = int(ds['x'].shape[0])
 A      = int(ds['mu_GL'].shape[0])
 SIGMA_T, SIGMA_S0, SIGMA_S1 = 1.0, 0.5, 0.0
 
-E      = 2000
 B      = 1000
-D      = len(ds["Q"]) * len(ds["x"])
-N_ITER = int(D * E / B)
+# Iteration budget set directly rather than as D*E/B, so changing B changes the
+# gradient quality, not the number of steps.
+N_ITER = 100_000
 LOG_EVERY = N_ITER // 100          # 100 validation points per trial
 
 # Data, collocation and validation arrays are identical for every trial.

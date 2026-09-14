@@ -54,37 +54,36 @@ def MLP(layers, activation=relu):
 
     return init, apply
 
+@partial(jit, static_argnums=(4,))
+def _sample_batch(key, inputs, output, branch_table, batch_size):
+    # Memory helper
+    idx = random.choice(key, output.shape[0], (batch_size,), replace=False)
+    if branch_table is None:
+        in_batch = tuple(arr[idx] for arr in inputs)
+    else:
+        branch_idx = inputs[0][idx]                    # (batch,)
+        branch     = branch_table[branch_idx]          # (batch, J)
+        rest       = tuple(arr[idx] for arr in inputs[1:])
+        in_batch   = (branch,) + rest
+    out_batch = output[idx]
+    return in_batch, out_batch
+
+
 class DataGenerator(data.Dataset):
     def __init__(self, inputs, output, batch_size=1024,
                  rng_key=random.PRNGKey(1234), branch_table=None):
-        # Initialization
-        self.inputs     = inputs
-        self.output     = output
-        self.N          = output.shape[0]
+        self.inputs     = tuple(np.asarray(arr) for arr in inputs)
+        self.output     = np.asarray(output)
+        self.N          = self.output.shape[0]
         self.batch_size = batch_size
         self.key        = rng_key
-        self.branch_table = branch_table
+        self.branch_table = None if branch_table is None else np.asarray(branch_table)
 
     def __getitem__(self, index):
         # Generate one batch of data
         self.key, subkey = random.split(self.key)
-        return self._batch(subkey)
-
-    @partial(jit, static_argnums=(0,))
-    def _batch(self, key):
-        # Generates data containing batch_size samples
-        idx = random.choice(key, self.N, (self.batch_size,), replace=False)
-        if self.branch_table is None:
-            in_batch = tuple(arr[idx] for arr in self.inputs)
-        else:
-            # inputs[0] is an index array; gather the actual branch rows from
-            # the unique table. Remaining inputs are sliced normally.
-            branch_idx = self.inputs[0][idx]               # (batch,)
-            branch     = self.branch_table[branch_idx]     # (batch, J)
-            rest       = tuple(arr[idx] for arr in self.inputs[1:])
-            in_batch   = (branch,) + rest
-        out_batch = self.output[idx]
-        return in_batch, out_batch
+        return _sample_batch(subkey, self.inputs, self.output,
+                             self.branch_table, self.batch_size)
 
 
 def build_val_batch(ds):
