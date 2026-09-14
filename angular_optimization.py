@@ -1,4 +1,17 @@
 import os
+import sys
+import fcntl
+import subprocess
+import time
+
+# Run plainly, this script is the LAUNCHER: it starts one worker per GPU in
+# CARDS, waits for them, and prints the results. It never trains itself, so it
+# keeps JAX on the CPU. A worker is this same script, started by the launcher
+# with SWEEP_LRS set and CUDA_VISIBLE_DEVICES pinned to one card.
+_ENV0  = dict(os.environ)
+WORKER = "SWEEP_LRS" in os.environ
+if not WORKER:
+    os.environ["JAX_PLATFORMS"] = "cpu"
 os.environ.setdefault("CUDA_VISIBLE_DEVICES", "1")
 os.environ.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
 import pickle
@@ -19,7 +32,7 @@ from model import (
 LR_CANDIDATES = {
     # "const_1e-2": lambda n: 1e-2,
     # "const_3e-3": lambda n: 3e-3,
-    "const_1e-3": lambda n: 1e-3,
+    # "const_1e-3": lambda n: 1e-3,
     "const_3e-4": lambda n: 3e-4,
     "const_1e-4": lambda n: 1e-4,
     # "const_3e-5": lambda n: 3e-5,
@@ -56,6 +69,14 @@ N_PER_SAMPLE = 1000
 branch_activation = "relu"   # unbounded -> extrapolates in source amplitude
 trunk_activation  = "tanh"
 sweep_name        = "B5000"
+CARDS             = [1, 2, 3, 4, 5, 6, 7]   # GPUs the launcher may use, one worker per card
+
+STUDY_NAME = f"{branch_activation}_{trunk_activation}_{sweep_name}"
+# Workers write to one SQLite file at the same time; a generous busy timeout makes
+# a write wait for the lock instead of failing the trial with "database is locked".
+STORAGE    = optuna.storages.RDBStorage(
+    "sqlite:///activation_studies.db", engine_kwargs={"connect_args": {"timeout": 60}})
+LOG_DIR    = "logs"
 
 size = "large"
 
@@ -86,14 +107,13 @@ val_batch = build_psi_val_batch(val_ds)
 branch_layers = [J] + N_LAYERS * [BRANCH_WIDTH] + [P_LATENT]
 trunk_layers  = [1] + N_LAYERS * [TRUNK_WIDTH]  + [A * P_LATENT]
 
-# Weights of the best trial so far. Seeded from an existing checkpoint so a
-# resumed sweep does not overwrite a better run.
+# Weights of the best trial so far. Several workers write here, so whether to
+# keep a trial is decided against this file itself, under a lock (see objective).
 CKPT_PATH  = f"trained_models/lr_search/{size}/{model_name}_{branch_activation}_{trunk_activation}_B{B}.pkl"
-_incumbent = {"val_ARE": float("inf")}
 if os.path.exists(CKPT_PATH):
     with open(CKPT_PATH, "rb") as f:
-        _incumbent["val_ARE"] = float(pickle.load(f).get("val_ARE", float("inf")))
-    print(f"Existing checkpoint {CKPT_PATH}: val_ARE={_incumbent['val_ARE']:.3f}%")
+        print(f"Existing checkpoint {CKPT_PATH}: "
+              f"val_ARE={float(pickle.load(f).get('val_ARE', float('inf'))):.3f}%")
 
 
 def passes_guard(model, tol=1.0):
@@ -156,72 +176,126 @@ def objective(trial):
 
     val_ARE = float(model.best_val_ARE)
 
-    # Keep the weights of the best trial only
-    if val_ARE < _incumbent["val_ARE"] and passes_guard(model):
-        _incumbent["val_ARE"] = val_ARE
-        os.makedirs(os.path.dirname(CKPT_PATH), exist_ok=True)
-        with open(CKPT_PATH, "wb") as f:
-            pickle.dump({
-                "params": model.params,
-                "config": {
-                    "model_type":    "angular_vec",
-                    "branch_activation": model.branch_activation_name,
-                    "trunk_activation":  model.trunk_activation_name,
-                    "branch_layers": branch_layers,
-                    "trunk_layers":  trunk_layers,
-                    "N_angles":      A,
-                    "Sigma_t":       SIGMA_T,
-                    "Sigma_s0":      SIGMA_S0,
-                    "Sigma_s1":      SIGMA_S1,
-                    "x_sensors":     onp.asarray(ds['x']),
-                    "X":             X_slab,
-                    "Q_shift":       Q_shift,
-                    "Q_scale":       Q_scale,
-                },
-                "loss_log":      model.loss_log,
-                "loss_data_log": model.loss_data_log,
-                "loss_bcs_log":  model.loss_bcs_log,
-                "loss_res_log":  model.loss_res_log,
-                "val_ARE_log":   model.val_ARE_log,
-                "val_iter_log":  model.val_iter_log,
-                "n_iter":        N_ITER,
-                "log_every":     LOG_EVERY,
-                "model_name":    model_name,
-                "lr_config":     lr_name,
-                "val_ARE":       val_ARE,
-                "best_val_ARE":  val_ARE,
-                "best_val_iter": model.best_val_iter,
-            }, f)
-        print(f"  new best: {lr_name} at {val_ARE:.3f}% -> saved {CKPT_PATH}")
+    # Keep the weights of the best trial only. Workers on other cards write the
+    # same CKPT_PATH, so compare against the checkpoint on disk while holding an
+    # exclusive lock, not against this process's memory: otherwise a worker that
+    # finishes later could overwrite a better checkpoint from another card.
+    os.makedirs(os.path.dirname(CKPT_PATH), exist_ok=True)
+    with open(CKPT_PATH + ".lock", "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        best_on_disk = float("inf")
+        if os.path.exists(CKPT_PATH):
+            with open(CKPT_PATH, "rb") as f:
+                best_on_disk = float(pickle.load(f).get("val_ARE", float("inf")))
+        if val_ARE < best_on_disk and passes_guard(model):
+            with open(CKPT_PATH + ".tmp", "wb") as f:
+                pickle.dump({
+                    "params": model.params,
+                    "config": {
+                        "model_type":    "angular_vec",
+                        "branch_activation": model.branch_activation_name,
+                        "trunk_activation":  model.trunk_activation_name,
+                        "branch_layers": branch_layers,
+                        "trunk_layers":  trunk_layers,
+                        "N_angles":      A,
+                        "Sigma_t":       SIGMA_T,
+                        "Sigma_s0":      SIGMA_S0,
+                        "Sigma_s1":      SIGMA_S1,
+                        "x_sensors":     onp.asarray(ds['x']),
+                        "X":             X_slab,
+                        "Q_shift":       Q_shift,
+                        "Q_scale":       Q_scale,
+                    },
+                    "loss_log":      model.loss_log,
+                    "loss_data_log": model.loss_data_log,
+                    "loss_bcs_log":  model.loss_bcs_log,
+                    "loss_res_log":  model.loss_res_log,
+                    "val_ARE_log":   model.val_ARE_log,
+                    "val_iter_log":  model.val_iter_log,
+                    "n_iter":        N_ITER,
+                    "log_every":     LOG_EVERY,
+                    "model_name":    model_name,
+                    "lr_config":     lr_name,
+                    "val_ARE":       val_ARE,
+                    "best_val_ARE":  val_ARE,
+                    "best_val_iter": model.best_val_iter,
+                }, f)
+            os.replace(CKPT_PATH + ".tmp", CKPT_PATH)   # atomic: never a half-written file
+            print(f"  new best: {lr_name} at {val_ARE:.3f}% -> saved {CKPT_PATH}")
 
     return val_ARE
 
 
 if __name__ == "__main__":
-    study = optuna.create_study(
-        storage=f"sqlite:///activation_studies.db",
-        study_name=f"{branch_activation}_{trunk_activation}_{sweep_name}",
-        direction="minimize",
-        sampler=optuna.samplers.GridSampler({"lr_config": list(LR_CANDIDATES)}),
-        pruner=optuna.pruners.MedianPruner(
-            n_startup_trials=3,
-            n_warmup_steps=N_ITER // 5,   # let warmup schedules get going first
-            interval_steps=LOG_EVERY,
-        ),
-        load_if_exists=True,
-    )
-    study.optimize(objective, n_trials=len(LR_CANDIDATES))
+    TS = optuna.trial.TrialState
 
+    if WORKER:
+        # Run the learning rates the launcher assigned to this card, one after
+        # another. PartialFixedSampler pins lr_config for this process only, while
+        # the stored distribution keeps the full grid, so every worker shares one
+        # study. A crashing trial is recorded as FAIL and the worker moves on.
+        lrs = os.environ["SWEEP_LRS"].split(",")
+        print(f"Worker on CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}: {lrs}")
+        for lr in lrs:
+            study = optuna.load_study(
+                study_name=STUDY_NAME, storage=STORAGE,
+                sampler=optuna.samplers.PartialFixedSampler(
+                    {"lr_config": lr}, optuna.samplers.RandomSampler()),
+                pruner=optuna.pruners.MedianPruner(
+                    n_startup_trials=3,
+                    n_warmup_steps=N_ITER // 5,   # let warmup schedules get going first
+                    interval_steps=LOG_EVERY,
+                ),
+            )
+            study.optimize(objective, n_trials=1, catch=(Exception,))
+        sys.exit(0)
+
+    # Launcher. A learning rate counts as done once it has a COMPLETE or PRUNED
+    # trial. FAILed ones are run again (GridSampler used to treat them as done and
+    # skip them). RUNNING ones are left alone, in case another sweep is still
+    # working on them.
+    study = optuna.create_study(study_name=STUDY_NAME, storage=STORAGE,
+                                direction="minimize", load_if_exists=True)
+    done    = {t.params.get("lr_config") for t in study.trials if t.state in (TS.COMPLETE, TS.PRUNED)}
+    running = {t.params.get("lr_config") for t in study.trials if t.state == TS.RUNNING} - done
+    todo    = [lr for lr in LR_CANDIDATES if lr not in done and lr not in running]
+    print(f"\nStudy {STUDY_NAME}: {len(done & set(LR_CANDIDATES))} done, {len(todo)} to run"
+          + (f", skipping {sorted(running)} (marked RUNNING)" if running else ""))
+
+    os.makedirs(LOG_DIR, exist_ok=True)
+    workers = []
+    for i, card in enumerate(CARDS):
+        lrs = todo[i::len(CARDS)]            # round-robin over the cards
+        if not lrs:
+            continue
+        log_path = f"{LOG_DIR}/{STUDY_NAME}_gpu{card}.log"
+        env = {**_ENV0, "CUDA_VISIBLE_DEVICES": str(card),
+               "SWEEP_LRS": ",".join(lrs), "PYTHONUNBUFFERED": "1"}
+        log = open(log_path, "a")           # append: a relaunch must not erase a failed trial's traceback
+        log.write(f"\n===== launch {time.strftime('%Y-%m-%d %H:%M:%S')}: {', '.join(lrs)} =====\n")
+        log.flush()
+        proc = subprocess.Popen([sys.executable, os.path.abspath(__file__)], env=env,
+                                stdout=log, stderr=subprocess.STDOUT)
+        workers.append((card, proc))
+        print(f"  GPU {card}: {', '.join(lrs):<40s} pid {proc.pid}   log {log_path}")
+    for card, proc in workers:
+        proc.wait()
+        print(f"  GPU {card} worker exited with code {proc.returncode}")
+
+    study = optuna.load_study(study_name=STUDY_NAME, storage=STORAGE)
     print("\n--- Learning-rate sweep results (best validation ARE) ---")
-    finished = [t for t in study.trials
-                if t.state == optuna.trial.TrialState.COMPLETE]
+    finished = [t for t in study.trials if t.state == TS.COMPLETE]
     for t in sorted(finished, key=lambda t: t.value):
         print(f"  {t.params['lr_config']:<24s} {t.value:8.3f}%")
-    pruned = [t for t in study.trials
-              if t.state == optuna.trial.TrialState.PRUNED]
-    for t in pruned:
-        print(f"  {t.params['lr_config']:<24s}   pruned")
+    for t in study.trials:
+        if t.state == TS.PRUNED:
+            print(f"  {t.params['lr_config']:<24s}   pruned")
+    failed = ({t.params.get("lr_config") for t in study.trials if t.state == TS.FAIL}
+              - {t.params.get("lr_config") for t in study.trials if t.state in (TS.COMPLETE, TS.PRUNED)})
+    for lr in sorted(x for x in failed if x):
+        print(f"  {lr:<24s}   FAILED - launch again to retry (see its log)")
 
-    print("\nBest params:", study.best_params)
-    print(f"Best validation ARE: {study.best_value:.3f}%")
+    if finished:
+        print("\nBest params:", study.best_params)
+        print(f"Best validation ARE: {study.best_value:.3f}%")
     print(f"Best trial weights: {CKPT_PATH}")
