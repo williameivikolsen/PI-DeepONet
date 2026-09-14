@@ -1,0 +1,20 @@
+nohup: ignoring input
+[I 2026-09-14 14:04:14,204] Using an existing study with name 'relu_tanh_B5000' instead of creating a new one.
+Batch size 5000, 100000 iterations per trial
+Branch input: (Q - 0.000000) / 1.000000
+Existing checkpoint trained_models/lr_search/large/pideeponet_angular_relu_tanh_B5000.pkl: val_ARE=0.473%
+
+Study relu_tanh_B5000: 0 done, 4 to run
+  GPU 1: const_3e-4                               pid 901008   log logs/relu_tanh_B5000_gpu1.log
+  GPU 2: const_1e-4                               pid 901009   log logs/relu_tanh_B5000_gpu2.log
+  GPU 3: exp_1e-3_d0.9_fast                       pid 901010   log logs/relu_tanh_B5000_gpu3.log
+  GPU 4: cosine_1e-3                              pid 901011   log logs/relu_tanh_B5000_gpu4.log
+  GPU 1 worker exited with code 0
+  GPU 2 worker exited with code 0
+  GPU 3 worker exited with code 0
+  GPU 4 worker exited with code 0
+
+--- Learning-rate sweep results (best validation ARE) ---
+  const_1e-3                 FAILED - launch again to retry (see its log)
+  const_1e-4                 FAILED - launch again to retry (see its log)
+Best trial weights: trained_models/lr_search/large/pideeponet_angular_relu_tanh_B5000.pkl

@@ -1,0 +1,165 @@
+
+===== launch 2026-09-14 14:02:47: const_3e-4 =====
+Batch size 5000, 100000 iterations per trial
+Branch input: (Q - 0.000000) / 1.000000
+Existing checkpoint trained_models/lr_search/large/pideeponet_angular_relu_tanh_B5000.pkl: val_ARE=0.473%
+Worker on CUDA_VISIBLE_DEVICES=1: ['const_3e-4']
+/itf-fi-ml/home/williaeo/PI-DeepONet/angular_optimization.py:242: ExperimentalWarning: PartialFixedSampler is experimental (supported from v2.4.0). The interface can change in the future.
+  sampler=optuna.samplers.PartialFixedSampler(
+[W 2026-09-14 14:02:55,822] Trial 4 failed with parameters: {} because of the following error: ValueError('CategoricalDistribution does not support dynamic value space.').
+Traceback (most recent call last):
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/study/_optimize.py", line 206, in _run_trial
+    value_or_values = func(trial)
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/angular_optimization.py", line 141, in objective
+    lr_name = trial.suggest_categorical("lr_config", list(LR_CANDIDATES))
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/trial/_trial.py", line 414, in suggest_categorical
+    return self._suggest(name, CategoricalDistribution(choices=choices))
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/trial/_trial.py", line 649, in _suggest
+    storage.set_trial_param(trial_id, name, param_value_in_internal_repr, distribution)
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/storages/_cached_storage.py", line 167, in set_trial_param
+    self._backend._set_trial_param(
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/storages/_rdb/storage.py", line 597, in _set_trial_param
+    self._set_trial_param_without_commit(
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/storages/_rdb/storage.py", line 632, in _set_trial_param_without_commit
+    distributions.check_distribution_compatibility(previous_distribution, distribution)
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/distributions.py", line 656, in check_distribution_compatibility
+    raise ValueError(
+ValueError: CategoricalDistribution does not support dynamic value space.
+[W 2026-09-14 14:02:55,838] Trial 4 failed with value None.
+
+===== launch 2026-09-14 14:04:14: const_3e-4 =====
+Batch size 5000, 100000 iterations per trial
+Branch input: (Q - 0.000000) / 1.000000
+Existing checkpoint trained_models/lr_search/large/pideeponet_angular_relu_tanh_B5000.pkl: val_ARE=0.473%
+Worker on CUDA_VISIBLE_DEVICES=1: ['const_3e-4']
+/itf-fi-ml/home/williaeo/PI-DeepONet/angular_optimization.py:242: ExperimentalWarning: PartialFixedSampler is experimental (supported from v2.4.0). The interface can change in the future.
+  sampler=optuna.samplers.PartialFixedSampler(
+[W 2026-09-14 14:04:22,826] Trial 9 failed with parameters: {} because of the following error: ValueError('CategoricalDistribution does not support dynamic value space.').
+Traceback (most recent call last):
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/study/_optimize.py", line 206, in _run_trial
+    value_or_values = func(trial)
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/angular_optimization.py", line 141, in objective
+    lr_name = trial.suggest_categorical("lr_config", list(LR_CANDIDATES))
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/trial/_trial.py", line 414, in suggest_categorical
+    return self._suggest(name, CategoricalDistribution(choices=choices))
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/trial/_trial.py", line 649, in _suggest
+    storage.set_trial_param(trial_id, name, param_value_in_internal_repr, distribution)
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/storages/_cached_storage.py", line 167, in set_trial_param
+    self._backend._set_trial_param(
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/storages/_rdb/storage.py", line 597, in _set_trial_param
+    self._set_trial_param_without_commit(
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/storages/_rdb/storage.py", line 632, in _set_trial_param_without_commit
+    distributions.check_distribution_compatibility(previous_distribution, distribution)
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/optuna/distributions.py", line 656, in check_distribution_compatibility
+    raise ValueError(
+ValueError: CategoricalDistribution does not support dynamic value space.
+[W 2026-09-14 14:04:22,831] Trial 9 failed with value None.
+
+===== launch 2026-09-14 14:12:00: const_3e-4 =====
+Batch size 5000, 100000 iterations per trial
+Branch input: (Q - 0.000000) / 1.000000
+Existing checkpoint trained_models/lr_search/large/pideeponet_angular_relu_tanh_B5000.pkl: val_ARE=0.473%
+Worker on CUDA_VISIBLE_DEVICES=1: ['const_3e-4']
+Iter      0: L=5.240e+00  L_data=5.204e+00  L_bcs=1.671e+01  L_res=3.047e+00  val_ARE=34.866% *
+Iter   1000: L=3.181e-01  L_data=2.617e-01  L_bcs=1.412e+00  L_res=2.571e-01  val_ARE=8.552% *
+Iter   2000: L=1.057e-01  L_data=7.379e-02  L_bcs=3.456e-02  L_res=2.092e-01  val_ARE=3.389% *
+Iter   3000: L=9.433e-02  L_data=5.999e-02  L_bcs=4.954e-02  L_res=1.994e-01  val_ARE=3.004% *
+Iter   4000: L=8.771e-02  L_data=5.484e-02  L_bcs=5.094e-02  L_res=1.871e-01  val_ARE=2.736% *
+Iter   5000: L=1.159e-01  L_data=8.612e-02  L_bcs=2.856e-02  L_res=2.169e-01  val_ARE=3.982%
+Iter   6000: L=1.010e-01  L_data=6.838e-02  L_bcs=5.333e-02  L_res=2.020e-01  val_ARE=3.467%
+Iter   7000: L=1.011e-01  L_data=6.899e-02  L_bcs=5.611e-02  L_res=2.000e-01  val_ARE=3.410%
+Iter   8000: L=8.645e-02  L_data=5.492e-02  L_bcs=7.318e-03  L_res=1.905e-01  val_ARE=2.831%
+Iter   9000: L=8.599e-02  L_data=5.270e-02  L_bcs=7.367e-02  L_res=1.817e-01  val_ARE=2.726% *
+Iter  10000: L=8.306e-02  L_data=5.194e-02  L_bcs=4.249e-02  L_res=1.783e-01  val_ARE=2.737%
+Iter  11000: L=7.160e-02  L_data=4.251e-02  L_bcs=2.586e-03  L_res=1.669e-01  val_ARE=2.433% *
+Iter  12000: L=6.339e-02  L_data=3.243e-02  L_bcs=3.709e-03  L_res=1.620e-01  val_ARE=1.917% *
+Iter  13000: L=5.578e-02  L_data=2.785e-02  L_bcs=4.507e-03  L_res=1.443e-01  val_ARE=1.718% *
+Iter  14000: L=5.043e-02  L_data=2.368e-02  L_bcs=1.683e-03  L_res=1.351e-01  val_ARE=1.460% *
+Iter  15000: L=4.815e-02  L_data=2.118e-02  L_bcs=1.958e-02  L_res=1.294e-01  val_ARE=1.410% *
+Iter  16000: L=4.346e-02  L_data=1.880e-02  L_bcs=1.075e-02  L_res=1.190e-01  val_ARE=1.342% *
+Iter  17000: L=4.021e-02  L_data=1.830e-02  L_bcs=1.480e-02  L_res=1.067e-01  val_ARE=1.376%
+Iter  18000: L=1.174e-01  L_data=8.946e-02  L_bcs=3.349e-02  L_res=2.123e-01  val_ARE=3.996%
+Iter  19000: L=7.544e-02  L_data=4.497e-02  L_bcs=6.292e-03  L_res=1.746e-01  val_ARE=2.612%
+Iter  20000: L=6.359e-02  L_data=3.430e-02  L_bcs=2.855e-03  L_res=1.578e-01  val_ARE=2.164%
+Iter  21000: L=5.706e-02  L_data=2.854e-02  L_bcs=3.507e-03  L_res=1.476e-01  val_ARE=2.009%
+Iter  22000: L=4.799e-02  L_data=2.268e-02  L_bcs=2.062e-03  L_res=1.280e-01  val_ARE=1.589%
+Iter  23000: L=4.470e-02  L_data=1.970e-02  L_bcs=1.747e-03  L_res=1.233e-01  val_ARE=1.464%
+Iter  24000: L=4.455e-02  L_data=2.070e-02  L_bcs=2.645e-02  L_res=1.150e-01  val_ARE=1.428%
+Iter  25000: L=3.825e-02  L_data=1.713e-02  L_bcs=1.389e-03  L_res=1.047e-01  val_ARE=1.250% *
+Iter  26000: L=3.406e-02  L_data=1.366e-02  L_bcs=1.164e-03  L_res=9.774e-02  val_ARE=1.095% *
+Iter  27000: L=3.147e-02  L_data=1.248e-02  L_bcs=1.727e-03  L_res=9.061e-02  val_ARE=1.022% *
+Iter  28000: L=4.013e-02  L_data=1.975e-02  L_bcs=1.107e-02  L_res=1.030e-01  val_ARE=1.435%
+Iter  29000: L=2.809e-02  L_data=1.044e-02  L_bcs=1.716e-03  L_res=8.282e-02  val_ARE=0.920% *
+Iter  30000: L=2.628e-02  L_data=9.796e-03  L_bcs=4.264e-03  L_res=7.683e-02  val_ARE=0.885% *
+Iter  31000: L=2.440e-02  L_data=8.824e-03  L_bcs=2.537e-03  L_res=7.238e-02  val_ARE=0.835% *
+Iter  32000: L=4.601e-02  L_data=2.427e-02  L_bcs=1.037e-01  L_res=9.536e-02  val_ARE=1.811%
+Iter  33000: L=2.076e-02  L_data=7.404e-03  L_bcs=2.131e-03  L_res=6.189e-02  val_ARE=0.767% *
+Iter  34000: L=1.976e-02  L_data=6.817e-03  L_bcs=1.200e-03  L_res=5.970e-02  val_ARE=0.693% *
+Iter  35000: L=2.213e-02  L_data=8.875e-03  L_bcs=1.109e-02  L_res=6.146e-02  val_ARE=0.976%
+Iter  36000: L=2.136e-02  L_data=8.517e-03  L_bcs=7.676e-03  L_res=6.005e-02  val_ARE=0.864%
+Iter  37000: L=1.762e-02  L_data=5.863e-03  L_bcs=2.748e-03  L_res=5.350e-02  val_ARE=0.658% *
+Iter  38000: L=1.733e-02  L_data=5.936e-03  L_bcs=2.357e-03  L_res=5.222e-02  val_ARE=0.693%
+Iter  39000: L=1.692e-02  L_data=6.335e-03  L_bcs=6.818e-03  L_res=4.857e-02  val_ARE=0.792%
+Iter  40000: L=1.568e-02  L_data=5.647e-03  L_bcs=5.746e-03  L_res=4.575e-02  val_ARE=0.788%
+Iter  41000: L=3.218e-02  L_data=1.412e-02  L_bcs=1.535e-01  L_res=5.849e-02  val_ARE=1.719%
+Iter  42000: L=1.529e-02  L_data=5.471e-03  L_bcs=2.973e-03  L_res=4.524e-02  val_ARE=0.714%
+Iter  43000: L=1.414e-02  L_data=4.490e-03  L_bcs=2.264e-03  L_res=4.354e-02  val_ARE=0.646% *
+Iter  44000: L=1.695e-02  L_data=7.273e-03  L_bcs=5.126e-03  L_res=4.641e-02  val_ARE=0.908%
+Iter  45000: L=1.250e-02  L_data=4.110e-03  L_bcs=2.843e-03  L_res=3.790e-02  val_ARE=0.620% *
+Iter  46000: L=7.148e-02  L_data=4.103e-02  L_bcs=7.292e-03  L_res=1.696e-01  val_ARE=2.773%
+Iter  47000: L=5.290e-02  L_data=2.749e-02  L_bcs=2.797e-03  L_res=1.341e-01  val_ARE=2.261%
+Iter  48000: L=4.658e-02  L_data=2.262e-02  L_bcs=2.999e-02  L_res=1.170e-01  val_ARE=1.944%
+Iter  49000: L=3.848e-02  L_data=1.734e-02  L_bcs=6.496e-03  L_res=1.041e-01  val_ARE=1.584%
+Iter  50000: L=3.371e-02  L_data=1.365e-02  L_bcs=5.725e-03  L_res=9.547e-02  val_ARE=1.314%
+Iter  51000: L=3.092e-02  L_data=1.266e-02  L_bcs=2.510e-03  L_res=8.774e-02  val_ARE=1.130%
+Iter  52000: L=2.812e-02  L_data=1.069e-02  L_bcs=2.729e-03  L_res=8.198e-02  val_ARE=1.035%
+Iter  53000: L=2.780e-02  L_data=1.104e-02  L_bcs=1.213e-02  L_res=7.787e-02  val_ARE=1.185%
+Iter  54000: L=2.460e-02  L_data=8.960e-03  L_bcs=7.105e-03  L_res=7.189e-02  val_ARE=0.843%
+Iter  55000: L=2.296e-02  L_data=8.493e-03  L_bcs=2.862e-03  L_res=6.749e-02  val_ARE=0.893%
+Iter  56000: L=2.079e-02  L_data=7.449e-03  L_bcs=2.837e-03  L_res=6.172e-02  val_ARE=0.770%
+Iter  57000: L=2.018e-02  L_data=6.826e-03  L_bcs=5.617e-03  L_res=6.047e-02  val_ARE=0.740%
+Iter  58000: L=8.337e-02  L_data=5.536e-02  L_bcs=7.452e-03  L_res=1.770e-01  val_ARE=3.404%
+Iter  59000: L=6.113e-02  L_data=3.412e-02  L_bcs=3.861e-03  L_res=1.482e-01  val_ARE=3.021%
+Iter  60000: L=5.438e-02  L_data=3.005e-02  L_bcs=2.976e-03  L_res=1.328e-01  val_ARE=2.891%
+Iter  61000: L=4.386e-02  L_data=2.188e-02  L_bcs=9.719e-03  L_res=1.122e-01  val_ARE=2.645%
+Iter  62000: L=3.842e-02  L_data=1.696e-02  L_bcs=1.388e-03  L_res=1.059e-01  val_ARE=1.973%
+Iter  63000: L=3.568e-02  L_data=1.753e-02  L_bcs=1.149e-02  L_res=9.131e-02  val_ARE=1.754%
+Iter  64000: L=2.863e-02  L_data=1.246e-02  L_bcs=5.087e-03  L_res=7.861e-02  val_ARE=1.382%
+Iter  65000: L=2.540e-02  L_data=1.027e-02  L_bcs=7.212e-03  L_res=7.139e-02  val_ARE=1.279%
+Iter  66000: L=2.231e-02  L_data=9.519e-03  L_bcs=4.651e-03  L_res=6.164e-02  val_ARE=1.347%
+Iter  67000: L=1.862e-02  L_data=6.963e-03  L_bcs=7.173e-04  L_res=5.483e-02  val_ARE=0.927%
+Iter  68000: L=1.721e-02  L_data=6.153e-03  L_bcs=1.636e-03  L_res=5.127e-02  val_ARE=0.905%
+Iter  69000: L=1.613e-02  L_data=5.889e-03  L_bcs=7.125e-04  L_res=4.788e-02  val_ARE=0.839%
+Iter  70000: L=1.559e-02  L_data=5.341e-03  L_bcs=3.046e-03  L_res=4.678e-02  val_ARE=0.807%
+Iter  71000: L=1.793e-02  L_data=7.023e-03  L_bcs=2.275e-02  L_res=4.749e-02  val_ARE=1.016%
+Iter  72000: L=1.335e-02  L_data=4.625e-03  L_bcs=1.541e-03  L_res=4.016e-02  val_ARE=0.779%
+Iter  73000: L=1.578e-02  L_data=6.208e-03  L_bcs=1.552e-02  L_res=4.263e-02  val_ARE=0.927%
+Iter  74000: L=1.201e-02  L_data=3.876e-03  L_bcs=4.941e-04  L_res=3.710e-02  val_ARE=0.738%
+Iter  75000: L=1.229e-02  L_data=3.927e-03  L_bcs=9.707e-03  L_res=3.623e-02  val_ARE=0.747%
+Iter  76000: L=1.125e-02  L_data=3.910e-03  L_bcs=1.935e-03  L_res=3.367e-02  val_ARE=0.783%
+Iter  77000: L=1.163e-02  L_data=4.570e-03  L_bcs=1.774e-03  L_res=3.337e-02  val_ARE=1.079%
+Iter  78000: L=1.072e-02  L_data=3.898e-03  L_bcs=1.748e-03  L_res=3.161e-02  val_ARE=0.797%
+Iter  79000: L=5.934e-02  L_data=3.539e-02  L_bcs=4.196e-03  L_res=1.374e-01  val_ARE=2.631%
+Iter  80000: L=3.964e-02  L_data=1.958e-02  L_bcs=3.008e-03  L_res=1.031e-01  val_ARE=1.974%
+Iter  81000: L=3.016e-02  L_data=1.413e-02  L_bcs=8.740e-04  L_res=8.088e-02  val_ARE=1.653%
+Iter  82000: L=2.620e-02  L_data=1.116e-02  L_bcs=4.189e-03  L_res=7.272e-02  val_ARE=1.302%
+Iter  83000: L=2.328e-02  L_data=9.769e-03  L_bcs=2.972e-03  L_res=6.517e-02  val_ARE=1.203%
+Iter  84000: L=1.984e-02  L_data=7.473e-03  L_bcs=8.066e-04  L_res=5.828e-02  val_ARE=0.960%
+Iter  85000: L=1.874e-02  L_data=6.770e-03  L_bcs=9.099e-04  L_res=5.583e-02  val_ARE=0.907%
+Iter  86000: L=1.703e-02  L_data=5.902e-03  L_bcs=6.636e-04  L_res=5.144e-02  val_ARE=0.776%
+Iter  87000: L=1.618e-02  L_data=5.913e-03  L_bcs=1.463e-03  L_res=4.786e-02  val_ARE=0.895%
+Iter  88000: L=1.597e-02  L_data=6.389e-03  L_bcs=9.851e-04  L_res=4.578e-02  val_ARE=0.921%
+Iter  89000: L=1.623e-02  L_data=5.607e-03  L_bcs=1.888e-02  L_res=4.546e-02  val_ARE=0.806%
+Iter  90000: L=1.420e-02  L_data=4.543e-03  L_bcs=7.600e-04  L_res=4.391e-02  val_ARE=0.656%
+Iter  91000: L=1.378e-02  L_data=4.467e-03  L_bcs=6.169e-04  L_res=4.248e-02  val_ARE=0.639%
+Iter  92000: L=1.385e-02  L_data=4.289e-03  L_bcs=2.420e-03  L_res=4.289e-02  val_ARE=0.637%
+Iter  93000: L=1.489e-02  L_data=6.236e-03  L_bcs=2.621e-03  L_res=4.156e-02  val_ARE=1.023%
+Iter  94000: L=1.281e-02  L_data=4.270e-03  L_bcs=1.091e-03  L_res=3.906e-02  val_ARE=0.745%
+Iter  95000: L=1.215e-02  L_data=4.096e-03  L_bcs=2.235e-03  L_res=3.670e-02  val_ARE=0.678%
+Iter  96000: L=1.194e-02  L_data=3.740e-03  L_bcs=1.340e-03  L_res=3.703e-02  val_ARE=0.624%
+Iter  97000: L=1.191e-02  L_data=4.037e-03  L_bcs=6.197e-04  L_res=3.621e-02  val_ARE=0.744%
+Iter  98000: L=1.385e-02  L_data=5.306e-03  L_bcs=9.178e-03  L_res=3.870e-02  val_ARE=0.985%
+Iter  99000: L=1.166e-02  L_data=3.521e-03  L_bcs=1.590e-03  L_res=3.645e-02  val_ARE=0.665%
+
+Best validation ARE = 0.620% at iter 45000; restoring those params.
+[I 2026-09-14 15:39:13,683] Trial 0 finished with value: 0.6199159622192383 and parameters: {}. Best is trial 0 with value: 0.6199159622192383.
