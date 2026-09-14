@@ -68,7 +68,7 @@ LAMBDA_DATA, LAMBDA_RES, LAMBDA_BCS = 0.7, 0.25, 0.05
 N_PER_SAMPLE = 1000
 branch_activation = "relu"   # unbounded -> extrapolates in source amplitude
 trunk_activation  = "tanh"
-sweep_name        = "B5000"
+sweep_name        = "B5000"   # new study when the training setup changes; editing LR_CANDIDATES needs none
 CARDS             = [1, 2, 3, 4, 5, 6, 7]   # GPUs the launcher may use, one worker per card
 
 STUDY_NAME = f"{branch_activation}_{trunk_activation}_{sweep_name}"
@@ -137,8 +137,12 @@ def passes_guard(model, tol=1.0):
     return ok
 
 
-def objective(trial):
-    lr_name = trial.suggest_categorical("lr_config", list(LR_CANDIDATES))
+def objective(trial, lr_name):
+    # The learning rate is assigned by the launcher, not sampled, and recorded as
+    # a user attribute. As a categorical parameter it tied each study to one
+    # frozen list of candidates: after any edit to LR_CANDIDATES, Optuna refused
+    # new trials ("CategoricalDistribution does not support dynamic value space").
+    trial.set_user_attr("lr_config", lr_name)
     learning_rate = LR_CANDIDATES[lr_name](N_ITER)
 
     data_dataset = DataGenerator(data_in, data_out, batch_size=B,
@@ -226,28 +230,31 @@ def objective(trial):
     return val_ARE
 
 
+def lr_of(trial):
+    # Learning rate of a stored trial: a user attribute since the parallel sweep,
+    # a sampled parameter in trials from before it.
+    return trial.user_attrs.get("lr_config", trial.params.get("lr_config"))
+
+
 if __name__ == "__main__":
     TS = optuna.trial.TrialState
 
     if WORKER:
         # Run the learning rates the launcher assigned to this card, one after
-        # another. PartialFixedSampler pins lr_config for this process only, while
-        # the stored distribution keeps the full grid, so every worker shares one
-        # study. A crashing trial is recorded as FAIL and the worker moves on.
+        # another, all in the shared study. A crashing trial is recorded as FAIL
+        # and the worker moves on.
         lrs = os.environ["SWEEP_LRS"].split(",")
         print(f"Worker on CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}: {lrs}")
         for lr in lrs:
             study = optuna.load_study(
                 study_name=STUDY_NAME, storage=STORAGE,
-                sampler=optuna.samplers.PartialFixedSampler(
-                    {"lr_config": lr}, optuna.samplers.RandomSampler()),
                 pruner=optuna.pruners.MedianPruner(
                     n_startup_trials=3,
                     n_warmup_steps=N_ITER // 5,   # let warmup schedules get going first
                     interval_steps=LOG_EVERY,
                 ),
             )
-            study.optimize(objective, n_trials=1, catch=(Exception,))
+            study.optimize(lambda trial: objective(trial, lr), n_trials=1, catch=(Exception,))
         sys.exit(0)
 
     # Launcher. A learning rate counts as done once it has a COMPLETE or PRUNED
@@ -256,10 +263,10 @@ if __name__ == "__main__":
     # working on them.
     study = optuna.create_study(study_name=STUDY_NAME, storage=STORAGE,
                                 direction="minimize", load_if_exists=True)
-    done    = {t.params.get("lr_config") for t in study.trials if t.state in (TS.COMPLETE, TS.PRUNED)}
-    running = {t.params.get("lr_config") for t in study.trials if t.state == TS.RUNNING} - done
+    done    = {lr_of(t) for t in study.trials if t.state in (TS.COMPLETE, TS.PRUNED)}
+    running = {lr_of(t) for t in study.trials if t.state == TS.RUNNING} - done - {None}
     todo    = [lr for lr in LR_CANDIDATES if lr not in done and lr not in running]
-    print(f"\nStudy {STUDY_NAME}: {len(done & set(LR_CANDIDATES))} done, {len(todo)} to run"
+    print(f"\nStudy {STUDY_NAME}: done {sorted(done & set(LR_CANDIDATES))}, to run {todo}"
           + (f", skipping {sorted(running)} (marked RUNNING)" if running else ""))
 
     os.makedirs(LOG_DIR, exist_ok=True)
@@ -286,16 +293,16 @@ if __name__ == "__main__":
     print("\n--- Learning-rate sweep results (best validation ARE) ---")
     finished = [t for t in study.trials if t.state == TS.COMPLETE]
     for t in sorted(finished, key=lambda t: t.value):
-        print(f"  {t.params['lr_config']:<24s} {t.value:8.3f}%")
+        print(f"  {str(lr_of(t)):<24s} {t.value:8.3f}%")
     for t in study.trials:
         if t.state == TS.PRUNED:
-            print(f"  {t.params['lr_config']:<24s}   pruned")
-    failed = ({t.params.get("lr_config") for t in study.trials if t.state == TS.FAIL}
-              - {t.params.get("lr_config") for t in study.trials if t.state in (TS.COMPLETE, TS.PRUNED)})
+            print(f"  {str(lr_of(t)):<24s}   pruned")
+    failed = ({lr_of(t) for t in study.trials if t.state == TS.FAIL}
+              - {lr_of(t) for t in study.trials if t.state in (TS.COMPLETE, TS.PRUNED)})
     for lr in sorted(x for x in failed if x):
         print(f"  {lr:<24s}   FAILED - launch again to retry (see its log)")
 
     if finished:
-        print("\nBest params:", study.best_params)
+        print(f"\nBest learning rate: {lr_of(study.best_trial)}")
         print(f"Best validation ARE: {study.best_value:.3f}%")
     print(f"Best trial weights: {CKPT_PATH}")
