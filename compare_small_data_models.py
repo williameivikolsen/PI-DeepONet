@@ -1,3 +1,7 @@
+import os
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "1")
+os.environ.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
+
 import numpy as onp
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
