@@ -23,12 +23,12 @@ from model import (
 print(jax.devices())
 
 CHECKPOINT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued.pkl"
-OUT_PATH   = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued_continued.pkl"
+OUT_PATH   = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued_annealed.pkl"
 
 B = 5000    # batch size
 # Additional iterations, set directly rather than as D*E/B, so changing B changes
 # the gradient quality, not the number of steps.
-n_iter = 200000
+n_iter = 100000
 
 size = "large"
 
@@ -55,20 +55,27 @@ hp = ckpt.get("hyperparameters")
 if hp is None:
     raise SystemExit(f"{CHECKPOINT} records no hyperparameters (it predates the architecture "
                      f"search): set lr_schedule and the three loss weights by hand to continue it.")
-lr_schedule = hp["lr"]
-lr_config   = ckpt["lr_config"]
+# Anneal instead of holding the rate constant: at a constant rate the weights
+# rattle around the minimum (a 200k-iteration constant-rate leg plateaued at
+# 0.60-0.74%). The warmup ramps the rate up from zero over the first 2000 steps
+# while Adam rebuilds its gradient averages, which replaces the spike a cold
+# restart otherwise causes; the cosine then decays it to 1% of the trial's rate.
+lr_peak     = hp["lr"]
+lr_schedule = optax.warmup_cosine_decay_schedule(
+    init_value=0.0, peak_value=lr_peak, warmup_steps=2000,
+    decay_steps=n_iter, end_value=lr_peak / 100)
+lr_config   = f"warmup_cosine_{lr_peak:.1e}_to_{lr_peak / 100:.1e}"
 model.lambda_data = 1.0
 model.lambda_res  = hp["res_over_data"]
 model.lambda_bcs  = hp["bcs_over_data"]
 print(f"  loss weights data/res/bcs = {model.lambda_data} / {model.lambda_res:.4f} / {model.lambda_bcs:.4f}")
 
-# Adam moments are not stored in the checkpoint, so this is a warm restart, not
-# a true resume: the optimiser state begins at zero and bias correction starts
-# over. Expect a transient in the first few hundred iterations.
+# Adam's gradient averages are not stored in the checkpoint, so they restart from
+# zero; the warmup in the schedule above keeps that restart from kicking the weights.
 model.optimizer   = optax.adam(learning_rate=lr_schedule)
 model.opt_state   = model.optimizer.init(model.params)
 model.lr_schedule = lr_schedule
-print(f"  optimiser rebuilt: adam at {lr_config} (Adam moments restart from zero)")
+print(f"  optimiser rebuilt: adam, {lr_config} (averages restart from zero; the warmup absorbs it)")
 
 data_in, data_out = build_psi_data_arrays(ds)
 bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=1000)
