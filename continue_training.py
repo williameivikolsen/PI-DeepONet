@@ -1,5 +1,5 @@
 import os
-os.environ.setdefault("CUDA_VISIBLE_DEVICES", "1")
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "3")
 os.environ.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
 import time
 
@@ -22,17 +22,10 @@ from model import (
 
 print(jax.devices())
 
-CHECKPOINT = "trained_models/training_testing/large/pideeponet_angular_relu_tanh_seed123_continued.pkl"
-OUT_PATH   = "trained_models/training_testing/large/pideeponet_angular_relu_tanh_seed123_continued.pkl"
+CHECKPOINT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch.pkl"
+OUT_PATH   = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued.pkl"
 
-# The checkpoint config does NOT record the learning rate, so load_model rebuilds
-# the model with the constructor default (constant 1e-3). Set it explicitly to
-# the rate that produced this checkpoint, or the continuation silently runs 10x
-# too fast.
-lr_config    = "const_1e-4"
-lr_schedule  = 1e-4
-
-B = 1000    # batch size
+B = 5000    # batch size
 # Additional iterations, set directly rather than as D*E/B, so changing B changes
 # the gradient quality, not the number of steps.
 n_iter = 100000
@@ -54,9 +47,20 @@ prev_best   = ckpt["best_val_ARE"]
 print(f"\nLoaded {CHECKPOINT}")
 print(f"  kind={kind}  branch/trunk = "
       f"{model.branch_activation_name}/{model.trunk_activation_name}")
-print(f"  previous leg: {prev_n_iter} iters, best val ARE {prev_best:.4f}% "
+print(f"  previous leg: {prev_n_iter} iters, best ARE (val + shift-val) {prev_best:.4f}% "
       f"at iter {ckpt['best_val_iter']}")
 print(f"  the loaded weights are that BEST iterate, not the final one")
+
+hp = ckpt.get("hyperparameters")
+if hp is None:
+    raise SystemExit(f"{CHECKPOINT} records no hyperparameters (it predates the architecture "
+                     f"search): set lr_schedule and the three loss weights by hand to continue it.")
+lr_schedule = hp["lr"]
+lr_config   = ckpt["lr_config"]
+model.lambda_data = 1.0
+model.lambda_res  = hp["res_over_data"]
+model.lambda_bcs  = hp["bcs_over_data"]
+print(f"  loss weights data/res/bcs = {model.lambda_data} / {model.lambda_res:.4f} / {model.lambda_bcs:.4f}")
 
 # Adam moments are not stored in the checkpoint, so this is a warm restart, not
 # a true resume: the optimiser state begins at zero and bias correction starts
@@ -70,10 +74,12 @@ data_in, data_out = build_psi_data_arrays(ds)
 bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=1000)
 res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=1000)
 
-val_np = onp.load("datasets/M_Iso_val.npz")
-val_ds = {k: jnp.asarray(val_np[k]) for k in val_np.files}
+v, s = onp.load("datasets/M_Iso_val.npz"), onp.load("datasets/M_Iso_shiftval.npz")
+val_ds = {"Q":     jnp.concatenate([v["Q"], s["Q"]]),
+          "phi_0": jnp.concatenate([v["phi_0"], s["phi_0"]]),
+          "x":     jnp.asarray(v["x"])}
 val_batch = build_psi_val_batch(val_ds)
-print(f"Loaded validation set: {val_ds['Q'].shape[0]} sources")
+print(f"Selection set: {v['Q'].shape[0]} validation + {s['Q'].shape[0]} shift-validation sources")
 
 # Fresh generator keys, so the continuation draws new batches rather than
 # replaying the exact sequence the model already trained on.
@@ -92,8 +98,8 @@ model.train(data_dataset, bcs_dataset, res_dataset,
 dt = time.time() - t0
 print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
-print(f"\n  previous best val ARE = {prev_best:.4f}%")
-print(f"  this leg's best       = {model.best_val_ARE:.4f}%  "
+print(f"\n  previous best (val + shift-val) = {prev_best:.4f}%")
+print(f"  this leg's best                 = {model.best_val_ARE:.4f}%  "
       f"({'improved' if model.best_val_ARE < prev_best else 'NO improvement'})")
 
 # ------------------------------------------------------------------------
@@ -157,6 +163,7 @@ with open(OUT_PATH, "wb") as f:
         "params": model.params,
         "config": dict(ckpt["config"]),
         "lr_config":     lr_config,
+        "hyperparameters": hp,
         "loss_log":      model.loss_log,
         "loss_data_log": model.loss_data_log,
         "loss_bcs_log":  model.loss_bcs_log,
