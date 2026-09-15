@@ -22,13 +22,13 @@ from model import (
 
 print(jax.devices())
 
-CHECKPOINT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch.pkl"
-OUT_PATH   = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued.pkl"
+CHECKPOINT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued.pkl"
+OUT_PATH   = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued_continued.pkl"
 
 B = 5000    # batch size
 # Additional iterations, set directly rather than as D*E/B, so changing B changes
 # the gradient quality, not the number of steps.
-n_iter = 100000
+n_iter = 200000
 
 size = "large"
 
