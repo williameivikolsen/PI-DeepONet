@@ -1,0 +1,11 @@
+
+===== launch 2026-09-15 09:13:00: trial 49 seed 2 =====
+Batch size 5000, 100000 iterations per trial
+Branch input: (Q - 0.000000) / 1.000000
+Reseed worker on CUDA_VISIBLE_DEVICES=6: [(49, 2)]
+
+Trial 2: 4 layers, branch 128, trunk 256, lr 2.84e-04, res/data 0.275, bcs/data 0.166, seed 2
+Iter      0: L=9.883e+00  L_data=8.326e+00  L_bcs=4.055e+00  L_res=3.208e+00  val_ARE=57.926% *
+Iter   1000: L=2.640e-01  L_data=1.539e-01  L_bcs=2.083e-01  L_res=2.742e-01  val_ARE=5.268% *
+Iter   2000: L=1.515e-01  L_data=8.431e-02  L_bcs=3.903e-02  L_res=2.205e-01  val_ARE=3.454% *
+Iter   3000: L=1.288e-01  L_data=6.901e-02  L_bcs=1.279e-02  L_res=2.095e-01  val_ARE=3.022% *

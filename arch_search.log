@@ -1,0 +1,39 @@
+nohup: ignoring input
+[I 2026-09-14 19:04:11,599] A new study created in RDB with name: relu_tanh_arch
+Batch size 5000, 100000 iterations per trial
+Branch input: (Q - 0.000000) / 1.000000
+
+Study relu_tanh_arch: 0 of 50 trials finished
+  GPU 1: architecture search                          pid 1216991   log logs/relu_tanh_arch_gpu1.log
+  GPU 2: architecture search                          pid 1216992   log logs/relu_tanh_arch_gpu2.log
+  GPU 3: architecture search                          pid 1216993   log logs/relu_tanh_arch_gpu3.log
+  GPU 4: architecture search                          pid 1216994   log logs/relu_tanh_arch_gpu4.log
+  GPU 5: architecture search                          pid 1216995   log logs/relu_tanh_arch_gpu5.log
+  GPU 6: architecture search                          pid 1216996   log logs/relu_tanh_arch_gpu6.log
+  GPU 7: architecture search                          pid 1216997   log logs/relu_tanh_arch_gpu7.log
+  GPU 1 worker exited with code 0
+  GPU 2 worker exited with code 0
+  GPU 3 worker exited with code 0
+  GPU 4 worker exited with code 0
+  GPU 5 worker exited with code 0
+  GPU 6 worker exited with code 0
+  GPU 7 worker exited with code 0
+
+--- relu_tanh_arch: 14 complete, 42 pruned, 4 failed, 0 marked running ---
+  trial  configuration                                                             params  score   best    val  shift
+     44  5 layers  branch 128  trunk 256  lr 1.2e-04  res/data  0.45  bcs/data 0.176    766756  0.742  0.663  0.555  0.772
+     32  6 layers  branch 128  trunk 256  lr 8.7e-05  res/data  0.38  bcs/data 0.152    849060  0.749  0.696  0.573  0.819
+     49  4 layers  branch 128  trunk 256  lr 2.8e-04  res/data  0.28  bcs/data 0.166    684452  0.763  0.717  0.649  0.784
+     56  6 layers  branch 256  trunk 512  lr 5.1e-05  res/data  0.47  bcs/data 0.069   2515620  0.790  0.714  0.495  0.933
+     55  6 layers  branch 128  trunk 256  lr 1.5e-04  res/data  0.32  bcs/data 0.181    849060  0.818  0.788  0.541  1.034
+     48  6 layers  branch 128  trunk 256  lr 1.1e-04  res/data  0.47  bcs/data 0.139    849060  0.834  0.792  0.566  1.017
+     28  6 layers  branch 256  trunk 256  lr 5.9e-05  res/data  0.70  bcs/data 0.069   1121188  0.848  0.804  0.723  0.885
+      4  6 layers  branch 128  trunk 256  lr 5.5e-05  res/data  0.54  bcs/data 0.161    849060  0.853  0.795  0.783  0.807
+     21  4 layers  branch 256  trunk 1024 lr 1.0e-04  res/data  0.19  bcs/data 0.090   5039780  0.957  0.746  0.701  0.791
+      7  3 layers  branch 128  trunk 256  lr 3.0e-04  res/data  0.20  bcs/data 0.227    602148  0.958  0.862  0.943  0.782
+  score = median of the last 10 selection-set ARE readings (%); best / val / shift = ARE of the
+  restored best parameters on the selection set / validation set / shift-validation set
+
+Next, re-run the best configurations with new seeds:  pinn/bin/python angular_optimization.py reseed
+
+Best weights of this study: trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch.pkl
