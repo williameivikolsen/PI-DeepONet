@@ -1,0 +1,165 @@
+[CudaDevice(id=0)]
+
+Loaded trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch.pkl
+  kind=PI_angular  branch/trunk = relu/tanh
+  previous leg: 100000 iters, best ARE (val + shift-val) 0.6635% at iter 99000
+  the loaded weights are that BEST iterate, not the final one
+  loss weights data/res/bcs = 1.0 / 0.4491 / 0.1762
+  optimiser rebuilt: adam at const_1.2e-04 (Adam moments restart from zero)
+Selection set: 50 validation + 50 shift-validation sources
+
+--- Continuing for 100000 iterations ---
+Traceback (most recent call last):
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/continue_training.py", line 95, in <module>
+    model.train(data_dataset, bcs_dataset, res_dataset,
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/model.py", line 367, in train
+    self.params, self.opt_state = self.step(
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/jax/_src/traceback_util.py", line 182, in reraise_with_filtered_traceback
+    return fun(*args, **kwargs)
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/jax/_src/pjit.py", line 292, in cache_miss
+    executable, pgle_profiler) = _python_pjit_helper(fun, jit_info, *args, **kwargs)
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/jax/_src/pjit.py", line 153, in _python_pjit_helper
+    out_flat, compiled, profiler = _pjit_call_impl_python(*args_flat, **p.params)
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/jax/_src/pjit.py", line 1855, in _pjit_call_impl_python
+    ).compile()
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/jax/_src/interpreters/pxla.py", line 2410, in compile
+    executable = UnloadedMeshExecutable.from_hlo(
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/jax/_src/interpreters/pxla.py", line 2952, in from_hlo
+    xla_executable = _cached_compilation(
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/jax/_src/interpreters/pxla.py", line 2743, in _cached_compilation
+    xla_executable = compiler.compile_or_get_cached(
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/jax/_src/compiler.py", line 500, in compile_or_get_cached
+    return _compile_and_write_cache(
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/jax/_src/compiler.py", line 768, in _compile_and_write_cache
+    executable = backend_compile_and_load(
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/jax/_src/profiler.py", line 354, in wrapper
+    return func(*args, **kwargs)
+  File "/itf-fi-ml/home/williaeo/PI-DeepONet/pinn/lib/python3.10/site-packages/jax/_src/compiler.py", line 385, in backend_compile_and_load
+    return backend.compile_and_load(
+KeyboardInterrupt
+[CudaDevice(id=0)]
+
+Loaded trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch.pkl
+  kind=PI_angular  branch/trunk = relu/tanh
+  previous leg: 100000 iters, best ARE (val + shift-val) 0.6635% at iter 99000
+  the loaded weights are that BEST iterate, not the final one
+  loss weights data/res/bcs = 1.0 / 0.4491 / 0.1762
+  optimiser rebuilt: adam at const_1.2e-04 (Adam moments restart from zero)
+Selection set: 50 validation + 50 shift-validation sources
+
+--- Continuing for 100000 iterations ---
+Iter      0: L=5.066e-01  L_data=1.097e-01  L_bcs=1.815e+00  L_res=1.716e-01  val_ARE=4.371% *
+Iter   1000: L=2.568e-02  L_data=4.501e-03  L_bcs=3.286e-04  L_res=4.702e-02  val_ARE=0.711% *
+Iter   2000: L=2.505e-02  L_data=4.370e-03  L_bcs=2.930e-04  L_res=4.594e-02  val_ARE=0.613% *
+Iter   3000: L=2.664e-02  L_data=5.650e-03  L_bcs=6.863e-04  L_res=4.646e-02  val_ARE=0.984%
+Iter   4000: L=2.606e-02  L_data=5.199e-03  L_bcs=2.352e-04  L_res=4.636e-02  val_ARE=0.771%
+Iter   5000: L=2.569e-02  L_data=4.392e-03  L_bcs=2.705e-03  L_res=4.637e-02  val_ARE=0.734%
+Iter   6000: L=2.441e-02  L_data=4.244e-03  L_bcs=3.483e-03  L_res=4.355e-02  val_ARE=0.640%
+Iter   7000: L=2.346e-02  L_data=4.171e-03  L_bcs=6.992e-04  L_res=4.267e-02  val_ARE=0.617%
+Iter   8000: L=2.463e-02  L_data=4.077e-03  L_bcs=7.688e-04  L_res=4.547e-02  val_ARE=0.634%
+Iter   9000: L=2.419e-02  L_data=4.213e-03  L_bcs=2.789e-04  L_res=4.437e-02  val_ARE=0.622%
+Iter  10000: L=2.337e-02  L_data=4.074e-03  L_bcs=5.794e-04  L_res=4.274e-02  val_ARE=0.639%
+Iter  11000: L=2.329e-02  L_data=4.147e-03  L_bcs=1.647e-03  L_res=4.199e-02  val_ARE=0.724%
+Iter  12000: L=2.384e-02  L_data=4.026e-03  L_bcs=6.040e-03  L_res=4.174e-02  val_ARE=0.655%
+Iter  13000: L=2.336e-02  L_data=3.782e-03  L_bcs=5.955e-03  L_res=4.126e-02  val_ARE=0.677%
+Iter  14000: L=2.450e-02  L_data=4.776e-03  L_bcs=6.083e-03  L_res=4.152e-02  val_ARE=0.842%
+Iter  15000: L=2.147e-02  L_data=3.827e-03  L_bcs=4.888e-04  L_res=3.909e-02  val_ARE=0.624%
+Iter  16000: L=1.986e-02  L_data=3.660e-03  L_bcs=5.532e-04  L_res=3.585e-02  val_ARE=0.670%
+Iter  17000: L=2.147e-02  L_data=3.969e-03  L_bcs=1.321e-03  L_res=3.844e-02  val_ARE=0.815%
+Iter  18000: L=2.300e-02  L_data=3.707e-03  L_bcs=7.611e-03  L_res=3.997e-02  val_ARE=0.673%
+Iter  19000: L=2.091e-02  L_data=3.364e-03  L_bcs=2.615e-03  L_res=3.805e-02  val_ARE=0.624%
+Iter  20000: L=2.062e-02  L_data=3.511e-03  L_bcs=2.631e-03  L_res=3.706e-02  val_ARE=0.636%
+Iter  21000: L=2.039e-02  L_data=3.449e-03  L_bcs=1.745e-03  L_res=3.703e-02  val_ARE=0.694%
+Iter  22000: L=1.967e-02  L_data=3.445e-03  L_bcs=1.157e-03  L_res=3.567e-02  val_ARE=0.642%
+Iter  23000: L=2.050e-02  L_data=3.470e-03  L_bcs=7.350e-03  L_res=3.504e-02  val_ARE=0.690%
+Iter  24000: L=1.898e-02  L_data=3.362e-03  L_bcs=1.958e-04  L_res=3.471e-02  val_ARE=0.662%
+Iter  25000: L=1.907e-02  L_data=3.272e-03  L_bcs=6.963e-04  L_res=3.491e-02  val_ARE=0.760%
+Iter  26000: L=1.862e-02  L_data=3.119e-03  L_bcs=1.120e-03  L_res=3.408e-02  val_ARE=0.711%
+Iter  27000: L=1.961e-02  L_data=3.249e-03  L_bcs=5.158e-03  L_res=3.440e-02  val_ARE=0.656%
+Iter  28000: L=1.843e-02  L_data=3.148e-03  L_bcs=7.631e-04  L_res=3.373e-02  val_ARE=0.713%
+Iter  29000: L=1.729e-02  L_data=2.859e-03  L_bcs=1.292e-03  L_res=3.163e-02  val_ARE=0.622%
+Iter  30000: L=1.871e-02  L_data=3.134e-03  L_bcs=4.652e-03  L_res=3.286e-02  val_ARE=0.649%
+Iter  31000: L=1.749e-02  L_data=2.821e-03  L_bcs=1.423e-03  L_res=3.211e-02  val_ARE=0.609% *
+Iter  32000: L=1.698e-02  L_data=2.820e-03  L_bcs=2.428e-03  L_res=3.058e-02  val_ARE=0.593% *
+Iter  33000: L=1.742e-02  L_data=3.039e-03  L_bcs=1.874e-04  L_res=3.195e-02  val_ARE=0.718%
+Iter  34000: L=1.713e-02  L_data=2.881e-03  L_bcs=3.390e-04  L_res=3.160e-02  val_ARE=0.695%
+Iter  35000: L=1.619e-02  L_data=2.624e-03  L_bcs=1.057e-03  L_res=2.980e-02  val_ARE=0.607%
+Iter  36000: L=1.589e-02  L_data=2.551e-03  L_bcs=2.348e-04  L_res=2.961e-02  val_ARE=0.590% *
+Iter  37000: L=1.663e-02  L_data=3.486e-03  L_bcs=7.956e-04  L_res=2.896e-02  val_ARE=0.752%
+Iter  38000: L=1.673e-02  L_data=2.488e-03  L_bcs=5.871e-04  L_res=3.147e-02  val_ARE=0.576% *
+Iter  39000: L=1.512e-02  L_data=2.480e-03  L_bcs=2.929e-04  L_res=2.804e-02  val_ARE=0.553% *
+Iter  40000: L=1.580e-02  L_data=2.605e-03  L_bcs=5.281e-04  L_res=2.917e-02  val_ARE=0.679%
+Iter  41000: L=1.538e-02  L_data=2.421e-03  L_bcs=1.428e-03  L_res=2.829e-02  val_ARE=0.560%
+Iter  42000: L=1.483e-02  L_data=2.384e-03  L_bcs=1.002e-03  L_res=2.733e-02  val_ARE=0.589%
+Iter  43000: L=1.581e-02  L_data=3.123e-03  L_bcs=7.325e-04  L_res=2.797e-02  val_ARE=0.761%
+Iter  44000: L=1.535e-02  L_data=2.469e-03  L_bcs=1.605e-03  L_res=2.806e-02  val_ARE=0.568%
+Iter  45000: L=1.562e-02  L_data=2.499e-03  L_bcs=1.227e-03  L_res=2.874e-02  val_ARE=0.664%
+Iter  46000: L=1.497e-02  L_data=2.281e-03  L_bcs=1.267e-03  L_res=2.777e-02  val_ARE=0.569%
+Iter  47000: L=1.448e-02  L_data=2.350e-03  L_bcs=6.228e-04  L_res=2.678e-02  val_ARE=0.600%
+Iter  48000: L=1.648e-02  L_data=2.498e-03  L_bcs=8.641e-03  L_res=2.775e-02  val_ARE=0.602%
+Iter  49000: L=1.459e-02  L_data=2.235e-03  L_bcs=1.737e-03  L_res=2.684e-02  val_ARE=0.563%
+Iter  50000: L=1.458e-02  L_data=2.345e-03  L_bcs=2.115e-03  L_res=2.641e-02  val_ARE=0.576%
+Iter  51000: L=1.481e-02  L_data=2.412e-03  L_bcs=3.658e-03  L_res=2.618e-02  val_ARE=0.619%
+Iter  52000: L=1.417e-02  L_data=2.336e-03  L_bcs=2.128e-04  L_res=2.627e-02  val_ARE=0.612%
+Iter  53000: L=1.610e-02  L_data=2.967e-03  L_bcs=5.509e-03  L_res=2.709e-02  val_ARE=0.864%
+Iter  54000: L=1.485e-02  L_data=3.111e-03  L_bcs=4.090e-04  L_res=2.599e-02  val_ARE=0.839%
+Iter  55000: L=1.421e-02  L_data=2.325e-03  L_bcs=2.415e-03  L_res=2.551e-02  val_ARE=0.621%
+Iter  56000: L=1.383e-02  L_data=2.058e-03  L_bcs=8.272e-04  L_res=2.590e-02  val_ARE=0.551% *
+Iter  57000: L=1.370e-02  L_data=2.042e-03  L_bcs=1.830e-04  L_res=2.588e-02  val_ARE=0.569%
+Iter  58000: L=1.371e-02  L_data=2.011e-03  L_bcs=2.303e-03  L_res=2.515e-02  val_ARE=0.542% *
+Iter  59000: L=1.321e-02  L_data=2.067e-03  L_bcs=4.062e-04  L_res=2.465e-02  val_ARE=0.568%
+Iter  60000: L=1.315e-02  L_data=1.958e-03  L_bcs=9.318e-04  L_res=2.456e-02  val_ARE=0.549%
+Iter  61000: L=1.286e-02  L_data=1.976e-03  L_bcs=2.273e-04  L_res=2.416e-02  val_ARE=0.555%
+Iter  62000: L=1.308e-02  L_data=2.003e-03  L_bcs=2.090e-03  L_res=2.385e-02  val_ARE=0.604%
+Iter  63000: L=1.282e-02  L_data=1.858e-03  L_bcs=3.694e-04  L_res=2.427e-02  val_ARE=0.582%
+Iter  64000: L=1.240e-02  L_data=1.949e-03  L_bcs=5.656e-04  L_res=2.305e-02  val_ARE=0.571%
+Iter  65000: L=1.221e-02  L_data=1.839e-03  L_bcs=7.468e-04  L_res=2.281e-02  val_ARE=0.528% *
+Iter  66000: L=1.271e-02  L_data=2.020e-03  L_bcs=2.055e-03  L_res=2.301e-02  val_ARE=0.644%
+Iter  67000: L=1.186e-02  L_data=1.801e-03  L_bcs=4.891e-04  L_res=2.221e-02  val_ARE=0.533%
+Iter  68000: L=1.262e-02  L_data=1.959e-03  L_bcs=4.608e-03  L_res=2.192e-02  val_ARE=0.612%
+Iter  69000: L=1.201e-02  L_data=1.936e-03  L_bcs=5.520e-04  L_res=2.222e-02  val_ARE=0.562%
+Iter  70000: L=1.321e-02  L_data=2.510e-03  L_bcs=3.029e-03  L_res=2.264e-02  val_ARE=0.835%
+Iter  71000: L=1.206e-02  L_data=1.772e-03  L_bcs=2.231e-04  L_res=2.283e-02  val_ARE=0.564%
+Iter  72000: L=1.168e-02  L_data=1.789e-03  L_bcs=1.690e-04  L_res=2.196e-02  val_ARE=0.587%
+Iter  73000: L=1.208e-02  L_data=1.759e-03  L_bcs=1.076e-03  L_res=2.256e-02  val_ARE=0.542%
+Iter  74000: L=1.438e-02  L_data=2.361e-03  L_bcs=6.793e-03  L_res=2.411e-02  val_ARE=0.772%
+Iter  75000: L=1.153e-02  L_data=1.710e-03  L_bcs=7.426e-04  L_res=2.156e-02  val_ARE=0.578%
+Iter  76000: L=1.118e-02  L_data=1.597e-03  L_bcs=2.501e-04  L_res=2.123e-02  val_ARE=0.554%
+Iter  77000: L=1.166e-02  L_data=2.047e-03  L_bcs=2.165e-03  L_res=2.056e-02  val_ARE=0.616%
+Iter  78000: L=1.162e-02  L_data=1.652e-03  L_bcs=5.865e-04  L_res=2.197e-02  val_ARE=0.546%
+Iter  79000: L=1.199e-02  L_data=2.326e-03  L_bcs=6.554e-04  L_res=2.125e-02  val_ARE=0.805%
+Iter  80000: L=1.177e-02  L_data=2.015e-03  L_bcs=7.562e-04  L_res=2.143e-02  val_ARE=0.733%
+Iter  81000: L=1.167e-02  L_data=1.620e-03  L_bcs=1.516e-03  L_res=2.178e-02  val_ARE=0.543%
+Iter  82000: L=1.147e-02  L_data=1.843e-03  L_bcs=2.225e-03  L_res=2.057e-02  val_ARE=0.597%
+Iter  83000: L=1.111e-02  L_data=1.551e-03  L_bcs=3.670e-04  L_res=2.115e-02  val_ARE=0.542%
+Iter  84000: L=1.081e-02  L_data=1.667e-03  L_bcs=2.790e-04  L_res=2.024e-02  val_ARE=0.597%
+Iter  85000: L=1.048e-02  L_data=1.642e-03  L_bcs=2.510e-04  L_res=1.957e-02  val_ARE=0.548%
+Iter  86000: L=1.057e-02  L_data=1.484e-03  L_bcs=8.021e-04  L_res=1.992e-02  val_ARE=0.511% *
+Iter  87000: L=1.066e-02  L_data=1.622e-03  L_bcs=1.850e-04  L_res=2.004e-02  val_ARE=0.623%
+Iter  88000: L=1.071e-02  L_data=1.626e-03  L_bcs=4.928e-04  L_res=2.003e-02  val_ARE=0.595%
+Iter  89000: L=1.020e-02  L_data=1.479e-03  L_bcs=5.092e-04  L_res=1.922e-02  val_ARE=0.520%
+Iter  90000: L=1.070e-02  L_data=1.524e-03  L_bcs=6.532e-04  L_res=2.017e-02  val_ARE=0.555%
+Iter  91000: L=1.007e-02  L_data=1.509e-03  L_bcs=3.719e-04  L_res=1.891e-02  val_ARE=0.567%
+Iter  92000: L=1.023e-02  L_data=1.491e-03  L_bcs=2.604e-04  L_res=1.936e-02  val_ARE=0.552%
+Iter  93000: L=1.009e-02  L_data=1.722e-03  L_bcs=2.315e-04  L_res=1.854e-02  val_ARE=0.693%
+Iter  94000: L=1.143e-02  L_data=1.743e-03  L_bcs=3.255e-03  L_res=2.029e-02  val_ARE=0.650%
+Iter  95000: L=1.216e-02  L_data=1.689e-03  L_bcs=9.249e-03  L_res=1.968e-02  val_ARE=0.603%
+Iter  96000: L=1.033e-02  L_data=1.443e-03  L_bcs=4.005e-04  L_res=1.963e-02  val_ARE=0.559%
+Iter  97000: L=1.052e-02  L_data=1.513e-03  L_bcs=2.354e-03  L_res=1.913e-02  val_ARE=0.571%
+Iter  98000: L=1.049e-02  L_data=1.507e-03  L_bcs=2.545e-04  L_res=1.990e-02  val_ARE=0.609%
+Iter  99000: L=1.004e-02  L_data=1.448e-03  L_bcs=1.192e-03  L_res=1.865e-02  val_ARE=0.581%
+
+Best validation ARE = 0.511% at iter 86000; restoring those params.
+Training time: 5429.5 s  (54.3 ms/iter)
+
+  previous best (val + shift-val) = 0.6635%
+  this leg's best                 = 0.5107%  (improved)
+
+=== save-time consistency guard ===
+  recorded best_val_ARE        = 0.5107%
+  val_ARE(restored params)     = 0.5107%
+  predict_phi0 path ARE        = 0.5107%
+  predict_phi0 pred range      = 2.39 .. 82.07   (true 2.25 .. 82.09)
+  guard passed: restored params reproduce best_val_ARE on both paths.
+
+Saved trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued.pkl
