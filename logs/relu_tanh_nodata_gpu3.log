@@ -1,0 +1,112 @@
+
+===== launch 2026-09-16 09:10:13: 1.2e-04 =====
+Batch size 5000, 300000 iterations per trial, lambda_data = 0.0 (no data loss)
+Architecture from pideeponet_angular_relu_tanh_arch_continued_annealed.pkl: branch [100, 128, 128, 128, 128, 128, 100], trunk [1, 256, 256, 256, 256, 256, 1600]
+Branch input: (Q - 0.000000) / 1.000000
+Worker on CUDA_VISIBLE_DEVICES=3: [0.00012]
+
+Trial 2: warmup_cosine_1.2e-04_to_1.2e-06, lambda data/res/bcs = 0.0 / 0.4491 / 0.1762
+Iter      0: L=3.408e+00  L_data=1.711e+01  L_bcs=5.357e-01  L_res=7.378e+00  val_ARE=100.503% *
+Iter   3000: L=1.135e-01  L_data=4.855e-01  L_bcs=3.152e-02  L_res=2.403e-01  val_ARE=4.765% *
+Iter   6000: L=9.927e-02  L_data=4.114e-03  L_bcs=4.648e-02  L_res=2.028e-01  val_ARE=3.398% *
+Iter   9000: L=9.078e-02  L_data=7.478e-02  L_bcs=4.218e-02  L_res=1.856e-01  val_ARE=2.984% *
+Iter  12000: L=8.444e-02  L_data=8.239e-02  L_bcs=6.977e-03  L_res=1.853e-01  val_ARE=2.894% *
+Iter  15000: L=8.068e-02  L_data=7.344e-02  L_bcs=4.963e-04  L_res=1.795e-01  val_ARE=2.539% *
+Iter  18000: L=7.611e-02  L_data=1.797e-02  L_bcs=1.268e-03  L_res=1.690e-01  val_ARE=2.467% *
+Iter  21000: L=7.315e-02  L_data=1.528e-01  L_bcs=3.406e-03  L_res=1.615e-01  val_ARE=2.389% *
+Iter  24000: L=7.171e-02  L_data=1.586e-02  L_bcs=1.446e-02  L_res=1.540e-01  val_ARE=2.493%
+Iter  27000: L=6.617e-02  L_data=2.762e-02  L_bcs=3.037e-03  L_res=1.461e-01  val_ARE=2.316% *
+Iter  30000: L=6.777e-02  L_data=1.456e-01  L_bcs=1.306e-02  L_res=1.458e-01  val_ARE=2.258% *
+Iter  33000: L=5.822e-02  L_data=4.407e-03  L_bcs=2.163e-03  L_res=1.288e-01  val_ARE=2.172% *
+Iter  36000: L=5.862e-02  L_data=8.643e-02  L_bcs=4.971e-03  L_res=1.286e-01  val_ARE=2.125% *
+Iter  39000: L=5.658e-02  L_data=1.135e-02  L_bcs=2.523e-03  L_res=1.250e-01  val_ARE=2.208%
+Iter  42000: L=5.424e-02  L_data=3.080e-03  L_bcs=4.332e-04  L_res=1.206e-01  val_ARE=2.183%
+Iter  45000: L=5.075e-02  L_data=2.753e-02  L_bcs=6.308e-04  L_res=1.128e-01  val_ARE=2.188%
+Iter  48000: L=5.001e-02  L_data=5.989e-03  L_bcs=1.299e-03  L_res=1.109e-01  val_ARE=2.140%
+Iter  51000: L=6.104e-02  L_data=5.778e-03  L_bcs=4.649e-02  L_res=1.177e-01  val_ARE=2.264%
+Iter  54000: L=4.921e-02  L_data=5.462e-03  L_bcs=6.515e-04  L_res=1.093e-01  val_ARE=2.215%
+Iter  57000: L=4.798e-02  L_data=2.806e-02  L_bcs=1.045e-03  L_res=1.064e-01  val_ARE=2.501%
+Iter  60000: L=4.994e-02  L_data=1.347e-02  L_bcs=1.184e-02  L_res=1.066e-01  val_ARE=2.588%
+Iter  63000: L=4.361e-02  L_data=3.376e-02  L_bcs=1.544e-03  L_res=9.651e-02  val_ARE=2.182%
+Iter  66000: L=4.148e-02  L_data=8.904e-03  L_bcs=4.078e-03  L_res=9.076e-02  val_ARE=2.073% *
+Iter  69000: L=3.927e-02  L_data=3.699e-02  L_bcs=4.026e-03  L_res=8.586e-02  val_ARE=2.200%
+Iter  72000: L=3.599e-02  L_data=1.117e-02  L_bcs=7.118e-04  L_res=7.987e-02  val_ARE=2.089%
+Iter  75000: L=4.125e-02  L_data=2.677e-02  L_bcs=9.761e-03  L_res=8.803e-02  val_ARE=2.163%
+Iter  78000: L=3.512e-02  L_data=6.112e-03  L_bcs=1.421e-03  L_res=7.763e-02  val_ARE=2.196%
+Iter  81000: L=3.221e-02  L_data=4.308e-02  L_bcs=2.703e-03  L_res=7.065e-02  val_ARE=2.071% *
+Iter  84000: L=2.953e-02  L_data=6.786e-03  L_bcs=9.595e-04  L_res=6.539e-02  val_ARE=2.494%
+Iter  87000: L=2.803e-02  L_data=7.504e-03  L_bcs=1.023e-03  L_res=6.200e-02  val_ARE=2.096%
+Iter  90000: L=2.698e-02  L_data=3.079e-03  L_bcs=5.175e-04  L_res=5.988e-02  val_ARE=2.066% *
+Iter  93000: L=2.721e-02  L_data=3.680e-03  L_bcs=7.119e-04  L_res=6.030e-02  val_ARE=2.056% *
+Iter  96000: L=2.537e-02  L_data=1.527e-02  L_bcs=5.770e-04  L_res=5.626e-02  val_ARE=1.966% *
+Iter  99000: L=2.518e-02  L_data=1.172e-02  L_bcs=1.733e-03  L_res=5.539e-02  val_ARE=1.948% *
+Iter 102000: L=2.324e-02  L_data=5.113e-03  L_bcs=5.762e-04  L_res=5.152e-02  val_ARE=1.916% *
+Iter 105000: L=2.289e-02  L_data=8.455e-03  L_bcs=4.210e-04  L_res=5.081e-02  val_ARE=1.859% *
+Iter 108000: L=2.564e-02  L_data=2.065e-02  L_bcs=1.019e-02  L_res=5.310e-02  val_ARE=2.397%
+Iter 111000: L=2.141e-02  L_data=2.366e-03  L_bcs=5.744e-04  L_res=4.745e-02  val_ARE=1.890%
+Iter 114000: L=2.025e-02  L_data=9.116e-03  L_bcs=3.092e-03  L_res=4.387e-02  val_ARE=1.779% *
+Iter 117000: L=1.996e-02  L_data=1.875e-02  L_bcs=3.635e-04  L_res=4.431e-02  val_ARE=1.706% *
+Iter 120000: L=1.855e-02  L_data=8.213e-03  L_bcs=4.045e-04  L_res=4.115e-02  val_ARE=1.642% *
+Iter 123000: L=1.771e-02  L_data=4.209e-03  L_bcs=6.574e-04  L_res=3.917e-02  val_ARE=1.972%
+Iter 126000: L=1.753e-02  L_data=1.586e-03  L_bcs=5.657e-04  L_res=3.881e-02  val_ARE=1.750%
+Iter 129000: L=1.629e-02  L_data=3.427e-03  L_bcs=4.905e-04  L_res=3.607e-02  val_ARE=1.589% *
+Iter 132000: L=1.683e-02  L_data=2.306e-03  L_bcs=1.198e-03  L_res=3.700e-02  val_ARE=1.595%
+Iter 135000: L=1.609e-02  L_data=7.812e-03  L_bcs=1.836e-04  L_res=3.576e-02  val_ARE=1.446% *
+Iter 138000: L=1.624e-02  L_data=9.057e-03  L_bcs=3.194e-04  L_res=3.603e-02  val_ARE=1.402% *
+Iter 141000: L=1.434e-02  L_data=3.482e-03  L_bcs=2.759e-04  L_res=3.183e-02  val_ARE=1.382% *
+Iter 144000: L=1.475e-02  L_data=5.499e-03  L_bcs=1.522e-04  L_res=3.278e-02  val_ARE=1.630%
+Iter 147000: L=1.378e-02  L_data=3.897e-03  L_bcs=4.223e-04  L_res=3.051e-02  val_ARE=1.307% *
+Iter 150000: L=1.457e-02  L_data=2.866e-03  L_bcs=2.501e-03  L_res=3.145e-02  val_ARE=1.243% *
+Iter 153000: L=1.381e-02  L_data=7.338e-03  L_bcs=3.942e-03  L_res=2.921e-02  val_ARE=1.397%
+Iter 156000: L=1.311e-02  L_data=6.863e-03  L_bcs=3.056e-04  L_res=2.907e-02  val_ARE=1.198% *
+Iter 159000: L=1.280e-02  L_data=6.758e-03  L_bcs=5.711e-04  L_res=2.828e-02  val_ARE=1.289%
+Iter 162000: L=1.297e-02  L_data=2.305e-03  L_bcs=4.686e-04  L_res=2.870e-02  val_ARE=1.180% *
+Iter 165000: L=1.250e-02  L_data=1.179e-03  L_bcs=2.993e-03  L_res=2.666e-02  val_ARE=1.142% *
+Iter 168000: L=1.229e-02  L_data=3.188e-03  L_bcs=6.473e-04  L_res=2.711e-02  val_ARE=1.171%
+Iter 171000: L=1.126e-02  L_data=2.183e-03  L_bcs=6.376e-04  L_res=2.481e-02  val_ARE=1.164%
+Iter 174000: L=1.119e-02  L_data=4.891e-03  L_bcs=3.782e-04  L_res=2.477e-02  val_ARE=1.106% *
+Iter 177000: L=1.176e-02  L_data=1.673e-03  L_bcs=3.659e-04  L_res=2.605e-02  val_ARE=1.205%
+Iter 180000: L=1.093e-02  L_data=5.309e-03  L_bcs=2.075e-04  L_res=2.426e-02  val_ARE=1.121%
+Iter 183000: L=1.084e-02  L_data=1.881e-03  L_bcs=1.117e-03  L_res=2.370e-02  val_ARE=1.083% *
+Iter 186000: L=1.045e-02  L_data=1.155e-03  L_bcs=9.449e-04  L_res=2.291e-02  val_ARE=1.110%
+Iter 189000: L=1.030e-02  L_data=3.956e-03  L_bcs=3.606e-04  L_res=2.279e-02  val_ARE=1.060% *
+Iter 192000: L=9.541e-03  L_data=2.617e-03  L_bcs=1.558e-04  L_res=2.118e-02  val_ARE=1.057% *
+Iter 195000: L=1.006e-02  L_data=2.804e-03  L_bcs=7.985e-05  L_res=2.236e-02  val_ARE=1.034% *
+Iter 198000: L=1.024e-02  L_data=2.615e-03  L_bcs=1.189e-04  L_res=2.276e-02  val_ARE=1.085%
+Iter 201000: L=1.014e-02  L_data=8.544e-04  L_bcs=2.162e-04  L_res=2.248e-02  val_ARE=1.006% *
+Iter 204000: L=9.911e-03  L_data=2.110e-02  L_bcs=1.668e-04  L_res=2.200e-02  val_ARE=1.090%
+Iter 207000: L=9.748e-03  L_data=1.058e-03  L_bcs=1.358e-04  L_res=2.165e-02  val_ARE=1.001% *
+Iter 210000: L=9.339e-03  L_data=5.519e-03  L_bcs=1.194e-04  L_res=2.075e-02  val_ARE=0.979% *
+Iter 213000: L=9.813e-03  L_data=4.721e-03  L_bcs=1.094e-04  L_res=2.181e-02  val_ARE=0.965% *
+Iter 216000: L=9.703e-03  L_data=9.231e-03  L_bcs=9.577e-05  L_res=2.157e-02  val_ARE=0.954% *
+Iter 219000: L=9.194e-03  L_data=3.072e-03  L_bcs=3.308e-04  L_res=2.034e-02  val_ARE=0.943% *
+Iter 222000: L=9.295e-03  L_data=1.012e-03  L_bcs=6.416e-05  L_res=2.067e-02  val_ARE=0.951%
+Iter 225000: L=9.214e-03  L_data=3.122e-03  L_bcs=1.227e-04  L_res=2.047e-02  val_ARE=0.965%
+Iter 228000: L=9.003e-03  L_data=1.511e-03  L_bcs=1.748e-04  L_res=1.998e-02  val_ARE=0.968%
+Iter 231000: L=9.179e-03  L_data=5.458e-03  L_bcs=1.352e-04  L_res=2.039e-02  val_ARE=0.940% *
+Iter 234000: L=9.109e-03  L_data=5.650e-03  L_bcs=6.836e-05  L_res=2.026e-02  val_ARE=0.934% *
+Iter 237000: L=9.154e-03  L_data=8.183e-04  L_bcs=7.162e-05  L_res=2.036e-02  val_ARE=0.944%
+Iter 240000: L=8.942e-03  L_data=5.013e-04  L_bcs=1.058e-04  L_res=1.987e-02  val_ARE=0.934%
+Iter 243000: L=9.129e-03  L_data=1.098e-03  L_bcs=3.400e-05  L_res=2.031e-02  val_ARE=0.935%
+Iter 246000: L=8.865e-03  L_data=5.500e-03  L_bcs=6.854e-05  L_res=1.971e-02  val_ARE=0.916% *
+Iter 249000: L=8.802e-03  L_data=1.702e-03  L_bcs=1.510e-04  L_res=1.954e-02  val_ARE=0.936%
+Iter 252000: L=8.994e-03  L_data=6.360e-03  L_bcs=3.189e-05  L_res=2.001e-02  val_ARE=0.924%
+Iter 255000: L=8.930e-03  L_data=4.571e-04  L_bcs=3.055e-05  L_res=1.987e-02  val_ARE=0.910% *
+Iter 258000: L=8.861e-03  L_data=3.123e-03  L_bcs=3.093e-05  L_res=1.972e-02  val_ARE=0.905% *
+Iter 261000: L=8.904e-03  L_data=4.814e-04  L_bcs=3.919e-05  L_res=1.981e-02  val_ARE=0.901% *
+Iter 264000: L=8.604e-03  L_data=3.493e-03  L_bcs=2.254e-05  L_res=1.915e-02  val_ARE=0.924%
+Iter 267000: L=8.759e-03  L_data=8.222e-04  L_bcs=1.092e-04  L_res=1.946e-02  val_ARE=0.908%
+Iter 270000: L=8.722e-03  L_data=6.177e-03  L_bcs=2.402e-05  L_res=1.941e-02  val_ARE=0.910%
+Iter 273000: L=8.813e-03  L_data=1.371e-03  L_bcs=1.636e-05  L_res=1.962e-02  val_ARE=0.905%
+Iter 276000: L=8.561e-03  L_data=2.375e-03  L_bcs=9.798e-06  L_res=1.906e-02  val_ARE=0.905%
+Iter 279000: L=8.816e-03  L_data=2.109e-03  L_bcs=1.345e-05  L_res=1.963e-02  val_ARE=0.908%
+Iter 282000: L=8.804e-03  L_data=2.092e-03  L_bcs=1.672e-05  L_res=1.960e-02  val_ARE=0.899% *
+Iter 285000: L=8.732e-03  L_data=3.471e-03  L_bcs=6.354e-06  L_res=1.944e-02  val_ARE=0.908%
+Iter 288000: L=8.326e-03  L_data=2.653e-03  L_bcs=9.400e-06  L_res=1.854e-02  val_ARE=0.906%
+Iter 291000: L=8.682e-03  L_data=5.821e-04  L_bcs=5.659e-06  L_res=1.933e-02  val_ARE=0.894% *
+Iter 294000: L=8.653e-03  L_data=9.960e-03  L_bcs=1.440e-05  L_res=1.926e-02  val_ARE=0.897%
+Iter 297000: L=8.704e-03  L_data=1.462e-03  L_bcs=1.966e-05  L_res=1.937e-02  val_ARE=0.899%
+
+Best validation ARE = 0.894% at iter 291000; restoring those params.
+  new best: trial 2 (warmup_cosine_1.2e-04_to_1.2e-06) at 0.894% -> saved trained_models/lr_search/large/pideeponet_angular_relu_tanh_nodata.pkl
+[I 2026-09-16 10:30:09,790] Trial 2 finished with value: 0.9052392840385437 and parameters: {}. Best is trial 2 with value: 0.9052392840385437.

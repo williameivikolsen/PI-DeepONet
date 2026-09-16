@@ -1,0 +1,38 @@
+nohup: ignoring input
+Batch size 5000, 300000 iterations per trial, lambda_data = 0.0 (no data loss)
+Architecture from pideeponet_angular_relu_tanh_arch_continued_annealed.pkl: branch [100, 128, 128, 128, 128, 128, 100], trunk [1, 256, 256, 256, 256, 256, 1600]
+Branch input: (Q - 0.000000) / 1.000000
+[I 2026-09-16 09:10:13,042] A new study created in RDB with name: relu_tanh_nodata
+
+Study relu_tanh_nodata: done [], to run [2e-05, 4e-05, 8e-05, 0.00012, 0.0002, 0.0004, 0.0008, 0.0016]
+  GPU 0: peak lr 2.0e-05                      pid 3043154   log logs/relu_tanh_nodata_gpu0.log
+  GPU 1: peak lr 4.0e-05                      pid 3043155   log logs/relu_tanh_nodata_gpu1.log
+  GPU 2: peak lr 8.0e-05                      pid 3043156   log logs/relu_tanh_nodata_gpu2.log
+  GPU 3: peak lr 1.2e-04                      pid 3043157   log logs/relu_tanh_nodata_gpu3.log
+  GPU 4: peak lr 2.0e-04                      pid 3043158   log logs/relu_tanh_nodata_gpu4.log
+  GPU 5: peak lr 4.0e-04                      pid 3043159   log logs/relu_tanh_nodata_gpu5.log
+  GPU 6: peak lr 8.0e-04                      pid 3043160   log logs/relu_tanh_nodata_gpu6.log
+  GPU 7: peak lr 1.6e-03                      pid 3043161   log logs/relu_tanh_nodata_gpu7.log
+  GPU 0 worker exited with code 0
+  GPU 1 worker exited with code 0
+  GPU 2 worker exited with code 0
+  GPU 3 worker exited with code 0
+  GPU 4 worker exited with code 0
+  GPU 5 worker exited with code 0
+  GPU 6 worker exited with code 0
+  GPU 7 worker exited with code 0
+
+--- relu_tanh_nodata (physics only, no data loss): 8 complete, 0 pruned, 0 failed, 0 marked running ---
+    peak lr   score    best     val   shift
+    1.2e-04   0.905   0.894   0.716   1.072
+    2.0e-04   1.097   1.081   0.795   1.367
+    8.0e-05   1.261   1.245   0.801   1.689
+    4.0e-05   1.478   1.455   1.429   1.480
+    2.0e-05   1.836   1.834   2.024   1.645
+    4.0e-04  16.367   3.744   3.814   3.674
+    8.0e-04  32.124   6.870   3.874   9.865
+    1.6e-03  32.702  22.047   4.950  39.144
+  score = median of the last 10 selection-set ARE readings (%); best / val / shift = ARE of the
+  restored best parameters on the selection set / validation set / shift-validation set
+
+Best weights of this study: trained_models/lr_search/large/pideeponet_angular_relu_tanh_nodata.pkl
