@@ -12,7 +12,8 @@ size = "large"
 
 checkpoints = {
     "Benchmark":  f"trained_models/training_testing/{size}/benchmark.pkl",
-    "Angular PI DeepONet": "trained_models/lr_search/large/pideeponet_angular_relu_tanh_B5000.pkl",
+    "PI DeepONet": "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued_annealed.pkl",
+    "PI DeepONet (No data)": "trained_models/lr_search/large/pideeponet_angular_relu_tanh_nodata.pkl",
 }
 
 test_dir = "datasets/test"
