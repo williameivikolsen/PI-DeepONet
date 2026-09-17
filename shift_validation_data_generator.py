@@ -10,12 +10,7 @@ SIGMA_T, SIGMA_S0, SIGMA_S1 = 1.0, 0.5, 0.0
 SHIFT_SEED = 8888
 OUTPUT_DIR = "datasets"
 
-# Shift-validation set, used for model SELECTION in angular_optimization.py.
-# It probes the two ways a source's SHAPE can depart from training (GRF l=0.10,
-# mean 5, variance 1): rougher sources, with more sensor-to-sensor fluctuation
-# relative to their mean, and smoother, flatter ones. Amplitude alone is not
-# probed — the relu branch extrapolates it exactly. None of these parameter sets
-# is a test scenario (test_data_generator.py), so the test set stays untouched.
+# Shift-validation set.
 #          l,    mean, variance
 GROUPS = [(0.07,  3.0, 0.6),    # rough, low mean
           (0.06,  6.0, 2.5),    # rough, training-like mean

@@ -30,8 +30,6 @@ for k in ds:
     print(f"  {k:<10s} shape={tuple(ds[k].shape)}  dtype={ds[k].dtype}")
 
 B = 1000  # Batch size
-# Iteration budget set directly rather than as D*E/B, so changing B changes the
-# gradient quality, not the number of steps.
 n_iter = 100_000
 log_every = n_iter // 100
 
@@ -40,25 +38,14 @@ Sigma_t, Sigma_s0, Sigma_s1 = 1.0, 0.5, 0.0
 J = int(ds['x'].shape[0])
 A = int(ds['mu_GL'].shape[0])
 
-# --- Supervised phi_0 data arrays (scalar flux) ---
-# Same vector-output trunk as PI_DeepONet_Angular (all A angles from one
-# forward pass), but the data loss supervises scalar phi_0 via GL
-# quadrature (PI_DeepONet_AngularScalar.loss_data), not the raw psi vector.
 data_in, data_out = build_data_arrays(ds)
-# Branch input transform: (Q - Q_shift) / Q_scale. Constants come from the
-# TRAINING SET as a whole — never from the sample being evaluated. Identity
-# while the branch is relu: relu absorbs a scale factor exactly, and a shift
-# would destroy the amplitude extrapolation the relu branch is there to give.
 Q_shift, Q_scale = 0.0, 1.0
-# Q_shift, Q_scale = 0.0, float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))   # for a bounded branch activation
 print(f"Branch input: (Q - {Q_shift:.6f}) / {Q_scale:.6f}")
 print(f"\nphi_0-supervision points: {data_out.shape[0]}  (= N*J, each a scalar target)")
 
-# --- Physics collocation sets: identical construction to angular_training.py ---
 bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=1000)
 res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=1000)
 
-# --- Validation set (phi_0 form; ARE on phi_0, same as the other models) ---
 val_np = onp.load("datasets/M_Iso_val.npz")
 val_ds = {k: jnp.asarray(val_np[k]) for k in val_np.files}
 val_batch = build_val_batch(val_ds)
@@ -71,7 +58,6 @@ bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
 res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
                              rng_key=random.PRNGKey(303), branch_table=res_Q)
 
-# Exact same architecture as angular_training.py's PI_DeepONet_Angular.
 p_latent      = 100
 n_layers      = 4
 branch_layers = [J] + n_layers * [250] + [p_latent]
@@ -97,9 +83,7 @@ model.train(data_dataset, bcs_dataset, res_dataset,
 dt = time.time() - t0
 print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
-# ------------------------------------------------------------------------
-# Save-time consistency guard (same rationale as angular_training.py).
-# ------------------------------------------------------------------------
+
 GUARD_TOL = 1.0  # percentage points
 
 _are_valpath = float(model.val_ARE(model.params, val_batch))

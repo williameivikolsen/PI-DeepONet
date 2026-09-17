@@ -67,19 +67,11 @@ A      = int(ds['mu_GL'].shape[0])
 SIGMA_T, SIGMA_S0, SIGMA_S1 = 1.0, 0.5, 0.0
 
 B      = 1000
-# Iteration budget set directly rather than as D*E/B, so changing B changes the
-# gradient quality, not the number of steps.
 N_ITER = 100_000
 LOG_EVERY = N_ITER // 100          # 100 validation points per trial
 
-# Data, collocation and validation arrays are identical for every trial.
 data_in, data_out = build_data_arrays(ds)
-# Branch input transform: (Q - Q_shift) / Q_scale. Constants come from the
-# TRAINING SET as a whole — never from the sample being evaluated. Identity
-# while the branch is relu: relu absorbs a scale factor exactly, and a shift
-# would destroy the amplitude extrapolation the relu branch is there to give.
 Q_shift, Q_scale = 0.0, 1.0
-# Q_shift, Q_scale = 0.0, float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))   # for a bounded branch activation
 print(f"Branch input: (Q - {Q_shift:.6f}) / {Q_scale:.6f}")
 bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=N_PER_SAMPLE)
 res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=N_PER_SAMPLE)
@@ -88,8 +80,6 @@ val_batch = build_val_batch(val_ds)
 branch_layers = [J] + N_LAYERS * [BRANCH_WIDTH] + [P_LATENT]
 trunk_layers  = [1] + N_LAYERS * [TRUNK_WIDTH]  + [A * P_LATENT]
 
-# Weights of the best trial so far. Seeded from an existing checkpoint so a
-# resumed sweep does not overwrite a better run.
 CKPT_PATH  = f"trained_models/lr_search/{size}/{model_name}_{branch_activation}_{trunk_activation}.pkl"
 _incumbent = {"val_ARE": float("inf")}
 if os.path.exists(CKPT_PATH):

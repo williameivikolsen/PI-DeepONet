@@ -30,8 +30,6 @@ for k in ds:
     print(f"  {k:<10s} shape={tuple(ds[k].shape)}  dtype={ds[k].dtype}")
 
 B = 10000  # Batch size
-# Iteration budget set directly rather than as D*E/B, so changing B changes the
-# gradient quality, not the number of steps.
 n_iter = 100_000
 log_every = n_iter // 100
 
@@ -40,22 +38,14 @@ Sigma_t, Sigma_s0, Sigma_s1 = 1.0, 0.5, 0.0
 J = int(ds['x'].shape[0])
 A = int(ds['mu_GL'].shape[0])
 
-# --- Supervised psi data arrays (psi at GL nodes) ---
 data_in, data_out = build_psi_data_arrays(ds)
-# Branch input transform: (Q - Q_shift) / Q_scale. Constants come from the
-# TRAINING SET as a whole — never from the sample being evaluated. Identity
-# while the branch is relu: relu absorbs a scale factor exactly, and a shift
-# would destroy the amplitude extrapolation the relu branch is there to give.
 Q_shift, Q_scale = 0.0, 1.0
-# Q_shift, Q_scale = 0.0, float(jnp.sqrt(jnp.mean(ds['Q'] ** 2)))   # for a bounded branch activation
 print(f"Branch input: (Q - {Q_shift:.6f}) / {Q_scale:.6f}")
 print(f"\npsi-supervision points: {data_out.shape[0]}  (= N*J, each carrying an A-vector target)")
 
-# --- Physics collocation sets: identical construction to training.py ---
 bcs_in, bcs_out, bcs_Q = build_bcs_arrays(ds, X=X_slab, n_per_sample=1000)
 res_in, res_out, res_Q = build_res_arrays(ds, X=X_slab, n_per_sample=1000)
 
-# --- Validation set (phi_0 form; ARE on phi_0 as in training.py) ---
 val_np = onp.load("datasets/M_Iso_val.npz")
 val_ds = {k: jnp.asarray(val_np[k]) for k in val_np.files}
 val_batch = build_psi_val_batch(val_ds)
@@ -100,14 +90,10 @@ model.train(data_dataset, bcs_dataset, res_dataset,
 dt = time.time() - t0
 print(f"Training time: {dt:.1f} s  ({dt / n_iter * 1000:.1f} ms/iter)")
 
-# ------------------------------------------------------------------------
-# Save-time consistency guard.
-# ------------------------------------------------------------------------
 GUARD_TOL = 1.0  # percentage points
 
 _are_valpath = float(model.val_ARE(model.params, val_batch))
 
-# predict_phi0 path on the validation data.
 _phi_pred = onp.asarray(model.predict_phi0(model.params,
                                            jnp.asarray(val_ds['Q']),
                                            jnp.asarray(val_ds['x'])))

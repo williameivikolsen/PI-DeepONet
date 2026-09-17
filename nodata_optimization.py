@@ -32,22 +32,14 @@ N_PER_SAMPLE = 1000
 sweep_name   = "nodata"     # new study when the training setup changes
 CARDS        = [0, 1, 2, 3, 4, 5, 6, 7]   # GPUs the launcher may use, one worker per card
 
-# Peak learning rates, one per card, spanning two decades around 1.19e-4 (the best
-# rate WITH data). Each is run with the warmup + cosine schedule below, so every
-# trial ends annealed rather than bouncing around the minimum at a constant rate.
 LR_PEAKS     = [2e-5, 4e-5, 8e-5, 1.2e-4, 2e-4, 4e-4, 8e-4, 1.6e-3]
 WARMUP_STEPS = 2000         # Adam's gradient averages rebuild over ~1000 steps
 END_FRACTION = 0.01         # final rate = peak * END_FRACTION
 
-# Architecture of the best data-trained model. Only its SHAPE is reused: the
-# weights are initialised fresh, or the model would inherit what that one learned
-# from labelled data and this would not be a no-data experiment.
 ARCH_CKPT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued_annealed.pkl"
 SEED      = 1234
 
 STUDY_NAME = f"relu_tanh_{sweep_name}"
-# Workers write to one SQLite file at the same time; a generous busy timeout makes
-# a write wait for the lock instead of failing the trial with "database is locked".
 STORAGE = optuna.storages.RDBStorage(
     "sqlite:///activation_studies.db", engine_kwargs={"connect_args": {"timeout": 60}})
 LOG_DIR = "logs"
@@ -70,15 +62,12 @@ A      = int(arch_cfg["N_angles"])
 SIGMA_T, SIGMA_S0, SIGMA_S1 = arch_cfg["Sigma_t"], arch_cfg["Sigma_s0"], arch_cfg["Sigma_s1"]
 J      = int(ds['x'].shape[0])
 
-# No supervised data term. The residual and boundary weights keep the ratio tuned
-# by the architecture search; with lambda_data = 0 only their ratio matters, since
-# Adam is invariant to the overall scale of the loss.
+# No supervised data term, setting lambda_data = 0
 LAMBDA_DATA = 0.0
 LAMBDA_RES  = arch_hp["res_over_data"]
 LAMBDA_BCS  = arch_hp["bcs_over_data"]
 
-# Selection set = validation set + shift-validation set, 50 sources each. These
-# labels are used ONLY to rank, prune and checkpoint trials, never in the loss.
+# Selection set = validation set + shift-validation set, 50 sources each.
 val_np   = onp.load("datasets/M_Iso_val.npz")
 shift_np = onp.load("datasets/M_Iso_shiftval.npz")
 assert onp.allclose(val_np["x"], shift_np["x"]), "validation sets must share the x grid"
@@ -94,9 +83,6 @@ LOG_EVERY = N_ITER // 100          # 100 selection-set evaluations per trial
 print(f"Batch size {B}, {N_ITER} iterations per trial, lambda_data = {LAMBDA_DATA} (no data loss)")
 print(f"Architecture from {ARCH_CKPT.split('/')[-1]}: branch {branch_layers}, trunk {trunk_layers}")
 
-# train() always takes a data batch, so it gets the smallest possible one: the term
-# is multiplied by lambda_data = 0 and contributes nothing to the gradient, and at
-# one point per step it costs nothing either.
 B_DATA = 1
 data_in, data_out = build_psi_data_arrays(ds)
 print(f"Branch input: (Q - {Q_shift:.6f}) / {Q_scale:.6f}")
@@ -106,8 +92,6 @@ sel_batch   = build_psi_val_batch(sel_ds)
 val_batch   = build_psi_val_batch(val_ds)
 shift_batch = build_psi_val_batch(shift_ds)
 
-# Weights of the best trial of this study. Several workers write here, so whether
-# to keep a trial is decided against this file itself, under a lock (see objective).
 CKPT_PATH = f"trained_models/lr_search/{size}/{model_name}_{STUDY_NAME}.pkl"
 if os.path.exists(CKPT_PATH):
     with open(CKPT_PATH, "rb") as f:
@@ -137,10 +121,6 @@ def passes_guard(model, tol=1.0):
 
 
 def objective(trial, lr_peak):
-    # The learning rate is assigned by the launcher, not sampled, and recorded as a
-    # user attribute: as a categorical parameter it would freeze the study to one
-    # fixed list of rates ("CategoricalDistribution does not support dynamic value
-    # space" as soon as LR_PEAKS is edited).
     trial.set_user_attr("lr_peak", lr_peak)
     trial.set_user_attr("seed", SEED)
     lr_schedule = optax.warmup_cosine_decay_schedule(
@@ -183,10 +163,6 @@ def objective(trial, lr_peak):
         val_batch=sel_batch, val_every=LOG_EVERY,
         callback=report_to_optuna,
     )
-
-    # Ranked by the median of the last 10 selection-set readings rather than the
-    # single best one: the minimum of a noisy curve rewards a lucky reading. The
-    # checkpoint still keeps the best parameters.
     score = float(onp.median(model.val_ARE_log[-10:]))
     if not math.isfinite(score):
         score = float("inf")
@@ -198,10 +174,6 @@ def objective(trial, lr_peak):
     trial.set_user_attr("shift_ARE", shift_are)
     trial.set_user_attr("best_iter", int(model.best_val_iter))
 
-    # Keep the weights of the best trial only. Workers on other cards write the
-    # same CKPT_PATH, so compare against the checkpoint on disk while holding an
-    # exclusive lock, not against this process's memory: otherwise a worker that
-    # finishes later could overwrite a better checkpoint from another card.
     os.makedirs(os.path.dirname(CKPT_PATH), exist_ok=True)
     with open(CKPT_PATH + ".lock", "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
@@ -267,9 +239,6 @@ if __name__ == "__main__":
     TS = optuna.trial.TrialState
 
     if WORKER:
-        # Run the learning rates the launcher assigned to this card, one after
-        # another, all in the shared study. A crashing trial is recorded as FAIL
-        # and the worker moves on.
         lrs = [float(x) for x in os.environ["SWEEP_LRS"].split(",")]
         print(f"Worker on CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}: {lrs}")
         for lr in lrs:
@@ -285,15 +254,11 @@ if __name__ == "__main__":
     study = optuna.create_study(study_name=STUDY_NAME, storage=STORAGE,
                                 direction="minimize", load_if_exists=True)
     finished = [t for t in study.trials if t.state in (TS.COMPLETE, TS.PRUNED)]
-    # A checkpoint without any finished trial behind it belongs to an earlier run
-    # (for instance after the study was reset) and would silently outrank this one.
     if not finished and os.path.exists(CKPT_PATH):
         sys.exit(f"\n{CKPT_PATH} already exists, but study {STUDY_NAME} has no finished trials:\n"
                  f"those weights come from an earlier run and would silently outrank this one.\n"
                  f"Rename or remove the file (or change sweep_name), then relaunch.")
 
-    # A rate counts as done once it has a COMPLETE or PRUNED trial; FAILed ones are
-    # run again, RUNNING ones left alone in case another sweep is still on them.
     done    = {lr_of(t) for t in study.trials if t.state in (TS.COMPLETE, TS.PRUNED)}
     running = {lr_of(t) for t in study.trials if t.state == TS.RUNNING} - done - {None}
     todo    = [lr for lr in LR_PEAKS if lr not in done and lr not in running]

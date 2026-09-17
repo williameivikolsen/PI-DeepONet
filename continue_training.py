@@ -26,8 +26,6 @@ CHECKPOINT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_c
 OUT_PATH   = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued_annealed.pkl"
 
 B = 5000    # batch size
-# Additional iterations, set directly rather than as D*E/B, so changing B changes
-# the gradient quality, not the number of steps.
 n_iter = 100000
 
 size = "large"
@@ -55,11 +53,6 @@ hp = ckpt.get("hyperparameters")
 if hp is None:
     raise SystemExit(f"{CHECKPOINT} records no hyperparameters (it predates the architecture "
                      f"search): set lr_schedule and the three loss weights by hand to continue it.")
-# Anneal instead of holding the rate constant: at a constant rate the weights
-# rattle around the minimum (a 200k-iteration constant-rate leg plateaued at
-# 0.60-0.74%). The warmup ramps the rate up from zero over the first 2000 steps
-# while Adam rebuilds its gradient averages, which replaces the spike a cold
-# restart otherwise causes; the cosine then decays it to 1% of the trial's rate.
 lr_peak     = hp["lr"]
 lr_schedule = optax.warmup_cosine_decay_schedule(
     init_value=0.0, peak_value=lr_peak, warmup_steps=2000,
@@ -70,8 +63,6 @@ model.lambda_res  = hp["res_over_data"]
 model.lambda_bcs  = hp["bcs_over_data"]
 print(f"  loss weights data/res/bcs = {model.lambda_data} / {model.lambda_res:.4f} / {model.lambda_bcs:.4f}")
 
-# Adam's gradient averages are not stored in the checkpoint, so they restart from
-# zero; the warmup in the schedule above keeps that restart from kicking the weights.
 model.optimizer   = optax.adam(learning_rate=lr_schedule)
 model.opt_state   = model.optimizer.init(model.params)
 model.lr_schedule = lr_schedule
@@ -88,8 +79,6 @@ val_ds = {"Q":     jnp.concatenate([v["Q"], s["Q"]]),
 val_batch = build_psi_val_batch(val_ds)
 print(f"Selection set: {v['Q'].shape[0]} validation + {s['Q'].shape[0]} shift-validation sources")
 
-# Fresh generator keys, so the continuation draws new batches rather than
-# replaying the exact sequence the model already trained on.
 data_dataset = DataGenerator(data_in, data_out, batch_size=B,
                              rng_key=random.PRNGKey(111))
 bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
@@ -109,14 +98,11 @@ print(f"\n  previous best (val + shift-val) = {prev_best:.4f}%")
 print(f"  this leg's best                 = {model.best_val_ARE:.4f}%  "
       f"({'improved' if model.best_val_ARE < prev_best else 'NO improvement'})")
 
-# ------------------------------------------------------------------------
-# Save-time consistency guard.
-# ------------------------------------------------------------------------
+
 GUARD_TOL = 1.0  # percentage points
 
 _are_valpath = float(model.val_ARE(model.params, val_batch))
 
-# predict_phi0 path on the validation data.
 _phi_pred = onp.asarray(model.predict_phi0(model.params,
                                            jnp.asarray(val_ds['Q']),
                                            jnp.asarray(val_ds['x'])))

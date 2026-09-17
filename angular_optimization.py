@@ -6,13 +6,6 @@ import fcntl
 import subprocess
 import time
 
-# Run plainly, this script is the LAUNCHER: it starts one worker per GPU in
-# CARDS, waits for them, and prints the results. It never trains itself, so it
-# keeps JAX on the CPU. A worker is this same script, started by the launcher
-# with SWEEP_MODE set and CUDA_VISIBLE_DEVICES pinned to one card.
-#
-#   pinn/bin/python angular_optimization.py          architecture search (TPE)
-#   pinn/bin/python angular_optimization.py reseed   re-run the best configurations with new seeds
 _ENV0  = dict(os.environ)
 WORKER = "SWEEP_MODE" in os.environ
 MODE   = os.environ.get("SWEEP_MODE") or (sys.argv[1] if len(sys.argv) > 1 else "search")
@@ -48,11 +41,6 @@ trunk_activation  = "tanh"
 sweep_name        = "arch"   # new study when the training setup changes
 CARDS             = [1, 2, 3, 4, 5, 6, 7]   # GPUs the launcher may use, one worker per card
 
-# Search space. Every parameter is an int or a float, so a range can be edited
-# later without starting a new study (Optuna freezes only the choices of
-# CATEGORICAL parameters). Widths are searched as powers of two. Only the RATIOS
-# of the loss weights matter, since Adam is invariant to the overall scale of the
-# loss, so lambda_data is fixed at 1. The old default 0.7/0.25/0.05 is 1/0.36/0.07.
 N_LAYERS      = (3, 6)
 BRANCH_LOG2   = (7, 9)          # branch width 128 .. 512
 TRUNK_LOG2    = (8, 10)         # trunk width  256 .. 1024
@@ -67,8 +55,6 @@ TOP_K, RESEED_SEEDS = 5, (1, 2)  # reseed mode: best TOP_K configurations, each 
 STUDY_NAME  = f"{branch_activation}_{trunk_activation}_{sweep_name}"
 RESEED_NAME = STUDY_NAME + "_reseed"
 THIS_STUDY  = RESEED_NAME if MODE == "reseed" else STUDY_NAME
-# Workers write to one SQLite file at the same time; a generous busy timeout makes
-# a write wait for the lock instead of failing the trial with "database is locked".
 STORAGE = optuna.storages.RDBStorage(
     "sqlite:///activation_studies.db", engine_kwargs={"connect_args": {"timeout": 60}})
 LOG_DIR = "logs"
@@ -78,11 +64,6 @@ size = "large"
 ds_np = onp.load("datasets/" + size + "/M_Iso_train.npz")
 ds    = {k: jnp.asarray(ds_np[k]) for k in ds_np.files}
 
-# Selection set = validation set + shift-validation set, 50 sources each, so both
-# weigh equally in the ARE that trials are ranked, pruned and checkpointed on. The
-# validation set matches the training distribution; the shift-validation set
-# (shift_validation_data_generator.py) holds rougher and smoother sources, from GRF
-# parameters that are not any test scenario.
 val_np   = onp.load("datasets/M_Iso_val.npz")
 shift_np = onp.load("datasets/M_Iso_shiftval.npz")
 assert onp.allclose(val_np["x"], shift_np["x"]), "validation sets must share the x grid"
@@ -112,8 +93,6 @@ sel_batch   = build_psi_val_batch(sel_ds)
 val_batch   = build_psi_val_batch(val_ds)
 shift_batch = build_psi_val_batch(shift_ds)
 
-# Weights of the best trial of THIS study. Several workers write here, so whether
-# to keep a trial is decided against this file itself, under a lock (see objective).
 CKPT_PATH = f"trained_models/lr_search/{size}/{model_name}_{THIS_STUDY}.pkl"
 
 
@@ -186,10 +165,6 @@ def objective(trial, seed=1234):
         callback=report_to_optuna,
     )
 
-    # Trials are RANKED by the median of their last 10 selection-set readings, not
-    # by the single best one: two runs of one configuration have landed 0.15
-    # points apart, and the minimum of a noisy curve rewards a lucky reading. The
-    # checkpoint still keeps the best parameters.
     score = float(onp.median(model.val_ARE_log[-10:]))
     if not math.isfinite(score):
         score = float("inf")
@@ -201,10 +176,6 @@ def objective(trial, seed=1234):
     trial.set_user_attr("shift_ARE", shift_are)
     trial.set_user_attr("best_iter", int(model.best_val_iter))
 
-    # Keep the weights of the best trial only. Workers on other cards write the
-    # same CKPT_PATH, so compare against the checkpoint on disk while holding an
-    # exclusive lock, not against this process's memory: otherwise a worker that
-    # finishes later could overwrite a better checkpoint from another card.
     os.makedirs(os.path.dirname(CKPT_PATH), exist_ok=True)
     with open(CKPT_PATH + ".lock", "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
@@ -280,9 +251,6 @@ if __name__ == "__main__":
     TS = optuna.trial.TrialState
 
     if WORKER and MODE == "search":
-        # Keep taking trials from the shared study until it has N_TRIALS finished
-        # ones. With constant_liar, TPE treats the other cards' running trials as
-        # poor results, so the workers spread out instead of sampling one point.
         study = optuna.load_study(
             study_name=THIS_STUDY, storage=STORAGE,
             sampler=optuna.samplers.TPESampler(n_startup_trials=N_STARTUP,
@@ -296,8 +264,6 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if WORKER and MODE == "reseed":
-        # Re-run the configurations the launcher assigned to this card, each with a
-        # new seed and without pruning. PartialFixedSampler fixes every parameter.
         tasks = json.loads(os.environ["SWEEP_TASKS"])
         print(f"Reseed worker on CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}: "
               f"{[(t['from_trial'], t['seed']) for t in tasks]}")
@@ -312,12 +278,9 @@ if __name__ == "__main__":
             study.optimize(run, n_trials=1, catch=(Exception,))
         sys.exit(0)
 
-    # ------------------------------- launcher -------------------------------
     study = optuna.create_study(study_name=THIS_STUDY, storage=STORAGE,
                                 direction="minimize", load_if_exists=True)
     finished = [t for t in study.trials if t.state in (TS.COMPLETE, TS.PRUNED)]
-    # A checkpoint without any finished trial behind it belongs to an earlier run
-    # (for instance after the study was reset) and would silently outrank this one.
     if not finished and os.path.exists(CKPT_PATH):
         sys.exit(f"\n{CKPT_PATH} already exists, but study {THIS_STUDY} has no finished trials:\n"
                  f"those weights come from an earlier run and would silently outrank this one.\n"
