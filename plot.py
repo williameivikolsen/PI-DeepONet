@@ -4,6 +4,7 @@ os.environ.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
 
 import numpy as onp
 import jax.numpy as jnp
+from jax.flatten_util import ravel_pytree
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -12,8 +13,8 @@ from helpers import load_model
 size = "large"
 file = "benchmark"
 
-# CHECKPOINT = f"trained_models/training_testing/{size}/{file}.pkl"
-CHECKPOINT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_nodata.pkl"
+CHECKPOINT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued_annealed.pkl"
+# CHECKPOINT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_nodata.pkl"
 
 SAMPLE_IDX = 0
 
@@ -28,6 +29,14 @@ SCENARIOS = [
 
 
 model, kind, ckpt = load_model(CHECKPOINT)
+cfg = ckpt["config"]
+bl, tl = cfg["branch_layers"], cfg["trunk_layers"]
+n_params = ravel_pytree(model.params)[0].size
+print(f"{kind}: {len(bl) - 2} hidden layers, branch {bl[0]}->{bl[1]}->{bl[-1]}, "
+      f"trunk {tl[0]}->{tl[1]}->{tl[-1]}, {cfg['branch_activation']}/{cfg['trunk_activation']} "
+      f"activations, {cfg['N_angles']} angles")
+print(f"  branch_layers {bl}\n  trunk_layers  {tl}\n  {n_params:,} parameters")
+print(f"  trained {ckpt['n_iter']} iters, {ckpt.get('lr_config')}, best ARE {ckpt['best_val_ARE']:.3f}%")
 
 palette  = sns.color_palette("deep", 3)
 col_Q    = palette[0]
@@ -76,5 +85,5 @@ fig.legend(handles, labels, loc="upper center", ncol=2, frameon=True,
            bbox_to_anchor=(0.5, 1.02))
 
 fig.tight_layout()
-# plt.savefig(f"results/tanh_samples.pdf", bbox_inches="tight")
+# plt.savefig(f"results/relu_tanh/no_data_samples.pdf", bbox_inches="tight")
 plt.show()
