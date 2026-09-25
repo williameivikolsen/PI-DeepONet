@@ -61,6 +61,14 @@ bcs_dataset  = DataGenerator(bcs_in,  bcs_out,  batch_size=B,
 res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
                              rng_key=random.PRNGKey(303), branch_table=res_Q)
 
+# Loss weighting: "none" (fixed lambdas only), "local_ntk" (a weight per point,
+# Algorithm 1 of Wang, Wang & Perdikaris 2022) or "global_ntk" (a weight per
+# loss term). ntk_alpha = 1 gives "NTK weights", 0.5 "moderate NTK weights".
+# The NTK weights replace the fixed lambdas, as in the paper.
+weighting      = "none"
+ntk_alpha      = 1.0
+ntk_chunk_size = 10    # points per NTK Jacobian chunk (bounds memory); None = whole batch
+
 branch_layers = [J] + 5*[250] + [100]
 trunk_layers  = [2] + 5*[250] + [100]
 
@@ -70,7 +78,9 @@ model = PI_DeepONet(
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
     x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
     lambda_data=0.1, lambda_res=0.85, lambda_bcs=0.05,
+    # lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0, # NTK weighting
     # lambda_data=0, lambda_res=0.9, lambda_bcs=0.1, # No data training
+    weighting=weighting, ntk_alpha=ntk_alpha, ntk_chunk_size=ntk_chunk_size,
     lr_transition_steps=n_iter//10,
     branch_activation="relu",
     trunk_activation="tanh",
@@ -104,11 +114,16 @@ with open(out_path, "wb") as f:
             "X":             X_slab,
             "Q_shift":       Q_shift,
             "Q_scale":       Q_scale,
+            "weighting":     weighting,
+            "ntk_alpha":     ntk_alpha,
         },
         "loss_log":      model.loss_log,
         "loss_data_log": model.loss_data_log,
         "loss_bcs_log":  model.loss_bcs_log,
         "loss_res_log":  model.loss_res_log,
+        "lam_data_log":  model.lam_data_log,
+        "lam_bcs_log":   model.lam_bcs_log,
+        "lam_res_log":   model.lam_res_log,
         "val_ARE_log":   model.val_ARE_log,
         "val_iter_log":  model.val_iter_log,
         "best_val_ARE":  model.best_val_ARE,
