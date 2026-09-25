@@ -65,7 +65,7 @@ res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
 # The NTK weights replace the fixed lambdas, as in the paper.
 weighting      = "none"
 ntk_alpha      = 1.0
-ntk_chunk_size = 100    # points per NTK Jacobian chunk (bounds memory); None = whole batch
+ntk_chunk_size = 400    # points per NTK Jacobian chunk (bounds memory); None = whole batch
 
 p_latent      = 100
 n_layers      = 5
