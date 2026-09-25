@@ -63,7 +63,7 @@ res_dataset  = DataGenerator(res_in,  res_out,  batch_size=B,
 # Algorithm 1 of Wang, Wang & Perdikaris 2022) or "global_ntk" (a weight per
 # loss term). ntk_alpha = 1 gives "NTK weights", 0.5 "moderate NTK weights".
 # The NTK weights replace the fixed lambdas, as in the paper.
-weighting      = "none"
+weighting      = "local_ntk"
 ntk_alpha      = 1.0
 ntk_chunk_size = 400    # points per NTK Jacobian chunk (bounds memory); None = whole batch
 
@@ -88,8 +88,8 @@ model = PI_DeepONet_Angular(
     N_angles=A,
     Sigma_t=Sigma_t, Sigma_s0=Sigma_s0, Sigma_s1=Sigma_s1,
     x_sensors=ds['x'], X=X_slab, Q_shift=Q_shift, Q_scale=Q_scale,
-    lambda_data=0.7, lambda_res=0.25, lambda_bcs=0.05,
-    # lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0, # NTK weighting
+    # lambda_data=0.7, lambda_res=0.25, lambda_bcs=0.05, # without NTK weighting
+    lambda_data=1.0, lambda_res=1.0, lambda_bcs=1.0,     # NTK weighting
     weighting=weighting, ntk_alpha=ntk_alpha, ntk_chunk_size=ntk_chunk_size,
     lr_schedule=lr_schedule,
     branch_activation="relu",   # unbounded -> extrapolates in source amplitude
