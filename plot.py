@@ -13,7 +13,7 @@ from helpers import load_model
 size = "large"
 file = "benchmark"
 
-CHECKPOINT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_arch_continued_annealed.pkl"
+CHECKPOINT = "trained_models/training_testing/ntk/pideeponet_angular_relu_tanh_seed123.pkl"
 # CHECKPOINT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_nodata.pkl"
 
 SAMPLE_IDX = 0
