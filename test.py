@@ -1,36 +1,25 @@
 import pickle
 import numpy as onp
 import matplotlib.pyplot as plt
+from helpers import load_model
 
-CHECKPOINT = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_nodata.pkl"
+relu_tanh_path = "trained_models/lr_search/large/pideeponet_angular_relu_tanh_nodata.pkl"
+benchmark = "trained_models/training_testing/large/benchmark.pkl"
 
-ckpt = pickle.load(open(CHECKPOINT, "rb"))
-cfg = ckpt["config"]
-iters = onp.arange(len(ckpt["loss_log"])) * ckpt["log_every"]
 
-hp = ckpt.get("hyperparameters")
-if hp is None:
-    raise SystemExit(f"{CHECKPOINT} records no hyperparameters (it predates the architecture "
-                     f"search): set lr_schedule and the three loss weights by hand to continue it.")
-lr_schedule = hp["lr"]
-lr_config   = ckpt["lr_config"]
-lambda_data = 1.0
-lambda_res  = float(hp["res_over_data"])
-lambda_bcs  = float(hp["bcs_over_data"])
-
-plt.figure(figsize=(8, 5))
-plt.plot(iters, ckpt["loss_log"], lw=2.0, color="black", label="total")
-plt.plot(iters, ckpt["loss_data_log"], lw=1.4, label="data")
-plt.plot(iters, ckpt["loss_bcs_log"], lw=1.4, label="BC")
-plt.plot(iters, ckpt["loss_res_log"], lw=1.4, label="residual")
-
-plt.yscale("log")
-plt.xlabel("iteration")
-plt.ylabel("loss")
-plt.title(f"branch {cfg['branch_activation']} / trunk {cfg['trunk_activation']}"
-          f"   ({ckpt['lr_config']}, best val ARE {ckpt['best_val_ARE']:.3f}%)")
+relu_tanh, _, _ = load_model(relu_tanh_path)
+benchmark, _, _ = load_model(benchmark)
+N = 100
+x = onp.linspace(0, 10, N)
+Q = onp.zeros(N)
+mask = (x > 2.5) & (x < 7.5)
+Q[mask] = 50
+# Q = -(x-5)**2 + 25
+relu_tanh_pred = onp.asarray(relu_tanh.predict_phi0(relu_tanh.params, Q[None, :], x)[0])   # (1, J) batch -> (N,)
+benchmark_pred = onp.asarray(benchmark.predict_phi0(benchmark.params, Q[None, :], x)[0])   # (1, J) batch -> (N,)
+plt.plot(x, Q, lw=1.2, alpha=0.6, label="Source $Q(x)$")
+plt.fill_between(x, 0, Q, alpha=0.10)
+plt.plot(x, relu_tanh_pred, label=r"Relu-Tanh $\phi(x)$")
+plt.plot(x, benchmark_pred, label=r"Benchmark $\phi(x)$")
 plt.legend()
-plt.tight_layout()
-plt.grid("--")
-# plt.savefig("results/relu_tanh_loss.pdf", bbox_inches="tight")
 plt.show()
